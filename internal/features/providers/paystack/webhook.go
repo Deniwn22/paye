@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ttomsin/paye/internal/providers"
+	provider "github.com/ttomsin/paye/internal/features/providers"
 )
 
 type paystackWebhookPayload struct {

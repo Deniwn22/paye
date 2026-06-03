@@ -1,5 +1,5 @@
 // internal/providers/provider.go
-package provider
+package providers
 
 type TransactionRequest struct {
 	Amount    float64

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ttomsin/paye/internal/providers"
+	"github.com/ttomsin/paye/internal/features/providers"
 )
 
 const base_url = "https://api.paystack.co"
@@ -70,14 +70,14 @@ func New(apiKey string) *Paystack {
 }
 
 // implements the provider interface
-var _ provider.Provider = (*Paystack)(nil)
+var _ providers.Provider = (*Paystack)(nil)
 
 func (p *Paystack) Name() string {
 	return "paystack"
 }
 
 // Initializes a transaction with Paystack and returns the response
-func (p *Paystack) InitializeTransaction(req provider.TransactionRequest) (*provider.TransactionResponse, error) {
+func (p *Paystack) InitializeTransaction(req providers.TransactionRequest) (*providers.TransactionResponse, error) {
 	// uses email & amount to initialize transaction
 	// convert req to JSON
 	pReq := paystackTransactionRequest{
@@ -109,7 +109,7 @@ func (p *Paystack) InitializeTransaction(req provider.TransactionRequest) (*prov
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
 	}
-	tResp := &provider.TransactionResponse{
+	tResp := &providers.TransactionResponse{
 		Status:    result.Status,
 		Message:   result.Message,
 		Reference: result.Data.Reference,
@@ -120,7 +120,7 @@ func (p *Paystack) InitializeTransaction(req provider.TransactionRequest) (*prov
 	return tResp, nil
 }
 
-func (p *Paystack) VerifyTransaction(reference string) (*provider.TransactionResponse, error) {
+func (p *Paystack) VerifyTransaction(reference string) (*providers.TransactionResponse, error) {
 	res, err := p.makeRequest("GET", fmt.Sprintf("%s/%s", verify_url, reference), nil)
 	if err != nil {
 		return nil, err
@@ -137,7 +137,7 @@ func (p *Paystack) VerifyTransaction(reference string) (*provider.TransactionRes
 		return nil, err
 	}
 
-	tResp := &provider.TransactionResponse{
+	tResp := &providers.TransactionResponse{
 		Status:    result.Status,
 		Message:   result.Message,
 		Reference: result.Data.Reference,
