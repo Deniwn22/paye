@@ -9,6 +9,7 @@ type IUserRepo interface {
 	CreateUser(user *models.User) error
 	FindByEmail(email string) (*models.User, error)
 	FindByApiKey(apiKey string) (*models.User, error)
+	FindByID(id string) (*models.User, error)
 }
 
 type UserRepo struct {
@@ -34,4 +35,10 @@ func (r *UserRepo) FindByEmail(email string) (*models.User, error) {
 func (r *UserRepo) FindByApiKey(apiKey string) (*models.User, error) {
 	var user models.User
 	return &user, r.db.Where("api_key = ?", apiKey).First(&user).Error
+}
+
+// FindByID finds a user by ID
+func (r *UserRepo) FindByID(id string) (*models.User, error) {
+	var user models.User
+	return &user, r.db.Where("id = ?", id).First(&user).Error
 }

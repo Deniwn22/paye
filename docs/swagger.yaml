@@ -1,0 +1,690 @@
+basePath: /api/v1
+definitions:
+  api.SwaggerDashboardStatsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/dto.DashboardStatsResponse'
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  api.SwaggerProviderConfigListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.ProviderConfigResponse'
+        type: array
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  api.SwaggerProviderConfigResponse:
+    properties:
+      data:
+        $ref: '#/definitions/dto.ProviderConfigResponse'
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  api.SwaggerSimpleResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  api.SwaggerWebhookConfigListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.WebhookConfigResponse'
+        type: array
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  api.SwaggerWebhookConfigResponse:
+    properties:
+      data:
+        $ref: '#/definitions/dto.WebhookConfigResponse'
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  api.SwaggerWebhookLogListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.WebhookLogResponse'
+        type: array
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  auth.AuthResponse:
+    properties:
+      api_key:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      token:
+        type: string
+    type: object
+  auth.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth.SignupRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  auth.SwaggerAuthResponse:
+    properties:
+      data:
+        $ref: '#/definitions/auth.AuthResponse'
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  dto.DashboardStatsResponse:
+    properties:
+      active_providers_count:
+        type: integer
+      failed_deliveries:
+        type: integer
+      failed_transactions:
+        type: integer
+      successful_deliveries:
+        type: integer
+      total_transactions:
+        type: integer
+      total_volume:
+        type: number
+    type: object
+  dto.ProviderConfigRequest:
+    properties:
+      is_active:
+        type: boolean
+      label:
+        type: string
+      provider_name:
+        allOf:
+        - $ref: '#/definitions/dto.ProviderType'
+        enum:
+        - paystack
+      public_key:
+        type: string
+      secret_key:
+        type: string
+    required:
+    - label
+    - provider_name
+    - public_key
+    - secret_key
+    type: object
+  dto.ProviderConfigResponse:
+    properties:
+      id:
+        type: string
+      is_active:
+        type: boolean
+      label:
+        type: string
+      provider_name:
+        type: string
+      public_key:
+        type: string
+      secret_key:
+        type: string
+    type: object
+  dto.ProviderType:
+    enum:
+    - paystack
+    type: string
+    x-enum-varnames:
+    - Paystack
+  dto.WebhookConfigRequest:
+    properties:
+      paye_webhook_slug:
+        type: string
+      provider_name:
+        type: string
+      target_url:
+        type: string
+    required:
+    - provider_name
+    - target_url
+    type: object
+  dto.WebhookConfigResponse:
+    properties:
+      id:
+        type: string
+      paye_webhook_slug:
+        type: string
+      provider_name:
+        type: string
+      target_url:
+        type: string
+    type: object
+  dto.WebhookLogResponse:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      error_message:
+        type: string
+      event:
+        type: string
+      forwarded_status:
+        type: integer
+      id:
+        type: string
+      payload:
+        type: string
+      reference:
+        type: string
+      status:
+        type: string
+      webhook_config_id:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Unified payment infrastructure API.
+  title: Paye API
+  version: "1.0"
+paths:
+  /auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: Sign in using email and password
+      parameters:
+      - description: Login payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.SwaggerAuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      summary: Authenticate user
+      tags:
+      - Auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Create a user account and return JWT credentials
+      parameters:
+      - description: Signup payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.SignupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.SwaggerAuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      summary: Register a new user
+      tags:
+      - Auth
+  /dashboard/logs:
+    get:
+      description: Retrieve recent webhook proxy delivery log history (paginated)
+      parameters:
+      - description: 'Pagination limit (default: 10)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Pagination offset (default: 0)'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerWebhookLogListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: List dashboard proxy webhook logs
+      tags:
+      - Dashboard
+  /dashboard/stats:
+    get:
+      description: Retrieve aggregated payment stats, including volumes, counts, and
+        active providers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerDashboardStatsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Get dashboard statistics
+      tags:
+      - Dashboard
+  /providers:
+    get:
+      description: Retrieve list of all provider configs for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerProviderConfigListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: List provider configurations
+      tags:
+      - Providers
+    post:
+      consumes:
+      - application/json
+      description: Create a provider configuration for the authenticated user
+      parameters:
+      - description: Provider Configuration Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ProviderConfigRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerProviderConfigResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Register provider configuration
+      tags:
+      - Providers
+  /providers/{id}:
+    delete:
+      description: Remove a specific provider config
+      parameters:
+      - description: Provider Config ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete provider configuration
+      tags:
+      - Providers
+    put:
+      consumes:
+      - application/json
+      description: Update fields of a specific provider config
+      parameters:
+      - description: Provider Config ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Provider Config Update Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ProviderConfigRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerProviderConfigResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Update provider configuration
+      tags:
+      - Providers
+  /providers/{id}/toggle:
+    patch:
+      description: Enable or disable a specific provider configuration
+      parameters:
+      - description: Provider Config ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Toggle provider active status
+      tags:
+      - Providers
+  /webhooks/configs:
+    get:
+      description: Retrieve all webhook configs for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerWebhookConfigListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: List webhook configurations
+      tags:
+      - Webhooks
+    post:
+      consumes:
+      - application/json
+      description: Register a webhook callback target for a specific provider
+      parameters:
+      - description: Webhook Configuration Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.WebhookConfigRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerWebhookConfigResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Create webhook configuration
+      tags:
+      - Webhooks
+  /webhooks/configs/{id}:
+    delete:
+      description: Remove a specific webhook config
+      parameters:
+      - description: Webhook Config ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete webhook configuration
+      tags:
+      - Webhooks
+    put:
+      consumes:
+      - application/json
+      description: Modify a specific webhook config
+      parameters:
+      - description: Webhook Config ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Webhook Config Update Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.WebhookConfigRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerWebhookConfigResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Update webhook configuration
+      tags:
+      - Webhooks
+  /webhooks/receive/{slug}:
+    post:
+      consumes:
+      - application/json
+      description: Public proxy endpoint that receives webhooks from providers (e.g.
+        Paystack) and forwards them to target URL
+      parameters:
+      - description: Webhook unique slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      - description: Paystack signature for verification
+        in: header
+        name: X-Paystack-Signature
+        type: string
+      - description: Provider Webhook payload
+        in: body
+        name: request
+        required: true
+        schema: {}
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      summary: Receive payment provider webhook
+      tags:
+      - Webhooks Public
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer <your-jwt-token>" to authenticate.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
