@@ -51,3 +51,17 @@ type SwaggerWebhookLogListResponse struct {
 	Message string                   `json:"message"`
 	Data    []dto.WebhookLogResponse `json:"data"`
 }
+
+// SwaggerTransactionInitializeResponse represents the transaction initialize success response
+type SwaggerTransactionInitializeResponse struct {
+	Status  bool                              `json:"status"`
+	Message string                            `json:"message"`
+	Data    dto.InitializeTransactionResponse `json:"data"`
+}
+
+// SwaggerTransactionVerifyResponse represents the transaction verify success response
+type SwaggerTransactionVerifyResponse struct {
+	Status  bool                           `json:"status"`
+	Message string                         `json:"message"`
+	Data    dto.VerifyTransactionResponse `json:"data"`
+}

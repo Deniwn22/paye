@@ -15,6 +15,7 @@ import (
 	"github.com/ttomsin/paye/internal/features/auth"
 	"github.com/ttomsin/paye/internal/features/dashboard"
 	"github.com/ttomsin/paye/internal/features/providers"
+	"github.com/ttomsin/paye/internal/features/transactions"
 	"github.com/ttomsin/paye/internal/features/user"
 	"github.com/ttomsin/paye/internal/features/webhooks"
 	"github.com/ttomsin/paye/internal/middleware"
@@ -71,18 +72,21 @@ func main() {
 	providerRepo := providers.NewProviderRepo(database.DB)
 	webhookRepo := webhooks.NewWebhookRepo(database.DB)
 	dashboardRepo := dashboard.NewDashboardRepo(database.DB)
+	transactionRepo := transactions.NewTransactionRepo(database.DB)
 
 	// init services
 	authService := auth.NewAuthService(userRepo, jwtSecret)
 	providerService := providers.NewProviderService(providerRepo, derivedEncryptionKey)
 	webhookService := webhooks.NewWebhookService(webhookRepo, providerRepo, userRepo, derivedEncryptionKey)
 	dashboardService := dashboard.NewDashboardService(dashboardRepo)
+	transactionService := transactions.NewTransactionService(transactionRepo, providerRepo, derivedEncryptionKey)
 
 	//init handlers
 	authHandler := auth.NewAuthHandler(*authService)
 	providerHandler := providers.NewProviderHandler(providerService)
 	webhookHandler := webhooks.NewWebhookHandler(webhookService)
 	dashboardHandler := dashboard.NewDashboardHandler(dashboardService)
+	transactionHandler := transactions.NewTransactionHandler(transactionService)
 
 	// Gin config
 	r := gin.Default()
@@ -122,6 +126,14 @@ func main() {
 
 	// Register Dashboard stats and logs routes (Protected)
 	dashboard.RegisterRoutes(protected, dashboardHandler)
+
+	// Protected Group (Requires API Key)
+	apiKeyMiddleware := middleware.NewApiKeyMiddleware(authService)
+	apiKeyProtected := v1.Group("")
+	apiKeyProtected.Use(apiKeyMiddleware.Handle)
+
+	// Register Transaction routes (Protected by API Key)
+	transactions.RegisterRoutes(apiKeyProtected, transactionHandler)
 
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal("failed to start server: ", err)

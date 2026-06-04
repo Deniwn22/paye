@@ -28,7 +28,7 @@ func (m *ApiKeyMiddleware) Handle(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	c.Set(UserIDContextKey, user.ID)
+	c.Set(UserIDContextKey, user.ID.String())
 	c.Set(UserEmailContextKey, user.Email)
 	c.Next()
 }
