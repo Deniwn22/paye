@@ -36,6 +36,24 @@ definitions:
       status:
         type: boolean
     type: object
+  api.SwaggerTransactionInitializeResponse:
+    properties:
+      data:
+        $ref: '#/definitions/dto.InitializeTransactionResponse'
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  api.SwaggerTransactionVerifyResponse:
+    properties:
+      data:
+        $ref: '#/definitions/dto.VerifyTransactionResponse'
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
   api.SwaggerWebhookConfigListResponse:
     properties:
       data:
@@ -129,6 +147,42 @@ definitions:
       total_volume:
         type: number
     type: object
+  dto.InitializeTransactionRequest:
+    properties:
+      amount:
+        type: number
+      currency:
+        type: string
+      email:
+        type: string
+      provider:
+        type: string
+      reference:
+        type: string
+    required:
+    - amount
+    - currency
+    - email
+    - provider
+    type: object
+  dto.InitializeTransactionResponse:
+    properties:
+      amount:
+        type: number
+      authorization_url:
+        type: string
+      currency:
+        type: string
+      message:
+        type: string
+      provider:
+        type: string
+      reference:
+        type: string
+      status:
+        description: pending, success, failed
+        type: string
+    type: object
   dto.ProviderConfigRequest:
     properties:
       is_active:
@@ -171,6 +225,22 @@ definitions:
     type: string
     x-enum-varnames:
     - Paystack
+  dto.VerifyTransactionResponse:
+    properties:
+      amount:
+        type: number
+      currency:
+        type: string
+      message:
+        type: string
+      provider:
+        type: string
+      reference:
+        type: string
+      status:
+        description: pending, success, failed
+        type: string
+    type: object
   dto.WebhookConfigRequest:
     properties:
       paye_webhook_slug:
@@ -508,6 +578,82 @@ paths:
       summary: Toggle provider active status
       tags:
       - Providers
+  /transactions/initialize:
+    post:
+      consumes:
+      - application/json
+      description: Initialize a payment transaction with a selected provider (e.g.,
+        Paystack).
+      parameters:
+      - description: API Key
+        in: header
+        name: X-Paye-API-Key
+        required: true
+        type: string
+      - description: Initialize Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.InitializeTransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerTransactionInitializeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      summary: Initialize payment transaction
+      tags:
+      - transactions
+  /transactions/verify/{reference}:
+    get:
+      description: Query and verify a transaction status from the payment provider.
+      parameters:
+      - description: API Key
+        in: header
+        name: X-Paye-API-Key
+        required: true
+        type: string
+      - description: Transaction Reference
+        in: path
+        name: reference
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerTransactionVerifyResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      summary: Verify transaction status
+      tags:
+      - transactions
   /webhooks/configs:
     get:
       description: Retrieve all webhook configs for the authenticated user

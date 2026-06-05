@@ -23,6 +23,14 @@ const (
 type Paystack struct {
 	apiKey  string
 	ApiType ApiType
+	BaseURL string
+}
+
+func (p *Paystack) getBaseURL() string {
+	if p.BaseURL != "" {
+		return p.BaseURL
+	}
+	return "https://api.paystack.co"
 }
 
 type paystackTransactionRequest struct {
@@ -91,7 +99,7 @@ func (p *Paystack) InitializeTransaction(req providers.TransactionRequest) (*pro
 		return nil, err
 	}
 	// make request to Paystack API
-	resp, err := p.makeRequest("POST", initialize_url, body)
+	resp, err := p.makeRequest("POST", p.getBaseURL()+"/transaction/initialize", body)
 	if err != nil {
 		return nil, err
 	}
@@ -110,18 +118,19 @@ func (p *Paystack) InitializeTransaction(req providers.TransactionRequest) (*pro
 		return nil, err
 	}
 	tResp := &providers.TransactionResponse{
-		Status:    result.Status,
-		Message:   result.Message,
-		Reference: result.Data.Reference,
-		AuthURL:   result.Data.AuthorizationURL,
-		Provider:  p.Name(),
+		Status:     result.Status,
+		Message:    result.Message,
+		Reference:  result.Data.Reference,
+		AuthURL:    result.Data.AuthorizationURL,
+		AccessCode: result.Data.AccessCode,
+		Provider:   p.Name(),
 	}
 
 	return tResp, nil
 }
 
 func (p *Paystack) VerifyTransaction(reference string) (*providers.TransactionResponse, error) {
-	res, err := p.makeRequest("GET", fmt.Sprintf("%s/%s", verify_url, reference), nil)
+	res, err := p.makeRequest("GET", fmt.Sprintf("%s/transaction/verify/%s", p.getBaseURL(), reference), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +147,7 @@ func (p *Paystack) VerifyTransaction(reference string) (*providers.TransactionRe
 	}
 
 	tResp := &providers.TransactionResponse{
-		Status:    result.Status,
+		Status:    result.Status && result.Data.Status == "success",
 		Message:   result.Message,
 		Reference: result.Data.Reference,
 		Amount:    float64(result.Data.Amount) / 100,

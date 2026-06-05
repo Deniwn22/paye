@@ -1,18 +1,17 @@
 package auth
 
 import (
-	"crypto/rand"
-	"encoding/hex"
-
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/ttomsin/paye/internal/crypto"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // Claims represents the JWT claims for a user.
 type Claims struct {
-	UserID string `json:"user_id"`
-	Email  string `json:"email"`
-	APIKey string `json:"api_key"`
+	UserID   string `json:"user_id"`
+	Email    string `json:"email"`
+	APIKey   string `json:"api_key"`
+	PublicID string `json:"public_id"`
 	jwt.RegisteredClaims
 }
 
@@ -31,20 +30,16 @@ func CheckPasswordHash(password, hashedPassword string) error {
 // GenerateAPIKey generates a random API key as a hex-encoded string.
 // and appends paye to the beginning of the key.
 func GenerateAPIKey() (string, error) {
-	apiKey := make([]byte, 32)
-	_, err := rand.Read(apiKey)
-	if err != nil {
-		return "", err
-	}
-	return "paye_" + hex.EncodeToString(apiKey), nil
+	return crypto.GenerateAPIKey()
 }
 
-// GenerateJWT generates a JWT token for the given user ID and API key.
-func GenerateJWT(userID, email, apiKey string, secretKey string) (string, error) {
+// GenerateJWT generates a JWT token for the given user ID, API key, and Public ID.
+func GenerateJWT(userID, email, apiKey, publicID string, secretKey string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &Claims{
-		UserID: userID,
-		Email:  email,
-		APIKey: apiKey,
+		UserID:   userID,
+		Email:    email,
+		APIKey:   apiKey,
+		PublicID: publicID,
 	})
 	return token.SignedString([]byte(secretKey))
 }

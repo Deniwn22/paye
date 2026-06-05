@@ -28,13 +28,13 @@ func NewDashboardHandler(service *DashboardService) *DashboardHandler {
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /dashboard/stats [get]
 func (h *DashboardHandler) GetStatsHandler(c *gin.Context) {
-	userID, exists := c.Get(middleware.UserIDContextKey)
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		c.JSON(http.StatusUnauthorized, api.Error("Project context missing"))
 		return
 	}
 
-	resp, err := h.service.GetStats(c.Request.Context(), userID.(string))
+	resp, err := h.service.GetStats(c.Request.Context(), projectID.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 		return
@@ -56,9 +56,9 @@ func (h *DashboardHandler) GetStatsHandler(c *gin.Context) {
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /dashboard/logs [get]
 func (h *DashboardHandler) GetLogsHandler(c *gin.Context) {
-	userID, exists := c.Get(middleware.UserIDContextKey)
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		c.JSON(http.StatusUnauthorized, api.Error("Project context missing"))
 		return
 	}
 
@@ -74,7 +74,7 @@ func (h *DashboardHandler) GetLogsHandler(c *gin.Context) {
 		offset = 0
 	}
 
-	resp, err := h.service.GetLogs(c.Request.Context(), userID.(string), limit, offset)
+	resp, err := h.service.GetLogs(c.Request.Context(), projectID.(string), limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 		return

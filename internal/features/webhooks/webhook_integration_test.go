@@ -27,13 +27,13 @@ import (
 	"gorm.io/gorm"
 )
 
-func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.User) {
+func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.User, *models.Project) {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("failed to open database: %v", err)
 	}
 
-	err = db.AutoMigrate(&models.User{}, &models.ProviderConfig{}, &models.WebhookConfig{}, &models.WebhookLog{})
+	err = db.AutoMigrate(&models.User{}, &models.Project{}, &models.ProviderConfig{}, &models.WebhookConfig{}, &models.WebhookLog{})
 	if err != nil {
 		t.Fatalf("failed to migrate database: %v", err)
 	}
@@ -45,13 +45,24 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 		Email:    "test@example.com",
 		Password: hashedPassword,
 		ApiKey:   apiKey,
+		PublicID: "paye_pub_test_12345",
 	}
 	if err := db.Create(testUser).Error; err != nil {
 		t.Fatalf("failed to create test user: %v", err)
 	}
 
+	testProject := &models.Project{
+		Name:     "Default Project",
+		ApiKey:   testUser.ApiKey,
+		PublicID: testUser.PublicID,
+		UserID:   testUser.Base.ID,
+	}
+	if err := db.Create(testProject).Error; err != nil {
+		t.Fatalf("failed to create test project: %v", err)
+	}
+
 	jwtSecret := "test_jwt_secret_key_32_bytes_long_xxxx"
-	token, err := auth.GenerateJWT(testUser.ID.String(), testUser.Email, testUser.ApiKey, jwtSecret)
+	token, err := auth.GenerateJWT(testUser.Base.ID.String(), testUser.Email, testUser.ApiKey, testUser.PublicID, jwtSecret)
 	if err != nil {
 		t.Fatalf("failed to generate JWT: %v", err)
 	}
@@ -77,18 +88,19 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 
 	v1 := r.Group("/api/v1")
 	jwtMiddleware := middleware.NewApiJwtMiddleware(jwtSecret)
+	projectMiddleware := middleware.NewProjectScopeMiddleware(db)
 	protected := v1.Group("")
-	protected.Use(jwtMiddleware.Handle)
+	protected.Use(jwtMiddleware.Handle, projectMiddleware.Handle)
 
 	providers.RegisterRoutes(protected, providerHandler)
 	webhooks.RegisterRoutes(protected, v1, webhookHandler)
 	dashboard.RegisterRoutes(protected, dashboardHandler)
 
-	return db, r, token, testUser
+	return db, r, token, testUser, testProject
 }
 
 func TestProviderCRUD(t *testing.T) {
-	_, r, token, _ := setupTestEnvironment(t)
+	_, r, token, _, _ := setupTestEnvironment(t)
 
 	// Create Provider
 	pReq := dto.ProviderConfigRequest{
@@ -164,7 +176,7 @@ func TestProviderCRUD(t *testing.T) {
 }
 
 func TestWebhookConfigCRUD(t *testing.T) {
-	_, r, token, _ := setupTestEnvironment(t)
+	_, r, token, _, _ := setupTestEnvironment(t)
 
 	// Create Webhook Config
 	wReq := dto.WebhookConfigRequest{
@@ -227,7 +239,7 @@ func TestWebhookConfigCRUD(t *testing.T) {
 }
 
 func TestWebhookProxyForwarding(t *testing.T) {
-	db, r, token, testUser := setupTestEnvironment(t)
+	db, r, token, testUser, testProject := setupTestEnvironment(t)
 	encryptionKey := "12345678901234567890123456789012"
 
 	// Create active ProviderConfig for Paystack with decrypted key
@@ -241,7 +253,7 @@ func TestWebhookProxyForwarding(t *testing.T) {
 		SecretKey:    encSecretKey,
 		PublicKey:    encPublicKey,
 		IsActive:     true,
-		UserID:       testUser.ID,
+		ProjectID:    testProject.Base.ID,
 	}
 	db.Create(provConfig)
 
@@ -315,7 +327,7 @@ func TestWebhookProxyForwarding(t *testing.T) {
 }
 
 func TestDashboardStatsAndLogs(t *testing.T) {
-	db, r, token, testUser := setupTestEnvironment(t)
+	db, r, token, _, testProject := setupTestEnvironment(t)
 	encryptionKey := "12345678901234567890123456789012"
 
 	// 1. Create a ProviderConfig and WebhookConfig
@@ -329,7 +341,7 @@ func TestDashboardStatsAndLogs(t *testing.T) {
 		SecretKey:    encSecretKey,
 		PublicKey:    encPublicKey,
 		IsActive:     true,
-		UserID:       testUser.ID,
+		ProjectID:    testProject.Base.ID,
 	}
 	db.Create(provConfig)
 
@@ -345,7 +357,7 @@ func TestDashboardStatsAndLogs(t *testing.T) {
 		ProviderName:    "paystack",
 		TargetURL:       mockTargetServer.URL,
 		PayeWebhookSlug: "dash-slug-123",
-		UserID:          testUser.ID,
+		ProjectID:       testProject.Base.ID,
 	}
 	db.Create(wConfig)
 

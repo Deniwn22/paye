@@ -14,12 +14,12 @@ func NewDashboardService(repo *DashboardRepo) *DashboardService {
 	return &DashboardService{repo: repo}
 }
 
-func (s *DashboardService) GetStats(ctx context.Context, userID string) (*dto.DashboardStatsResponse, error) {
-	return s.repo.GetStats(ctx, userID)
+func (s *DashboardService) GetStats(ctx context.Context, projectID string) (*dto.DashboardStatsResponse, error) {
+	return s.repo.GetStats(ctx, projectID)
 }
 
-func (s *DashboardService) GetLogs(ctx context.Context, userID string, limit int, offset int) ([]*dto.WebhookLogResponse, error) {
-	logs, err := s.repo.GetLogs(ctx, userID, limit, offset)
+func (s *DashboardService) GetLogs(ctx context.Context, projectID string, limit int, offset int) ([]*dto.WebhookLogResponse, error) {
+	logs, err := s.repo.GetLogs(ctx, projectID, limit, offset)
 	if err != nil {
 		return nil, err
 	}

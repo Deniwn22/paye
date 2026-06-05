@@ -31,7 +31,7 @@ func NewProviderHandler(service *ProviderService) *ProviderHandler {
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /providers [post]
 func (h *ProviderHandler) AddProviderHandler(c *gin.Context) {
-	userID, exists := c.Get(middleware.UserIDContextKey)
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
 		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
 		return
@@ -43,7 +43,7 @@ func (h *ProviderHandler) AddProviderHandler(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.service.AddProvider(c.Request.Context(), &req, userID.(string))
+	resp, err := h.service.AddProvider(c.Request.Context(), &req, projectID.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 		return
@@ -63,13 +63,13 @@ func (h *ProviderHandler) AddProviderHandler(c *gin.Context) {
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /providers [get]
 func (h *ProviderHandler) ListProvidersHandler(c *gin.Context) {
-	userID, exists := c.Get(middleware.UserIDContextKey)
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
 		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
 		return
 	}
 
-	resp, err := h.service.ListProviders(c.Request.Context(), userID.(string))
+	resp, err := h.service.ListProviders(c.Request.Context(), projectID.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 		return
@@ -94,7 +94,7 @@ func (h *ProviderHandler) ListProvidersHandler(c *gin.Context) {
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /providers/{id} [put]
 func (h *ProviderHandler) UpdateProviderHandler(c *gin.Context) {
-	userID, exists := c.Get(middleware.UserIDContextKey)
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
 		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
 		return
@@ -112,7 +112,7 @@ func (h *ProviderHandler) UpdateProviderHandler(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.service.UpdateProvider(c.Request.Context(), &req, userID.(string), providerID)
+	resp, err := h.service.UpdateProvider(c.Request.Context(), &req, projectID.(string), providerID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 		return
@@ -134,7 +134,7 @@ func (h *ProviderHandler) UpdateProviderHandler(c *gin.Context) {
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /providers/{id} [delete]
 func (h *ProviderHandler) DeleteProviderHandler(c *gin.Context) {
-	userID, exists := c.Get(middleware.UserIDContextKey)
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
 		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
 		return
@@ -147,7 +147,7 @@ func (h *ProviderHandler) DeleteProviderHandler(c *gin.Context) {
 	}
 
 	// Verify ownership before deleting
-	_, err := h.service.repo.FindProviderById(c.Request.Context(), providerID, userID.(string))
+	_, err := h.service.repo.FindProviderById(c.Request.Context(), providerID, projectID.(string))
 	if err != nil {
 		c.JSON(http.StatusNotFound, api.Error("Provider configuration not found"))
 		return
@@ -175,7 +175,7 @@ func (h *ProviderHandler) DeleteProviderHandler(c *gin.Context) {
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /providers/{id}/toggle [patch]
 func (h *ProviderHandler) ToggleProviderHandler(c *gin.Context) {
-	userID, exists := c.Get(middleware.UserIDContextKey)
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
 		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
 		return
@@ -188,7 +188,7 @@ func (h *ProviderHandler) ToggleProviderHandler(c *gin.Context) {
 	}
 
 	// Verify ownership
-	_, err := h.service.repo.FindProviderById(c.Request.Context(), providerID, userID.(string))
+	_, err := h.service.repo.FindProviderById(c.Request.Context(), providerID, projectID.(string))
 	if err != nil {
 		c.JSON(http.StatusNotFound, api.Error("Provider configuration not found"))
 		return

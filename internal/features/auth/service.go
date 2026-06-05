@@ -1,19 +1,23 @@
 package auth
 
 import (
+	"context"
 	"errors"
 
+	"github.com/google/uuid"
+	"github.com/ttomsin/paye/internal/features/projects"
 	"github.com/ttomsin/paye/internal/features/user"
 	"github.com/ttomsin/paye/internal/models"
 )
 
 type IAuthService interface {
-	VerifyAPIKey(apiKey string) (*models.User, error)
+	VerifyAPIKey(apiKey string) (*models.User, *models.Project, error)
 }
 
 type AuthService struct {
-	userRepo  user.IUserRepo
-	jwtSecret string
+	userRepo    user.IUserRepo
+	projectRepo projects.IProjectRepo
+	jwtSecret   string
 }
 
 type SignupRequest struct {
@@ -35,8 +39,8 @@ type AuthResponse struct {
 	Token  string `json:"token"`
 }
 
-func NewAuthService(userRepo user.IUserRepo, jwtSecret string) *AuthService {
-	return &AuthService{userRepo: userRepo, jwtSecret: jwtSecret}
+func NewAuthService(userRepo user.IUserRepo, projectRepo projects.IProjectRepo, jwtSecret string) *AuthService {
+	return &AuthService{userRepo: userRepo, projectRepo: projectRepo, jwtSecret: jwtSecret}
 }
 
 func (s *AuthService) RegisterUser(req *SignupRequest) (*AuthResponse, error) {
@@ -59,16 +63,28 @@ func (s *AuthService) RegisterUser(req *SignupRequest) (*AuthResponse, error) {
 		return nil, err
 	}
 
+	publicID := uuid.New().String()
+
 	user := &models.User{
 		Name:     req.Name,
 		Email:    req.Email,
 		Password: hashedPassword,
 		ApiKey:   apiKey,
+		PublicID: publicID,
 	}
 	if err := s.userRepo.CreateUser(user); err != nil {
 		return nil, err
 	}
-	token, err := GenerateJWT(user.Base.ID.String(), user.Email, user.ApiKey, s.jwtSecret)
+	defaultProject := &models.Project{
+		Name:     "Default Project",
+		ApiKey:   user.ApiKey,
+		PublicID: user.PublicID,
+		UserID:   user.Base.ID,
+	}
+	if err := s.projectRepo.CreateProject(context.Background(), defaultProject); err != nil {
+		return nil, err
+	}
+	token, err := GenerateJWT(user.Base.ID.String(), user.Email, user.ApiKey, user.PublicID, s.jwtSecret)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +113,7 @@ func (s *AuthService) LoginUser(req *LoginRequest) (*AuthResponse, error) {
 	if err := CheckPasswordHash(req.Password, user.Password); err != nil {
 		return nil, errors.New("invalid password")
 	}
-	token, err := GenerateJWT(user.Base.ID.String(), user.Email, user.ApiKey, s.jwtSecret)
+	token, err := GenerateJWT(user.Base.ID.String(), user.Email, user.ApiKey, user.PublicID, s.jwtSecret)
 	if err != nil {
 		return nil, err
 	}
@@ -111,13 +127,36 @@ func (s *AuthService) LoginUser(req *LoginRequest) (*AuthResponse, error) {
 }
 
 // verify API key
-func (s *AuthService) VerifyAPIKey(apiKey string) (*models.User, error) {
+func (s *AuthService) VerifyAPIKey(apiKey string) (*models.User, *models.Project, error) {
+	// 1. Try to find project by API key
+	project, err := s.projectRepo.FindByApiKey(context.Background(), apiKey)
+	if err == nil && project != nil {
+		user, err := s.userRepo.FindByID(project.UserID.String())
+		if err != nil {
+			return nil, nil, err
+		}
+		return user, project, nil
+	}
+
+	// 2. Legacy fallback: look up user by API key
 	user, err := s.userRepo.FindByApiKey(apiKey)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if user == nil {
-		return nil, errors.New("invalid API key")
+		return nil, nil, errors.New("invalid API key")
 	}
-	return user, nil
+
+	// Migrate this legacy user by dynamically creating a Default Project
+	project = &models.Project{
+		Name:     "Default Project",
+		ApiKey:   user.ApiKey,
+		PublicID: user.PublicID,
+		UserID:   user.Base.ID,
+	}
+	if err := s.projectRepo.CreateProject(context.Background(), project); err != nil {
+		return nil, nil, err
+	}
+
+	return user, project, nil
 }

@@ -18,14 +18,14 @@ func NewProviderService(repo *ProviderRepo, encryptionKey string) *ProviderServi
 	return &ProviderService{repo: repo, encryptionKey: encryptionKey}
 }
 
-// GetProviderByLabel retrieves a provider configuration by label for the given user.
-func (s *ProviderService) GetProviderByLabel(ctx context.Context, userID string, label string) *models.ProviderConfig {
-	return s.repo.GetProviderByLabel(ctx, userID, label)
+// GetProviderByLabel retrieves a provider configuration by label for the given project.
+func (s *ProviderService) GetProviderByLabel(ctx context.Context, projectID string, label string) *models.ProviderConfig {
+	return s.repo.GetProviderByLabel(ctx, projectID, label)
 }
 
-// ListProviders retrieves all provider configurations for the given user.
-func (s *ProviderService) ListProviders(ctx context.Context, userId string) ([]*dto.ProviderConfigResponse, error) {
-	configs := s.repo.ListProviders(ctx, userId)
+// ListProviders retrieves all provider configurations for the given project.
+func (s *ProviderService) ListProviders(ctx context.Context, projectID string) ([]*dto.ProviderConfigResponse, error) {
+	configs := s.repo.ListProviders(ctx, projectID)
 	res := make([]*dto.ProviderConfigResponse, 0, len(configs))
 	for _, config := range configs {
 		decrypted, err := s.decryptConfigKeys(config)
@@ -42,8 +42,8 @@ func (s *ProviderService) ListProviders(ctx context.Context, userId string) ([]*
 	return res, nil
 }
 
-// AddProvider adds a new provider configuration for the given user.
-func (s *ProviderService) AddProvider(ctx context.Context, pcreq *dto.ProviderConfigRequest, userId string) (*dto.ProviderConfigResponse, error) {
+// AddProvider adds a new provider configuration for the given project.
+func (s *ProviderService) AddProvider(ctx context.Context, pcreq *dto.ProviderConfigRequest, projectID string) (*dto.ProviderConfigResponse, error) {
 	// we need to encrypt the secret key and public key before saving
 	encryptedSecretKey, err := crypto.Encrypt(pcreq.SecretKey, s.encryptionKey)
 	if err != nil {
@@ -58,7 +58,7 @@ func (s *ProviderService) AddProvider(ctx context.Context, pcreq *dto.ProviderCo
 	pcreq.PublicKey = encryptedPublicKey
 
 	pc := dto.ToProviderConfig(pcreq)
-	provider, err := s.repo.AddProvider(ctx, pc, userId)
+	provider, err := s.repo.AddProvider(ctx, pc, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -70,10 +70,10 @@ func (s *ProviderService) AddProvider(ctx context.Context, pcreq *dto.ProviderCo
 	return dto.ToProviderConfigResponse(decrypted), nil
 }
 
-// UpdateProvider updates an existing provider configuration for the given user.
-func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.ProviderConfigRequest, userId string, providerId string) (*dto.ProviderConfigResponse, error) {
+// UpdateProvider updates an existing provider configuration for the given project.
+func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.ProviderConfigRequest, projectID string, providerId string) (*dto.ProviderConfigResponse, error) {
 	// find provider by id
-	provider, err := s.repo.FindProviderById(ctx, providerId, userId)
+	provider, err := s.repo.FindProviderById(ctx, providerId, projectID)
 	if err != nil {
 		return nil, err
 	}
