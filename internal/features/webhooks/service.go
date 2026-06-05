@@ -41,7 +41,7 @@ func NewWebhookService(repo *WebhookRepo, providerRepo *providers.ProviderRepo, 
 	}
 }
 
-func (s *WebhookService) CreateWebhook(ctx context.Context, req *dto.WebhookConfigRequest, userId string) (*dto.WebhookConfigResponse, error) {
+func (s *WebhookService) CreateWebhook(ctx context.Context, req *dto.WebhookConfigRequest, projectID string) (*dto.WebhookConfigResponse, error) {
 	slug := req.PayeWebhookSlug
 	if slug == "" {
 		slug = uuid.New().String()
@@ -50,15 +50,15 @@ func (s *WebhookService) CreateWebhook(ctx context.Context, req *dto.WebhookConf
 	wc := dto.ToWebhookConfig(req)
 	wc.PayeWebhookSlug = slug
 
-	config, err := s.repo.Create(ctx, wc, userId)
+	config, err := s.repo.Create(ctx, wc, projectID)
 	if err != nil {
 		return nil, err
 	}
 	return dto.ToWebhookConfigResponse(config), nil
 }
 
-func (s *WebhookService) ListWebhooks(ctx context.Context, userId string) ([]*dto.WebhookConfigResponse, error) {
-	configs, err := s.repo.List(ctx, userId)
+func (s *WebhookService) ListWebhooks(ctx context.Context, projectID string) ([]*dto.WebhookConfigResponse, error) {
+	configs, err := s.repo.List(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -69,8 +69,8 @@ func (s *WebhookService) ListWebhooks(ctx context.Context, userId string) ([]*dt
 	return res, nil
 }
 
-func (s *WebhookService) UpdateWebhook(ctx context.Context, req *dto.WebhookConfigRequest, userId string, id string) (*dto.WebhookConfigResponse, error) {
-	wc, err := s.repo.FindByID(ctx, id, userId)
+func (s *WebhookService) UpdateWebhook(ctx context.Context, req *dto.WebhookConfigRequest, projectID string, id string) (*dto.WebhookConfigResponse, error) {
+	wc, err := s.repo.FindByID(ctx, id, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -90,15 +90,15 @@ func (s *WebhookService) UpdateWebhook(ctx context.Context, req *dto.WebhookConf
 	return dto.ToWebhookConfigResponse(wc), nil
 }
 
-func (s *WebhookService) DeleteWebhook(ctx context.Context, id string, userId string) error {
-	wc, err := s.repo.FindByID(ctx, id, userId)
+func (s *WebhookService) DeleteWebhook(ctx context.Context, id string, projectID string) error {
+	wc, err := s.repo.FindByID(ctx, id, projectID)
 	if err != nil {
 		return err
 	}
 	if wc == nil {
 		return errors.New("webhook configuration not found")
 	}
-	return s.repo.Delete(ctx, id, userId)
+	return s.repo.Delete(ctx, id, projectID)
 }
 
 func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signature string, payload []byte) error {
@@ -108,8 +108,8 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 		return fmt.Errorf("webhook config not found for slug %s: %w", slug, err)
 	}
 
-	// Fetch active provider config
-	pc, err := s.providerRepo.FindActiveProvider(ctx, wc.UserID.String(), wc.ProviderName)
+	// Fetch active provider config scoped to project
+	pc, err := s.providerRepo.FindActiveProvider(ctx, wc.ProjectID.String(), wc.ProviderName)
 	if err != nil {
 		return fmt.Errorf("active provider config not found for provider %s: %w", wc.ProviderName, err)
 	}
@@ -149,14 +149,9 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 		log.Printf("WebhookProxy Warning: Failed to create WebhookLog: %v", err)
 	}
 
-	// Fetch user to get ApiKey for signing the proxied request
-	u, err := s.userRepo.FindByID(wc.UserID.String())
-	if err != nil {
-		return fmt.Errorf("failed to fetch user for webhook config: %w", err)
-	}
-
-	// Asynchronously forward the webhook to the target URL
-	go s.forwardWebhook(wl, wc.TargetURL, u.ApiKey, payload)
+	// Asynchronously forward the webhook to the target URL using Project's API key
+	apiKey := wc.Project.ApiKey
+	go s.forwardWebhook(wl, wc.TargetURL, apiKey, payload)
 
 	return nil
 }

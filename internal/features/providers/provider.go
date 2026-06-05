@@ -10,14 +10,15 @@ type TransactionRequest struct {
 }
 
 type TransactionResponse struct {
-	Status    bool
-	Message   string
-	Reference string
-	AuthURL   string
-	Provider  string
-	Amount    float64
-	Currency  string
-	Metadata  map[string]any
+	Status     bool
+	Message    string
+	Reference  string
+	AuthURL    string
+	AccessCode string
+	Provider   string
+	Amount     float64
+	Currency   string
+	Metadata   map[string]any
 }
 
 type WebhookEvent struct {

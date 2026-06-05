@@ -16,6 +16,8 @@ import (
 	"github.com/ttomsin/paye/internal/features/dashboard"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/transactions"
+	"github.com/ttomsin/paye/internal/features/projects"
+	"github.com/ttomsin/paye/internal/features/sdk"
 	"github.com/ttomsin/paye/internal/features/user"
 	"github.com/ttomsin/paye/internal/features/webhooks"
 	"github.com/ttomsin/paye/internal/middleware"
@@ -69,13 +71,15 @@ func main() {
 
 	// init repos
 	userRepo := user.NewUserRepo(database.DB)
+	projectRepo := projects.NewProjectRepo(database.DB)
 	providerRepo := providers.NewProviderRepo(database.DB)
 	webhookRepo := webhooks.NewWebhookRepo(database.DB)
 	dashboardRepo := dashboard.NewDashboardRepo(database.DB)
 	transactionRepo := transactions.NewTransactionRepo(database.DB)
 
 	// init services
-	authService := auth.NewAuthService(userRepo, jwtSecret)
+	authService := auth.NewAuthService(userRepo, projectRepo, jwtSecret)
+	projectService := projects.NewProjectService(projectRepo)
 	providerService := providers.NewProviderService(providerRepo, derivedEncryptionKey)
 	webhookService := webhooks.NewWebhookService(webhookRepo, providerRepo, userRepo, derivedEncryptionKey)
 	dashboardService := dashboard.NewDashboardService(dashboardRepo)
@@ -83,10 +87,12 @@ func main() {
 
 	//init handlers
 	authHandler := auth.NewAuthHandler(*authService)
+	projectHandler := projects.NewProjectHandler(projectService)
 	providerHandler := providers.NewProviderHandler(providerService)
 	webhookHandler := webhooks.NewWebhookHandler(webhookService)
 	dashboardHandler := dashboard.NewDashboardHandler(dashboardService)
 	transactionHandler := transactions.NewTransactionHandler(transactionService)
+	sdkHandler := sdk.NewSDKHandler(userRepo, projectRepo, providerRepo, transactionService, derivedEncryptionKey)
 
 	// Gin config
 	r := gin.Default()
@@ -99,6 +105,9 @@ func main() {
 	
 	// Register Swagger public endpoint
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Register Dynamic SDK serving route (Public)
+	r.GET("/sdk/:publicId", sdkHandler.ServeSDK)
 	
 	// Public Group
 	v1 := r.Group("/api/v1")
@@ -112,10 +121,17 @@ func main() {
 	// Auth Routes (Public)
 	auth.RegisterRoutes(v1, authHandler)
 
+	// Public SDK Initialize Endpoint (Public)
+	v1.POST("/sdk/transactions/initialize", sdkHandler.InitializeSDKTransaction)
+
 	// Protected Group (Requires JWT token)
 	jwtMiddleware := middleware.NewApiJwtMiddleware(jwtSecret)
+	projectScopeMiddleware := middleware.NewProjectScopeMiddleware(database.DB)
 	protected := v1.Group("")
-	protected.Use(jwtMiddleware.Handle)
+	protected.Use(jwtMiddleware.Handle, projectScopeMiddleware.Handle)
+
+	// Register Project routes (Protected)
+	projects.RegisterRoutes(protected, projectHandler)
 
 	// Register Provider Config routes (Protected)
 	providers.RegisterRoutes(protected, providerHandler)
@@ -126,6 +142,9 @@ func main() {
 
 	// Register Dashboard stats and logs routes (Protected)
 	dashboard.RegisterRoutes(protected, dashboardHandler)
+
+	// Register Transaction list route (Protected by JWT)
+	protected.GET("/transactions", transactionHandler.ListTransactionsHandler)
 
 	// Protected Group (Requires API Key)
 	apiKeyMiddleware := middleware.NewApiKeyMiddleware(authService)

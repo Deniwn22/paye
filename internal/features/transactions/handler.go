@@ -1,6 +1,7 @@
 package transactions
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,9 +32,9 @@ func NewTransactionHandler(service *TransactionService) *TransactionHandler {
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /transactions/initialize [post]
 func (h *TransactionHandler) InitializeTransactionHandler(c *gin.Context) {
-	userID, exists := c.Get(middleware.UserIDContextKey)
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		c.JSON(http.StatusUnauthorized, api.Error("Project context missing"))
 		return
 	}
 
@@ -43,7 +44,7 @@ func (h *TransactionHandler) InitializeTransactionHandler(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.service.InitializeTransaction(c.Request.Context(), userID.(string), &req)
+	resp, err := h.service.InitializeTransaction(c.Request.Context(), projectID.(string), &req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 		return
@@ -64,10 +65,11 @@ func (h *TransactionHandler) InitializeTransactionHandler(c *gin.Context) {
 // @Failure 404 {object} api.SwaggerSimpleResponse
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /transactions/verify/{reference} [get]
+// @Router /transactions/verify/{reference} [get]
 func (h *TransactionHandler) VerifyTransactionHandler(c *gin.Context) {
-	userID, exists := c.Get(middleware.UserIDContextKey)
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		c.JSON(http.StatusUnauthorized, api.Error("Project context missing"))
 		return
 	}
 
@@ -77,13 +79,45 @@ func (h *TransactionHandler) VerifyTransactionHandler(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.service.VerifyTransaction(c.Request.Context(), userID.(string), reference)
+	resp, err := h.service.VerifyTransaction(c.Request.Context(), projectID.(string), reference)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 		return
 	}
 
 	c.JSON(http.StatusOK, api.Success("Transaction verified successfully", resp))
+}
+
+// ListTransactionsHandler handles listing transactions for the merchant
+// @Summary List payment transactions
+// @Description Retrieve a list of payment transactions for the authenticated merchant.
+// @Tags transactions
+// @Produce json
+// @Param Authorization header string true "Bearer token"
+// @Success 200 {object} api.SwaggerTransactionListResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /transactions [get]
+func (h *TransactionHandler) ListTransactionsHandler(c *gin.Context) {
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, api.Error("Project context missing"))
+		return
+	}
+
+	limitStr := c.DefaultQuery("limit", "10")
+	offsetStr := c.DefaultQuery("offset", "0")
+	var limit, offset int
+	fmt.Sscanf(limitStr, "%d", &limit)
+	fmt.Sscanf(offsetStr, "%d", &offset)
+
+	resp, err := h.service.ListTransactions(c.Request.Context(), projectID.(string), limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success("Transactions retrieved successfully", resp))
 }
 
 // RegisterRoutes registers endpoints in the provided router group

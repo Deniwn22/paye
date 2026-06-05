@@ -61,3 +61,15 @@ func Decrypt(cipherText string, key string) (string, error) {
 
 	return string(plainText), nil
 }
+
+// GenerateAPIKey generates a random API key as a hex-encoded string
+// and appends paye to the beginning of the key.
+func GenerateAPIKey() (string, error) {
+	apiKey := make([]byte, 32)
+	_, err := rand.Read(apiKey)
+	if err != nil {
+		return "", err
+	}
+	return "paye_" + hex.EncodeToString(apiKey), nil
+}
+

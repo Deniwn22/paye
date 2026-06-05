@@ -12,6 +12,7 @@ import (
 	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/features/auth"
+	"github.com/ttomsin/paye/internal/features/projects"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/transactions"
 	"github.com/ttomsin/paye/internal/features/user"
@@ -21,13 +22,13 @@ import (
 	"gorm.io/gorm"
 )
 
-func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.User, *transactions.TransactionService) {
+func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.User, *models.Project, *transactions.TransactionService) {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("failed to open database: %v", err)
 	}
 
-	err = db.AutoMigrate(&models.User{}, &models.ProviderConfig{}, &models.WebhookConfig{}, &models.WebhookLog{}, &models.Transaction{})
+	err = db.AutoMigrate(&models.User{}, &models.Project{}, &models.ProviderConfig{}, &models.WebhookConfig{}, &models.WebhookLog{}, &models.Transaction{})
 	if err != nil {
 		t.Fatalf("failed to migrate database: %v", err)
 	}
@@ -44,13 +45,24 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 		t.Fatalf("failed to create test user: %v", err)
 	}
 
+	testProject := &models.Project{
+		Name:     "Default Project",
+		ApiKey:   testUser.ApiKey,
+		PublicID: "paye_pub_test_12345", // Mock public ID
+		UserID:   testUser.Base.ID,
+	}
+	if err := db.Create(testProject).Error; err != nil {
+		t.Fatalf("failed to create test project: %v", err)
+	}
+
 	encryptionKey := "12345678901234567890123456789012" // 32 bytes
 
 	userRepo := user.NewUserRepo(db)
+	projectRepo := projects.NewProjectRepo(db)
 	providerRepo := providers.NewProviderRepo(db)
 	txRepo := transactions.NewTransactionRepo(db)
 
-	authService := auth.NewAuthService(userRepo, "test_jwt_secret_key_32_bytes_long_xxxx")
+	authService := auth.NewAuthService(userRepo, projectRepo, "test_jwt_secret_key_32_bytes_long_xxxx")
 	txService := transactions.NewTransactionService(txRepo, providerRepo, encryptionKey)
 	txHandler := transactions.NewTransactionHandler(txService)
 
@@ -64,11 +76,11 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 
 	transactions.RegisterRoutes(protected, txHandler)
 
-	return db, r, apiKey, testUser, txService
+	return db, r, apiKey, testUser, testProject, txService
 }
 
 func TestTransactionInitializeAndVerify(t *testing.T) {
-	db, r, apiKey, testUser, txService := setupTestEnvironment(t)
+	db, r, apiKey, _, testProject, txService := setupTestEnvironment(t)
 	encryptionKey := "12345678901234567890123456789012"
 
 	// 1. Create active ProviderConfig for Paystack
@@ -82,7 +94,7 @@ func TestTransactionInitializeAndVerify(t *testing.T) {
 		SecretKey:    encSecretKey,
 		PublicKey:    encPublicKey,
 		IsActive:     true,
-		UserID:       testUser.ID,
+		ProjectID:    testProject.Base.ID,
 	}
 	db.Create(provConfig)
 

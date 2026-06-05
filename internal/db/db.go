@@ -25,5 +25,5 @@ func Connect(dsn string) (*DB, error) {
 }
 
 func Migrate(db *DB) error {
-	return db.DB.AutoMigrate(&models.User{}, &models.ProviderConfig{}, &models.WebhookConfig{}, &models.WebhookLog{}, &models.Transaction{})
+	return db.DB.AutoMigrate(&models.User{}, &models.Project{}, &models.ProviderConfig{}, &models.WebhookConfig{}, &models.WebhookLog{}, &models.Transaction{})
 }

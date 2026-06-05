@@ -16,30 +16,30 @@ func NewProviderRepo(db *gorm.DB) *ProviderRepo {
 	return &ProviderRepo{db: db}
 }
 
-// AddProvider adds a  provider (userID, provider-config)
-func (p *ProviderRepo) AddProvider(ctx context.Context, pc *models.ProviderConfig, userId string) (*models.ProviderConfig, error) {
-	uID, err := uuid.Parse(userId)
+// AddProvider adds a provider config scoped to projectID
+func (p *ProviderRepo) AddProvider(ctx context.Context, pc *models.ProviderConfig, projectID string) (*models.ProviderConfig, error) {
+	projID, err := uuid.Parse(projectID)
 	if err != nil {
 		return nil, err
 	}
-	pc.UserID = uID
+	pc.ProjectID = projID
 	if err := p.db.WithContext(ctx).Create(&pc).Error; err != nil {
 		return nil, err
 	}
 	return pc, nil
 }
 
-// ListProviders returns a list of all providers for a given user
-func (p *ProviderRepo) ListProviders(ctx context.Context, userId string) []*models.ProviderConfig {
+// ListProviders returns a list of all providers for a given projectID
+func (p *ProviderRepo) ListProviders(ctx context.Context, projectID string) []*models.ProviderConfig {
 	var providers []*models.ProviderConfig
-	p.db.WithContext(ctx).Where("user_id = ?", userId).Find(&providers)
+	p.db.WithContext(ctx).Where("project_id = ?", projectID).Find(&providers)
 	return providers
 }
 
-// GetProvider returns a single provider by name
-func (p *ProviderRepo) GetProviderByLabel(ctx context.Context, userID string, label string) *models.ProviderConfig {
+// GetProviderByLabel returns a single provider by label and projectID
+func (p *ProviderRepo) GetProviderByLabel(ctx context.Context, projectID string, label string) *models.ProviderConfig {
 	var provider models.ProviderConfig
-	p.db.WithContext(ctx).First(&provider, "user_id = ? AND label = ?", userID, label)
+	p.db.WithContext(ctx).First(&provider, "project_id = ? AND label = ?", projectID, label)
 	return &provider
 }
 
@@ -61,15 +61,15 @@ func (p *ProviderRepo) ToggleProviderStatus(ctx context.Context, id string) erro
 	return p.db.WithContext(ctx).Save(&provider).Error
 }
 
-// FindProviderById returns a provider by ID
-func (p *ProviderRepo) FindProviderById(ctx context.Context, id string, userId string) (*models.ProviderConfig, error) {
+// FindProviderById returns a provider by ID and projectID
+func (p *ProviderRepo) FindProviderById(ctx context.Context, id string, projectID string) (*models.ProviderConfig, error) {
 	var provider models.ProviderConfig
-	return &provider, p.db.WithContext(ctx).First(&provider, "id = ? AND user_id = ?", id, userId).Error
+	return &provider, p.db.WithContext(ctx).First(&provider, "id = ? AND project_id = ?", id, projectID).Error
 }
 
-// FindActiveProvider returns an active provider config by provider name and user ID
-func (p *ProviderRepo) FindActiveProvider(ctx context.Context, userId string, providerName string) (*models.ProviderConfig, error) {
+// FindActiveProvider returns an active provider config by provider name and projectID
+func (p *ProviderRepo) FindActiveProvider(ctx context.Context, projectID string, providerName string) (*models.ProviderConfig, error) {
 	var provider models.ProviderConfig
-	err := p.db.WithContext(ctx).First(&provider, "user_id = ? AND provider_name = ? AND is_active = ?", userId, providerName, true).Error
+	err := p.db.WithContext(ctx).First(&provider, "project_id = ? AND provider_name = ? AND is_active = ?", projectID, providerName, true).Error
 	return &provider, err
 }

@@ -35,10 +35,10 @@ func (s *TransactionService) SetPaystackBaseURL(url string) {
 }
 
 // InitializeTransaction initializes a transaction with the selected provider, registers it on the paye client, and stores it in the database
-func (s *TransactionService) InitializeTransaction(ctx context.Context, userID string, req *dto.InitializeTransactionRequest) (*dto.InitializeTransactionResponse, error) {
-	uID, err := uuid.Parse(userID)
+func (s *TransactionService) InitializeTransaction(ctx context.Context, projectID string, req *dto.InitializeTransactionRequest) (*dto.InitializeTransactionResponse, error) {
+	pID, err := uuid.Parse(projectID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid user ID: %w", err)
+		return nil, fmt.Errorf("invalid project ID: %w", err)
 	}
 
 	reference := req.Reference
@@ -46,7 +46,7 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, userID s
 		reference = "paye_ref_" + uuid.New().String()
 	}
 
-	pc, err := s.providerRepo.FindActiveProvider(ctx, userID, req.Provider)
+	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, req.Provider)
 	if err != nil {
 		return nil, fmt.Errorf("active provider config not found: %w", err)
 	}
@@ -92,7 +92,7 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, userID s
 	rawRespBytes, _ := json.Marshal(resp)
 
 	tx := &models.Transaction{
-		UserID:      uID,
+		ProjectID:   pID,
 		Provider:    req.Provider,
 		Reference:   reference,
 		Amount:      req.Amount,
@@ -100,6 +100,7 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, userID s
 		Email:       req.Email,
 		Status:      "pending",
 		AuthURL:     resp.AuthURL,
+		AccessCode:  resp.AccessCode,
 		RawResponse: string(rawRespBytes),
 	}
 
@@ -112,13 +113,13 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, userID s
 }
 
 // VerifyTransaction checks the status of a transaction on the provider, registers it on the paye client, and updates it in the database
-func (s *TransactionService) VerifyTransaction(ctx context.Context, userID string, reference string) (*dto.VerifyTransactionResponse, error) {
-	tx, err := s.repo.FindTransactionByRef(ctx, reference, userID)
+func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID string, reference string) (*dto.VerifyTransactionResponse, error) {
+	tx, err := s.repo.FindTransactionByRef(ctx, reference, projectID)
 	if err != nil {
 		return nil, fmt.Errorf("transaction not found: %w", err)
 	}
 
-	pc, err := s.providerRepo.FindActiveProvider(ctx, userID, tx.Provider)
+	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, tx.Provider)
 	if err != nil {
 		return nil, fmt.Errorf("active provider config not found: %w", err)
 	}
@@ -170,3 +171,17 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, userID strin
 
 	return dto.ToVerifyTransactionResponse(tx, resp.Message), nil
 }
+
+// ListTransactions retrieves a list of transaction DTOs for a project
+func (s *TransactionService) ListTransactions(ctx context.Context, projectID string, limit int, offset int) ([]*dto.VerifyTransactionResponse, error) {
+	txs, err := s.repo.ListTransactions(ctx, projectID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	var res []*dto.VerifyTransactionResponse
+	for _, tx := range txs {
+		res = append(res, dto.ToVerifyTransactionResponse(tx, ""))
+	}
+	return res, nil
+}
+

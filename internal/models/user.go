@@ -9,4 +9,5 @@ type User struct {
 	Email    string `gorm:"unique;"`
 	Password string `gorm:"not null"`
 	ApiKey   string `gorm:"unique;not null"`
+	PublicID string `gorm:"unique;not null"`
 }

@@ -32,9 +32,9 @@ func NewWebhookHandler(service *WebhookService) *WebhookHandler {
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /webhooks/configs [post]
 func (h *WebhookHandler) CreateWebhookHandler(c *gin.Context) {
-	userID, exists := c.Get(middleware.UserIDContextKey)
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		c.JSON(http.StatusUnauthorized, api.Error("Project context missing"))
 		return
 	}
 
@@ -44,7 +44,7 @@ func (h *WebhookHandler) CreateWebhookHandler(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.service.CreateWebhook(c.Request.Context(), &req, userID.(string))
+	resp, err := h.service.CreateWebhook(c.Request.Context(), &req, projectID.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 		return
@@ -64,13 +64,13 @@ func (h *WebhookHandler) CreateWebhookHandler(c *gin.Context) {
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /webhooks/configs [get]
 func (h *WebhookHandler) ListWebhooksHandler(c *gin.Context) {
-	userID, exists := c.Get(middleware.UserIDContextKey)
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		c.JSON(http.StatusUnauthorized, api.Error("Project context missing"))
 		return
 	}
 
-	resp, err := h.service.ListWebhooks(c.Request.Context(), userID.(string))
+	resp, err := h.service.ListWebhooks(c.Request.Context(), projectID.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 		return
@@ -95,9 +95,9 @@ func (h *WebhookHandler) ListWebhooksHandler(c *gin.Context) {
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /webhooks/configs/{id} [put]
 func (h *WebhookHandler) UpdateWebhookHandler(c *gin.Context) {
-	userID, exists := c.Get(middleware.UserIDContextKey)
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		c.JSON(http.StatusUnauthorized, api.Error("Project context missing"))
 		return
 	}
 
@@ -113,7 +113,7 @@ func (h *WebhookHandler) UpdateWebhookHandler(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.service.UpdateWebhook(c.Request.Context(), &req, userID.(string), id)
+	resp, err := h.service.UpdateWebhook(c.Request.Context(), &req, projectID.(string), id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 		return
@@ -135,9 +135,9 @@ func (h *WebhookHandler) UpdateWebhookHandler(c *gin.Context) {
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /webhooks/configs/{id} [delete]
 func (h *WebhookHandler) DeleteWebhookHandler(c *gin.Context) {
-	userID, exists := c.Get(middleware.UserIDContextKey)
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		c.JSON(http.StatusUnauthorized, api.Error("Project context missing"))
 		return
 	}
 
@@ -147,7 +147,7 @@ func (h *WebhookHandler) DeleteWebhookHandler(c *gin.Context) {
 		return
 	}
 
-	err := h.service.DeleteWebhook(c.Request.Context(), id, userID.(string))
+	err := h.service.DeleteWebhook(c.Request.Context(), id, projectID.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 		return

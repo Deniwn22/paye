@@ -13,13 +13,14 @@ type InitializeTransactionRequest struct {
 }
 
 type InitializeTransactionResponse struct {
-	Reference string  `json:"reference"`
-	AuthURL   string  `json:"authorization_url,omitempty"`
-	Status    string  `json:"status"` // pending, success, failed
-	Amount    float64 `json:"amount"`
-	Currency  string  `json:"currency"`
-	Provider  string  `json:"provider"`
-	Message   string  `json:"message,omitempty"`
+	Reference  string  `json:"reference"`
+	AuthURL    string  `json:"authorization_url,omitempty"`
+	AccessCode string  `json:"access_code,omitempty"`
+	Status     string  `json:"status"` // pending, success, failed
+	Amount     float64 `json:"amount"`
+	Currency   string  `json:"currency"`
+	Provider   string  `json:"provider"`
+	Message    string  `json:"message,omitempty"`
 }
 
 type VerifyTransactionResponse struct {
@@ -33,13 +34,14 @@ type VerifyTransactionResponse struct {
 
 func ToInitializeTransactionResponse(tx *models.Transaction, message string) *InitializeTransactionResponse {
 	return &InitializeTransactionResponse{
-		Reference: tx.Reference,
-		AuthURL:   tx.AuthURL,
-		Status:    tx.Status,
-		Amount:    tx.Amount,
-		Currency:  tx.Currency,
-		Provider:  tx.Provider,
-		Message:   message,
+		Reference:  tx.Reference,
+		AuthURL:    tx.AuthURL,
+		AccessCode: tx.AccessCode,
+		Status:     tx.Status,
+		Amount:     tx.Amount,
+		Currency:   tx.Currency,
+		Provider:   tx.Provider,
+		Message:    message,
 	}
 }
 

@@ -7,6 +7,6 @@ type WebhookConfig struct {
 	ProviderName    string // (e.g "paystack", "flutterwave")
 	TargetURL       string
 	PayeWebhookSlug string    `gorm:"unique;not null"` // (e.g "paystack-webhook", "flutterwave-webhook")
-	UserID          uuid.UUID // (foreign key -> User)
-	User            *User     `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	ProjectID       uuid.UUID // (foreign key -> Project)
+	Project         *Project  `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
 }

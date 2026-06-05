@@ -65,3 +65,10 @@ type SwaggerTransactionVerifyResponse struct {
 	Message string                         `json:"message"`
 	Data    dto.VerifyTransactionResponse `json:"data"`
 }
+
+// SwaggerTransactionListResponse represents the list of transactions success response
+type SwaggerTransactionListResponse struct {
+	Status  bool                             `json:"status"`
+	Message string                           `json:"message"`
+	Data    []dto.VerifyTransactionResponse `json:"data"`
+}

@@ -22,7 +22,7 @@ func (m *ApiKeyMiddleware) Handle(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	user, err := m.authService.VerifyAPIKey(apiKey)
+	user, project, err := m.authService.VerifyAPIKey(apiKey)
 	if err != nil {
 		c.JSON(401, gin.H{"error": "Invalid API key"})
 		c.Abort()
@@ -30,6 +30,7 @@ func (m *ApiKeyMiddleware) Handle(c *gin.Context) {
 	}
 	c.Set(UserIDContextKey, user.ID.String())
 	c.Set(UserEmailContextKey, user.Email)
+	c.Set(ProjectIDContextKey, project.ID.String())
 	c.Next()
 }
 

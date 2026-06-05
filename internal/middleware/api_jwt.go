@@ -11,6 +11,7 @@ import (
 const UserIDContextKey = "user_id"
 const UserEmailContextKey = "user_email"
 const UserApiKeyContextKey = "user_api_key"
+const ProjectIDContextKey = "project_id"
 
 type ApiJwtMiddleware struct {
 	jwtSecretKey string

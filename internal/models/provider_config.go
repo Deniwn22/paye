@@ -11,6 +11,6 @@ type ProviderConfig struct {
 	IsActive     bool
 
 	// Foreign keys
-	UserID uuid.UUID // (foreign key -> User)
-	User   *User     `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	ProjectID uuid.UUID // (foreign key -> Project)
+	Project   *Project  `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
 }

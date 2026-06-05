@@ -118,11 +118,12 @@ func (p *Paystack) InitializeTransaction(req providers.TransactionRequest) (*pro
 		return nil, err
 	}
 	tResp := &providers.TransactionResponse{
-		Status:    result.Status,
-		Message:   result.Message,
-		Reference: result.Data.Reference,
-		AuthURL:   result.Data.AuthorizationURL,
-		Provider:  p.Name(),
+		Status:     result.Status,
+		Message:    result.Message,
+		Reference:  result.Data.Reference,
+		AuthURL:    result.Data.AuthorizationURL,
+		AccessCode: result.Data.AccessCode,
+		Provider:   p.Name(),
 	}
 
 	return tResp, nil
