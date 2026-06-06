@@ -9,13 +9,27 @@ import (
 	"github.com/ttomsin/paye/internal/models"
 )
 
+type PaystackServiceClient interface {
+	Refund(ctx context.Context, projectID string, req RefundRequest) (*RefundResponse, error)
+	CreateTransferRecipient(ctx context.Context, projectID string, req TransferRecipientRequest) (*TransferRecipientResponse, error)
+	InitiateTransfer(ctx context.Context, projectID string, req TransferRequest) (*TransferResponse, error)
+	CreatePlan(ctx context.Context, projectID string, req PlanRequest) (*PlanResponse, error)
+	CreateSubscription(ctx context.Context, projectID string, req SubscriptionRequest) (*SubscriptionResponse, error)
+	CancelSubscription(ctx context.Context, projectID string, subscriptionCode string, emailToken string) error
+}
+
 type ProviderService struct {
-	repo          *ProviderRepo
-	encryptionKey string
+	repo            *ProviderRepo
+	encryptionKey   string
+	paystackService PaystackServiceClient
 }
 
 func NewProviderService(repo *ProviderRepo, encryptionKey string) *ProviderService {
 	return &ProviderService{repo: repo, encryptionKey: encryptionKey}
+}
+
+func (s *ProviderService) SetPaystackService(ps PaystackServiceClient) {
+	s.paystackService = ps
 }
 
 // GetProviderByLabel retrieves a provider configuration by label for the given project.
@@ -144,4 +158,82 @@ func maskKey(key string) string {
 		return "********"
 	}
 	return key[:4] + "********" + key[len(key)-4:]
+}
+
+// RefundTransaction delegates the refund request to the Paystack service
+func (s *ProviderService) RefundTransaction(ctx context.Context, projectID string, provider string, req RefundRequest) (*RefundResponse, error) {
+	switch provider {
+	case "paystack":
+		if s.paystackService == nil {
+			return nil, fmt.Errorf("paystack service not registered")
+		}
+		return s.paystackService.Refund(ctx, projectID, req)
+	default:
+		return nil, fmt.Errorf("provider %s does not support refunds", provider)
+	}
+}
+
+// CreateTransferRecipient delegates the transfer recipient creation to the Paystack service
+func (s *ProviderService) CreateTransferRecipient(ctx context.Context, projectID string, provider string, req TransferRecipientRequest) (*TransferRecipientResponse, error) {
+	switch provider {
+	case "paystack":
+		if s.paystackService == nil {
+			return nil, fmt.Errorf("paystack service not registered")
+		}
+		return s.paystackService.CreateTransferRecipient(ctx, projectID, req)
+	default:
+		return nil, fmt.Errorf("provider %s does not support transfer recipients", provider)
+	}
+}
+
+// InitiateTransfer delegates the transfer initiation to the Paystack service
+func (s *ProviderService) InitiateTransfer(ctx context.Context, projectID string, provider string, req TransferRequest) (*TransferResponse, error) {
+	switch provider {
+	case "paystack":
+		if s.paystackService == nil {
+			return nil, fmt.Errorf("paystack service not registered")
+		}
+		return s.paystackService.InitiateTransfer(ctx, projectID, req)
+	default:
+		return nil, fmt.Errorf("provider %s does not support transfers", provider)
+	}
+}
+
+// CreatePlan delegates the plan creation to the Paystack service
+func (s *ProviderService) CreatePlan(ctx context.Context, projectID string, provider string, req PlanRequest) (*PlanResponse, error) {
+	switch provider {
+	case "paystack":
+		if s.paystackService == nil {
+			return nil, fmt.Errorf("paystack service not registered")
+		}
+		return s.paystackService.CreatePlan(ctx, projectID, req)
+	default:
+		return nil, fmt.Errorf("provider %s does not support plans", provider)
+	}
+}
+
+// CreateSubscription delegates the subscription creation to the Paystack service
+func (s *ProviderService) CreateSubscription(ctx context.Context, projectID string, provider string, req SubscriptionRequest) (*SubscriptionResponse, error) {
+	switch provider {
+	case "paystack":
+		if s.paystackService == nil {
+			return nil, fmt.Errorf("paystack service not registered")
+		}
+		return s.paystackService.CreateSubscription(ctx, projectID, req)
+	default:
+		return nil, fmt.Errorf("provider %s does not support subscriptions", provider)
+	}
+}
+
+// CancelSubscription delegates the subscription cancellation to the Paystack service
+func (s *ProviderService) CancelSubscription(ctx context.Context, projectID string, provider string, subscriptionCode string, emailToken string) error {
+	switch provider {
+	case "paystack":
+		if s.paystackService == nil {
+			return fmt.Errorf("paystack service not registered")
+		}
+		return s.paystackService.CancelSubscription(ctx, projectID, subscriptionCode, emailToken)
+	default:
+		return fmt.Errorf("provider %s does not support subscription cancellation", provider)
+	}
 }

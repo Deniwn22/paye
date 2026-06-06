@@ -15,6 +15,7 @@ import (
 	"github.com/ttomsin/paye/internal/features/auth"
 	"github.com/ttomsin/paye/internal/features/dashboard"
 	"github.com/ttomsin/paye/internal/features/providers"
+	"github.com/ttomsin/paye/internal/features/paystack"
 	"github.com/ttomsin/paye/internal/features/transactions"
 	"github.com/ttomsin/paye/internal/features/projects"
 	"github.com/ttomsin/paye/internal/features/sdk"
@@ -76,11 +77,14 @@ func main() {
 	webhookRepo := webhooks.NewWebhookRepo(database.DB)
 	dashboardRepo := dashboard.NewDashboardRepo(database.DB)
 	transactionRepo := transactions.NewTransactionRepo(database.DB)
+	paystackRepo := paystack.NewPaystackRepository(database.DB)
 
 	// init services
 	authService := auth.NewAuthService(userRepo, projectRepo, jwtSecret)
 	projectService := projects.NewProjectService(projectRepo)
+	paystackService := paystack.NewPaystackService(paystackRepo, providerRepo, derivedEncryptionKey)
 	providerService := providers.NewProviderService(providerRepo, derivedEncryptionKey)
+	providerService.SetPaystackService(paystackService)
 	webhookService := webhooks.NewWebhookService(webhookRepo, providerRepo, userRepo, derivedEncryptionKey)
 	dashboardService := dashboard.NewDashboardService(dashboardRepo)
 	transactionService := transactions.NewTransactionService(transactionRepo, providerRepo, derivedEncryptionKey)
