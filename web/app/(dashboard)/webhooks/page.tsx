@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation"
 import { getToken, getActiveProjectID } from "@/lib/cookies"
 import WebhooksManager from "@/components/webhooks-manager"
-
-const BACKEND_URL = "http://localhost:8080/api/v1"
+import { BACKEND_URL } from "@/lib/config"
 
 async function getWebhooks(token: string, projectID: string | null) {
   try {

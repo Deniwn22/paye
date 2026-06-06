@@ -9,8 +9,7 @@ import {
   setActiveProjectID,
   deleteActiveProjectID,
 } from "@/lib/cookies"
-
-const BACKEND_URL = "http://localhost:8080/api/v1"
+import { BACKEND_URL } from "@/lib/config"
 
 // --- Auth Actions ---
 

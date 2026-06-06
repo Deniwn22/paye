@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Key, Eye, EyeOff, Copy, Check, Terminal, Code, Cpu, ShieldCheck } from "lucide-react"
 import { toast } from "sonner"
+import { PAYE_API_URL, BACKEND_URL } from "@/lib/config"
 
 export default function ApiKeyPanel({ apiKey, publicId }: { apiKey: string; publicId: string }) {
   const [showKey, setShowKey] = useState(false)
@@ -119,7 +120,7 @@ export default function ApiKeyPanel({ apiKey, publicId }: { apiKey: string; publ
               </div>
               <pre className="p-4 overflow-x-auto text-xs font-mono text-zinc-800 dark:text-zinc-100 leading-relaxed select-all">
                 <code>
-{`curl -X POST "http://localhost:8080/api/v1/transactions/initialize" \\
+{`curl -X POST "${BACKEND_URL}/transactions/initialize" \\
   -H "X-Paye-API-Key: ${showKey ? apiKey : "paye_live_xxxxxxxxxxxxxxxx"}" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -152,7 +153,7 @@ export default function ApiKeyPanel({ apiKey, publicId }: { apiKey: string; publ
                 </div>
                 <pre className="p-4 overflow-x-auto text-xs font-mono text-zinc-800 dark:text-zinc-100 leading-relaxed select-all">
                   <code>
-{`<script src="http://localhost:8080/sdk/${publicId || "your_public_id"}.js"></script>`}
+{`<script src="${PAYE_API_URL}/sdk/${publicId || "your_public_id"}.js"></script>`}
                   </code>
                 </pre>
               </div>

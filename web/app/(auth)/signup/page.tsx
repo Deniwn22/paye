@@ -3,7 +3,7 @@
 import { useActionState } from "react"
 import Link from "next/link"
 import { signUpAction } from "@/app/actions"
-import { ShieldCheck, UserPlus, ArrowRight, AlertCircle } from "lucide-react"
+import { AlertCircle } from "lucide-react"
 
 export default function SignUpPage() {
   const [state, formAction, isPending] = useActionState(signUpAction, null)
@@ -11,8 +11,8 @@ export default function SignUpPage() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-zinc-50 p-6 font-sans text-zinc-900 transition-colors duration-300 selection:bg-sky-500/20 selection:text-sky-400 dark:bg-zinc-950 dark:text-zinc-100">
       {/* Background Radial Glow */}
-      <div className="pointer-events-none absolute top-1/2 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-500/5 blur-3xl dark:bg-sky-500/10" />
-      <div className="pointer-events-none absolute inset-0 top-0 bg-[linear-gradient(to_right,rgba(120,119,198,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(120,119,198,0.01)_1px,transparent_1px)] bg-[size:32px_32px] dark:bg-[linear-gradient(to_right,rgba(120,119,198,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(120,119,198,0.02)_1px,transparent_1px)]" />
+      <div className="pointer-events-none absolute top-1/2 left-1/2 h-125 w-125 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-500/5 blur-3xl dark:bg-sky-500/10" />
+      <div className="pointer-events-none absolute inset-0 top-0 bg-[linear-gradient(to_right,rgba(120,119,198,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(120,119,198,0.01)_1px,transparent_1px)] bg-size-[32px_32px] dark:bg-[linear-gradient(to_right,rgba(120,119,198,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(120,119,198,0.02)_1px,transparent_1px)]" />
 
       <div className="relative z-10 w-full max-w-md animate-in rounded-2xl border border-zinc-200 bg-white p-8 shadow-2xl backdrop-blur-md duration-200 zoom-in-95 fade-in dark:border-zinc-800 dark:bg-zinc-900/60">
         {/* Brand Logo Header */}

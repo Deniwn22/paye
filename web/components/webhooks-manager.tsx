@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { addWebhookAction, deleteWebhookAction } from "@/app/actions"
 import { Plus, Link2, Copy, Check, Trash2, ArrowRight, ShieldCheck, AlertCircle } from "lucide-react"
+import { BACKEND_URL } from "@/lib/config"
 import {
   Dialog,
   DialogContent,
@@ -33,7 +34,7 @@ export default function WebhooksManager({ initialConfigs = [] }: { initialConfig
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null)
 
   const handleCopyUrl = (slugValue: string) => {
-    const fullUrl = `http://localhost:8080/api/v1/webhooks/receive/${slugValue}`
+    const fullUrl = `${BACKEND_URL}/webhooks/receive/${slugValue}`
     navigator.clipboard.writeText(fullUrl)
     setCopiedSlug(slugValue)
     toast.success("Webhook URL copied to clipboard")
@@ -173,7 +174,7 @@ export default function WebhooksManager({ initialConfigs = [] }: { initialConfig
       ) : (
         <div className="space-y-6">
           {configs.map((c) => {
-            const proxyUrl = `http://localhost:8080/api/v1/webhooks/receive/${c.paye_webhook_slug}`
+            const proxyUrl = `${BACKEND_URL}/webhooks/receive/${c.paye_webhook_slug}`
             const isCopied = copiedSlug === c.paye_webhook_slug
 
             return (

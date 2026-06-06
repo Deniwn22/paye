@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ArrowLeft, BookOpen, Zap, Settings, ShieldCheck, Copy, Check } from "lucide-react"
+import { PAYE_API_URL } from "@/lib/config"
 
 export default function DocsPage() {
   const [copiedText, setCopiedText] = useState<string | null>(null)
@@ -14,7 +15,7 @@ export default function DocsPage() {
     setTimeout(() => setCopiedText(null), 2000)
   }
 
-  const scriptSnippet = `<script src="http://localhost:8080/sdk/your_merchant_public_id.js"></script>`
+  const scriptSnippet = `<script src="${PAYE_API_URL}/sdk/your_merchant_public_id.js"></script>`
   const containerSnippet = `<div data-paye-checkout 
      data-amount="5000" 
      data-email="customer@email.com">

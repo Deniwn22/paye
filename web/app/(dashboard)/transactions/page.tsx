@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation"
 import { getToken, getActiveProjectID } from "@/lib/cookies"
 import TransactionsTable from "@/components/transactions-table"
-
-const BACKEND_URL = "http://localhost:8080/api/v1"
+import { BACKEND_URL } from "@/lib/config"
 
 async function getTransactions(token: string, projectID: string | null) {
   try {

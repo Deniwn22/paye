@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { getToken, getActiveProjectID } from "@/lib/cookies"
 import ApiKeyPanel from "@/components/api-key-panel"
+import { BACKEND_URL } from "@/lib/config"
 
 export default async function ApiKeyPage() {
   const token = await getToken()
@@ -13,7 +14,7 @@ export default async function ApiKeyPage() {
   // Fetch projects list from backend
   let projects: any[] = []
   try {
-    const res = await fetch("http://localhost:8080/api/v1/projects", {
+    const res = await fetch(`${BACKEND_URL}/projects`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

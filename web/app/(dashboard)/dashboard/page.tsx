@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation"
 import { getToken, getActiveProjectID } from "@/lib/cookies"
 import WebhookLogsTable from "@/components/webhook-logs-table"
-import { CreditCard, Activity, Network, TrendingUp, AlertTriangle } from "lucide-react"
-
-const BACKEND_URL = "http://localhost:8080/api/v1"
+import { AlertTriangle } from "lucide-react"
+import { BACKEND_URL } from "@/lib/config"
 
 async function getStats(token: string, projectID: string | null) {
   try {
@@ -19,6 +18,7 @@ async function getStats(token: string, projectID: string | null) {
     const result = await res.json()
     return result.status ? result.data : null
   } catch (err) {
+    if (err instanceof Error) console.error(err.message)
     return null
   }
 }
@@ -37,6 +37,7 @@ async function getLogs(token: string, projectID: string | null) {
     const result = await res.json()
     return result.status ? result.data : []
   } catch (err) {
+    if (err instanceof Error) console.error(err.message)
     return []
   }
 }
@@ -60,24 +61,31 @@ export default async function DashboardPage() {
 
   const deliverySuccessRate =
     successfulDeliveries + failedDeliveries > 0
-      ? Math.round((successfulDeliveries / (successfulDeliveries + failedDeliveries)) * 100)
+      ? Math.round(
+          (successfulDeliveries / (successfulDeliveries + failedDeliveries)) *
+            100
+        )
       : 100
 
   return (
     <div className="space-y-8 select-text">
       {/* Title */}
-      <div className="border-b border-zinc-200/60 dark:border-zinc-900/60 pb-5">
-        <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white tracking-tight">Overview</h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Real-time transaction overview and delivery status.</p>
+      <div className="border-b border-zinc-200/60 pb-5 dark:border-zinc-900/60">
+        <h1 className="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+          Overview
+        </h1>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          Real-time transaction overview and delivery status.
+        </p>
       </div>
 
       {/* Offline Alert */}
       {!stats && (
-        <div className="p-4 border border-rose-500/25 bg-rose-500/5 text-rose-600 dark:text-rose-400 text-sm font-semibold rounded-xl flex items-start gap-3 shadow-sm">
-          <AlertTriangle className="w-5 h-5 shrink-0 text-rose-500" />
+        <div className="flex items-start gap-3 rounded-xl border border-rose-500/25 bg-rose-500/5 p-4 text-sm font-semibold text-rose-600 shadow-sm dark:text-rose-400">
+          <AlertTriangle className="h-5 w-5 shrink-0 text-rose-500" />
           <div className="space-y-1">
-            <h4 className="font-bold text-sm">Connection error</h4>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-normal">
+            <h4 className="text-sm font-bold">Connection error</h4>
+            <p className="text-xs leading-normal text-zinc-500 dark:text-zinc-400">
               Unable to connect to server. Please try again.
             </p>
           </div>
@@ -85,63 +93,74 @@ export default async function DashboardPage() {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {/* Total Volume */}
-        <div className="p-5 border border-zinc-200/60 dark:border-zinc-900 bg-white dark:bg-[#111111] rounded-xl hover:border-b-[#0ea5e9] hover:dark:border-b-[#0ea5e9] transition-all flex flex-col justify-between h-[125px]">
+        <div className="flex h-31.25 flex-col justify-between rounded-xl border border-zinc-200/60 bg-white p-5 transition-all hover:border-b-[#0ea5e9] dark:border-zinc-900 dark:bg-[#111111] hover:dark:border-b-[#0ea5e9]">
           <div>
-            <span className="text-xs text-zinc-400 dark:text-zinc-500 uppercase font-bold tracking-wider block">Total Volume</span>
+            <span className="block text-xs font-bold tracking-wider text-zinc-400 uppercase dark:text-zinc-500">
+              Total Volume
+            </span>
           </div>
           <div>
-            <span className="text-2xl font-black text-zinc-900 dark:text-white block font-mono tracking-tight">
-              ₦{totalVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            <span className="block font-mono text-2xl font-black tracking-tight text-zinc-900 dark:text-white">
+              ₦
+              {totalVolume.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}
             </span>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400 block mt-1">
+            <span className="mt-1 block text-xs text-zinc-500 dark:text-zinc-400">
               Across all connected providers
             </span>
           </div>
         </div>
 
         {/* Transactions count */}
-        <div className="p-5 border border-zinc-200/60 dark:border-zinc-900 bg-white dark:bg-[#111111] rounded-xl hover:border-b-[#0ea5e9] hover:dark:border-b-[#0ea5e9] transition-all flex flex-col justify-between h-[125px]">
+        <div className="flex h-31.25 flex-col justify-between rounded-xl border border-zinc-200/60 bg-white p-5 transition-all hover:border-b-[#0ea5e9] dark:border-zinc-900 dark:bg-[#111111] hover:dark:border-b-[#0ea5e9]">
           <div>
-            <span className="text-xs text-zinc-400 dark:text-zinc-500 uppercase font-bold tracking-wider block">Transactions</span>
+            <span className="block text-xs font-bold tracking-wider text-zinc-400 uppercase dark:text-zinc-500">
+              Transactions
+            </span>
           </div>
           <div>
-            <span className="text-2xl font-black text-zinc-900 dark:text-white block font-mono tracking-tight">
+            <span className="block font-mono text-2xl font-black tracking-tight text-zinc-900 dark:text-white">
               {totalTransactions}
             </span>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400 block mt-1">
+            <span className="mt-1 block text-xs text-zinc-500 dark:text-zinc-400">
               {failedTransactions} failed
             </span>
           </div>
         </div>
 
         {/* Delivery Success Rate */}
-        <div className="p-5 border border-zinc-200/60 dark:border-zinc-900 bg-white dark:bg-[#111111] rounded-xl hover:border-b-[#0ea5e9] hover:dark:border-b-[#0ea5e9] transition-all flex flex-col justify-between h-[125px]">
+        <div className="flex h-31.25 flex-col justify-between rounded-xl border border-zinc-200/60 bg-white p-5 transition-all hover:border-b-[#0ea5e9] dark:border-zinc-900 dark:bg-[#111111] hover:dark:border-b-[#0ea5e9]">
           <div>
-            <span className="text-xs text-zinc-400 dark:text-zinc-500 uppercase font-bold tracking-wider block">Delivery Rate</span>
+            <span className="block text-xs font-bold tracking-wider text-zinc-400 uppercase dark:text-zinc-500">
+              Delivery Rate
+            </span>
           </div>
           <div>
-            <span className="text-2xl font-black text-zinc-900 dark:text-white block font-mono tracking-tight">
+            <span className="block font-mono text-2xl font-black tracking-tight text-zinc-900 dark:text-white">
               {deliverySuccessRate}%
             </span>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400 block mt-1">
-              {successfulDeliveries} successful / {failedDeliveries} failed deliveries
+            <span className="mt-1 block text-xs text-zinc-500 dark:text-zinc-400">
+              {successfulDeliveries} successful / {failedDeliveries} failed
+              deliveries
             </span>
           </div>
         </div>
 
         {/* Active Providers count */}
-        <div className="p-5 border border-zinc-200/60 dark:border-zinc-900 bg-white dark:bg-[#111111] rounded-xl hover:border-b-[#0ea5e9] hover:dark:border-b-[#0ea5e9] transition-all flex flex-col justify-between h-[125px]">
+        <div className="flex h-31.25 flex-col justify-between rounded-xl border border-zinc-200/60 bg-white p-5 transition-all hover:border-b-[#0ea5e9] dark:border-zinc-900 dark:bg-[#111111] hover:dark:border-b-[#0ea5e9]">
           <div>
-            <span className="text-xs text-zinc-400 dark:text-zinc-500 uppercase font-bold tracking-wider block">Active Providers</span>
+            <span className="block text-xs font-bold tracking-wider text-zinc-400 uppercase dark:text-zinc-500">
+              Active Providers
+            </span>
           </div>
           <div>
-            <span className="text-2xl font-black text-zinc-900 dark:text-white block font-mono tracking-tight">
+            <span className="block font-mono text-2xl font-black tracking-tight text-zinc-900 dark:text-white">
               {activeProviders}
             </span>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400 block mt-1">
+            <span className="mt-1 block text-xs text-zinc-500 dark:text-zinc-400">
               providers connected
             </span>
           </div>
@@ -150,9 +169,13 @@ export default async function DashboardPage() {
 
       {/* Webhook Log List */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between border-b border-zinc-200/60 dark:border-zinc-900/60 pb-3">
-          <h2 className="text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Recent Activity</h2>
-          <span className="text-xs text-zinc-400">Showing latest 10 deliveries</span>
+        <div className="flex items-center justify-between border-b border-zinc-200/60 pb-3 dark:border-zinc-900/60">
+          <h2 className="text-sm font-bold tracking-wider text-zinc-500 uppercase dark:text-zinc-400">
+            Recent Activity
+          </h2>
+          <span className="text-xs text-zinc-400">
+            Showing latest 10 deliveries
+          </span>
         </div>
         <WebhookLogsTable logs={logs} />
       </div>

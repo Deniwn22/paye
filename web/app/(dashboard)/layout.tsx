@@ -16,6 +16,7 @@ import {
 import SidebarNav from "@/components/sidebar-nav"
 import ProjectSwitcher from "@/components/project-switcher"
 import { LogOut, ChevronRight } from "lucide-react"
+import { BACKEND_URL } from "@/lib/config"
 
 export default async function DashboardLayout({
   children,
@@ -33,7 +34,7 @@ export default async function DashboardLayout({
   // Fetch projects from backend
   let projects: any[] = []
   try {
-    const res = await fetch("http://localhost:8080/api/v1/projects", {
+    const res = await fetch(`${BACKEND_URL}/projects`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
