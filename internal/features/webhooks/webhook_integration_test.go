@@ -399,8 +399,8 @@ func TestDashboardStatsAndLogs(t *testing.T) {
 	json.Unmarshal(w.Body.Bytes(), &statsResult)
 	statsData := statsResult["data"].(map[string]any)
 
-	if statsData["total_volume"].(float64) != 5000.0 {
-		t.Errorf("Expected total volume 5000, got %v", statsData["total_volume"])
+	if statsData["total_volume"].(float64) != 50.0 {
+		t.Errorf("Expected total volume 50, got %v", statsData["total_volume"])
 	}
 	if int(statsData["total_transactions"].(float64)) != 1 {
 		t.Errorf("Expected 1 successful transaction, got %v", statsData["total_transactions"])

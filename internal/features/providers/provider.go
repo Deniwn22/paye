@@ -22,11 +22,13 @@ type TransactionResponse struct {
 }
 
 type WebhookEvent struct {
-	Event     string
-	Reference string
-	Amount    float64
-	Status    string
-	Provider  string
+	Event             string
+	Reference         string
+	Amount            float64
+	Status            string
+	Provider          string
+	AuthorizationCode string
+	SubscriptionCode  string
 }
 
 // Refund types

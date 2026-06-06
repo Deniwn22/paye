@@ -29,12 +29,37 @@ func (p *Paystack) HandleWebhook(signature string, payload []byte) (*provider.We
 	amount, _ := webhookData.Data["amount"].(float64)
 	status, _ := webhookData.Data["status"].(string)
 
+	// Extract authorization code from charge.success
+	authorizationCode := ""
+	if auth, ok := webhookData.Data["authorization"].(map[string]any); ok {
+		if code, ok := auth["authorization_code"].(string); ok {
+			authorizationCode = code
+		}
+	}
+
+	// Extract subscription code — lives directly on data for subscription.disable
+	subscriptionCode := ""
+	if sub, ok := webhookData.Data["subscription_code"].(string); ok {
+		subscriptionCode = sub
+	}
+
+	// For invoice.payment_failed, subscription is nested inside data
+	if webhookData.Event == "invoice.payment_failed" {
+		if subMap, ok := webhookData.Data["subscription"].(map[string]any); ok {
+			if code, ok := subMap["subscription_code"].(string); ok {
+				subscriptionCode = code
+			}
+		}
+	}
+
 	return &provider.WebhookEvent{
-		Event:     webhookData.Event,
-		Reference: reference,
-		Amount:    amount,
-		Status:    status,
-		Provider:  p.Name(),
+		Event:             webhookData.Event,
+		Reference:         reference,
+		Amount:            amount / 100,
+		Status:            status,
+		Provider:          p.Name(),
+		AuthorizationCode: authorizationCode,
+		SubscriptionCode:  subscriptionCode,
 	}, nil
 }
 
