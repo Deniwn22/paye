@@ -17,14 +17,16 @@ export default function SignUpPage() {
       <div className="relative z-10 w-full max-w-md animate-in rounded-2xl border border-zinc-200 bg-white p-8 shadow-2xl backdrop-blur-md duration-200 zoom-in-95 fade-in dark:border-zinc-800 dark:bg-zinc-900/60">
         {/* Brand Logo Header */}
         <div className="mt-2 mb-8 flex flex-col items-center">
-          <Link href="/" className="group mb-4 flex items-center gap-2.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500 text-sm font-black text-black shadow-md shadow-sky-500/10 transition-transform group-hover:scale-105">
-              P
-            </span>
-            <span className="text-base font-extrabold tracking-tight text-zinc-900 dark:text-white">
-              Paye
-            </span>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="group flex items-center gap-2.5 select-none"
+            >
+              <span className="text-lg font-black tracking-tight text-foreground">
+                Paye<span className="font-medium text-sky-500">.</span>
+              </span>
+            </Link>
+          </div>
           <h2 className="text-base font-bold tracking-tight text-zinc-900 dark:text-white">
             Create your account
           </h2>

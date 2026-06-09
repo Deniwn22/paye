@@ -75,8 +75,8 @@ export async function PUT(req: NextRequest) {
         })
         if (projRes.ok) {
           const projData = await projRes.json()
-          const projects = projData.data || []
-          const activeProject = projects.find((p: any) => p.id === activeProjectId) || projects[0]
+          const projects: import("@/components/project-switcher").Project[] = projData.data || []
+          const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0]
           const apiKey = activeProject?.api_key
 
           if (apiKey) {

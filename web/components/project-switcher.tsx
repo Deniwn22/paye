@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { switchProjectAction, createProjectAction, deleteProjectAction } from "@/app/actions"
 import { toast } from "sonner"
 
-interface Project {
+export interface Project {
   id: string
   name: string
   api_key: string

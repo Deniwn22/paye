@@ -15,7 +15,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar"
 import SidebarNav from "@/components/sidebar-nav"
-import ProjectSwitcher from "@/components/project-switcher"
+import ProjectSwitcher, { Project } from "@/components/project-switcher"
 import { LogOut, ChevronRight } from "lucide-react"
 import { BACKEND_URL } from "@/lib/config"
 
@@ -34,7 +34,8 @@ export default async function DashboardLayout({
   const activeMode = await getActiveMode()
 
   // Fetch projects from backend
-  let projects: any[] = []
+  let projects: Project[] = []
+  let shouldRedirect = false
   try {
     const res = await fetch(`${BACKEND_URL}/projects`, {
       headers: {
@@ -42,12 +43,20 @@ export default async function DashboardLayout({
       },
       next: { revalidate: 0 },
     })
-    const data = await res.json()
-    if (res.ok && data.status) {
-      projects = data.data || []
+    if (res.status === 401) {
+      shouldRedirect = true
+    } else if (res.ok) {
+      const data = await res.json()
+      if (data.status) {
+        projects = data.data || []
+      }
     }
   } catch (e) {
     console.error("Failed to load projects:", e)
+  }
+
+  if (shouldRedirect) {
+    redirect("/api/auth/logout")
   }
 
   const activeProjectID =
