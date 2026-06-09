@@ -179,7 +179,11 @@ func main() {
 	// Register Transaction routes (Protected by API Key)
 	transactions.RegisterRoutes(apiKeyProtected, transactionHandler)
 
-	if err := r.Run(":8080"); err != nil {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	if err := r.Run(":" + port); err != nil {
 		log.Fatal("failed to start server: ", err)
 	}
 }
