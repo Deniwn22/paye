@@ -1,16 +1,11 @@
 import { redirect } from "next/navigation"
-import { getToken, getActiveProjectID } from "@/lib/cookies"
+import { getToken } from "@/lib/cookies"
 import TransactionsTable from "@/components/transactions-table"
-import { BACKEND_URL } from "@/lib/config"
+import { fetchBackend } from "@/lib/api"
 
-async function getTransactions(token: string, projectID: string | null) {
+async function getTransactions() {
   try {
-    const headers: Record<string, string> = { Authorization: `Bearer ${token}` }
-    if (projectID) {
-      headers["X-Project-ID"] = projectID
-    }
-    const res = await fetch(`${BACKEND_URL}/transactions?limit=50`, {
-      headers,
+    const res = await fetchBackend("/transactions?limit=50", {
       cache: "no-store",
     })
     if (!res.ok) return []
@@ -27,8 +22,7 @@ export default async function TransactionsPage() {
     redirect("/signin")
   }
 
-  const projectID = await getActiveProjectID()
-  const transactions = await getTransactions(token, projectID)
+  const transactions = await getTransactions()
 
   return (
     <div className="space-y-6">

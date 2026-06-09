@@ -15,4 +15,5 @@ type Refund struct {
 	MerchantNote         string    `json:"merchant_note"`
 	Status               string    `gorm:"default:pending" json:"status"` // pending, success, failed
 	RawResponse          string    `json:"raw_response,omitempty"`
+	IsLive               bool      `gorm:"default:false;index" json:"is_live"`
 }

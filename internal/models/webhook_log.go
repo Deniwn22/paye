@@ -4,8 +4,10 @@ import "github.com/google/uuid"
 
 type WebhookLog struct {
 	Base
-	WebhookConfigID uuid.UUID      `gorm:"type:uuid;not null"`
-	WebhookConfig   *WebhookConfig `gorm:"foreignKey:WebhookConfigID;constraint:OnDelete:CASCADE;"`
+	ProjectID       uuid.UUID      `gorm:"type:uuid;not null;index"`
+	Project         *Project       `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE;"`
+	WebhookConfigID *uuid.UUID     `gorm:"type:uuid"` // nullable for locally-handled webhooks
+	WebhookConfig   *WebhookConfig `gorm:"foreignKey:WebhookConfigID;constraint:OnDelete:SET NULL;"`
 	Event           string         `gorm:"not null"`
 	Reference       string
 	Amount          float64
@@ -13,4 +15,5 @@ type WebhookLog struct {
 	ForwardedStatus int
 	ErrorMessage    string `gorm:"type:text"`
 	Payload         string `gorm:"type:text"`
+	IsLive          bool   `gorm:"default:false;index"`
 }

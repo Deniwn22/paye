@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/google/uuid"
+	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/features/projects"
 	"github.com/ttomsin/paye/internal/features/user"
 	"github.com/ttomsin/paye/internal/models"
@@ -58,28 +58,43 @@ func (s *AuthService) RegisterUser(req *SignupRequest) (*AuthResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	apiKey, err := GenerateAPIKey()
+	liveApiKey, err := crypto.GenerateAPIKey(true)
+	if err != nil {
+		return nil, err
+	}
+	testApiKey, err := crypto.GenerateAPIKey(false)
 	if err != nil {
 		return nil, err
 	}
 
-	publicID := uuid.New().String()
+	livePublicID, err := crypto.GeneratePublicID(true)
+	if err != nil {
+		return nil, err
+	}
+	testPublicID, err := crypto.GeneratePublicID(false)
+	if err != nil {
+		return nil, err
+	}
 
 	user := &models.User{
-		Name:     req.Name,
-		Email:    req.Email,
-		Password: hashedPassword,
-		ApiKey:   apiKey,
-		PublicID: publicID,
+		Name:         req.Name,
+		Email:        req.Email,
+		Password:     hashedPassword,
+		ApiKey:       liveApiKey,
+		PublicID:     livePublicID,
+		TestApiKey:   testApiKey,
+		TestPublicID: testPublicID,
 	}
 	if err := s.userRepo.CreateUser(user); err != nil {
 		return nil, err
 	}
 	defaultProject := &models.Project{
-		Name:     "Default Project",
-		ApiKey:   user.ApiKey,
-		PublicID: user.PublicID,
-		UserID:   user.Base.ID,
+		Name:         "Default Project",
+		ApiKey:       user.ApiKey,
+		PublicID:     user.PublicID,
+		TestApiKey:   user.TestApiKey,
+		TestPublicID: user.TestPublicID,
+		UserID:       user.Base.ID,
 	}
 	if err := s.projectRepo.CreateProject(context.Background(), defaultProject); err != nil {
 		return nil, err

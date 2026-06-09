@@ -115,38 +115,80 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 		return fmt.Errorf("active provider config not found for provider %s: %w", wc.ProviderName, err)
 	}
 
-	// Decrypt provider secret key
-	decryptedSecret, err := crypto.Decrypt(pc.SecretKey, s.encryptionKey)
-	if err != nil {
-		return fmt.Errorf("failed to decrypt provider secret key: %w", err)
+	// Try verifying with Live keys first, then Test keys
+	var webhookEvent *providers.WebhookEvent
+	var isLive bool
+	var verifyErr error
+
+	// Try Live key
+	liveSecret, _ := pc.GetKeysForMode(true)
+	if liveSecret != "" {
+		decryptedSecret, err := crypto.Decrypt(liveSecret, s.encryptionKey)
+		if err == nil {
+			var providerClient providers.Provider
+			switch wc.ProviderName {
+			case "paystack":
+				providerClient = paystack.New(decryptedSecret)
+			case "flutterwave":
+				providerClient = flutterwave.New(decryptedSecret)
+			}
+			if providerClient != nil {
+				webhookEvent, verifyErr = providerClient.HandleWebhook(signature, payload)
+				if verifyErr == nil {
+					isLive = true
+				}
+			}
+		}
 	}
 
-	// Instantiate provider client and handle signature verification
-	var providerClient providers.Provider
-	switch wc.ProviderName {
-	case "paystack":
-		providerClient = paystack.New(decryptedSecret)
-	case "flutterwave":
-		providerClient = flutterwave.New(decryptedSecret)
-	default:
-		return fmt.Errorf("unsupported provider: %s", wc.ProviderName)
+	// Try Test key if live verification failed or was not configured
+	if webhookEvent == nil {
+		testSecret, _ := pc.GetKeysForMode(false)
+		if testSecret != "" {
+			decryptedSecret, err := crypto.Decrypt(testSecret, s.encryptionKey)
+			if err == nil {
+				var providerClient providers.Provider
+				switch wc.ProviderName {
+				case "paystack":
+					providerClient = paystack.New(decryptedSecret)
+				case "flutterwave":
+					providerClient = flutterwave.New(decryptedSecret)
+				}
+				if providerClient != nil {
+					webhookEvent, verifyErr = providerClient.HandleWebhook(signature, payload)
+					if verifyErr == nil {
+						isLive = false
+					}
+				}
+			}
+		}
 	}
 
-	webhookEvent, err := providerClient.HandleWebhook(signature, payload)
-	if err != nil {
-		return fmt.Errorf("invalid webhook signature: %w", err)
+	if webhookEvent == nil {
+		if verifyErr != nil {
+			return fmt.Errorf("invalid webhook signature: %w", verifyErr)
+		}
+		return fmt.Errorf("failed to verify webhook signature: no credentials succeeded")
 	}
 
 	// Create a WebhookLog record in the database
 	wl := &models.WebhookLog{
-		WebhookConfigID: wc.Base.ID,
+		ProjectID:       wc.ProjectID,
+		WebhookConfigID: &wc.Base.ID,
 		Event:           webhookEvent.Event,
 		Reference:       webhookEvent.Reference,
 		Amount:          webhookEvent.Amount,
 		Status:          webhookEvent.Status,
 		ForwardedStatus: 0,
 		Payload:         string(payload),
+		IsLive:          isLive,
 	}
+
+	if wc.TargetURL == "" {
+		wl.ForwardedStatus = 200
+		wl.ErrorMessage = "Locally stored; no forwarding target URL configured"
+	}
+
 	err = s.repo.CreateLog(ctx, wl)
 	if err != nil {
 		log.Printf("WebhookProxy Warning: Failed to create WebhookLog: %v", err)
@@ -156,9 +198,16 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 		_ = s.repo.UpdateTransactionAuthCode(ctx, webhookEvent.Reference, webhookEvent.AuthorizationCode, "success", string(payload))
 	}
 
-	// Asynchronously forward the webhook to the target URL using Project's API key
-	apiKey := wc.Project.ApiKey
-	go s.forwardWebhook(wl, wc.TargetURL, apiKey, payload)
+	// Forward webhook if TargetURL is not empty
+	if wc.TargetURL != "" {
+		apiKey := wc.Project.ApiKey
+		if !isLive {
+			if wc.Project.TestApiKey != "" {
+				apiKey = wc.Project.TestApiKey
+			}
+		}
+		go s.forwardWebhook(wl, wc.TargetURL, apiKey, payload)
+	}
 
 	return nil
 }
@@ -208,4 +257,8 @@ func (s *WebhookService) forwardWebhook(wl *models.WebhookLog, targetURL string,
 	} else {
 		log.Printf("WebhookProxy Success: Successfully forwarded event to %s with status %s", targetURL, resp.Status)
 	}
+}
+
+func (s *WebhookService) ListLogs(ctx context.Context, projectID string, isLive bool, limit int, offset int) ([]*models.WebhookLog, error) {
+	return s.repo.ListLogs(ctx, projectID, isLive, limit, offset)
 }

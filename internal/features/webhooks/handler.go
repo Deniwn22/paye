@@ -215,6 +215,45 @@ func (h *WebhookHandler) ReceiveWebhookHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
 
+// ListWebhookLogsHandler godoc
+// @Summary List webhook logs
+// @Description Retrieve webhooks logs for the authenticated project scoped by active mode
+// @Tags Webhooks
+// @Security BearerAuth
+// @Produce json
+// @Param limit query int false "Pagination limit"
+// @Param offset query int false "Pagination offset"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /webhooks/logs [get]
+func (h *WebhookHandler) ListWebhookLogsHandler(c *gin.Context) {
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, api.Error("Project context missing"))
+		return
+	}
+
+	var query struct {
+		Limit  int `form:"limit,default=50"`
+		Offset int `form:"offset,default=0"`
+	}
+	if err := c.ShouldBindQuery(&query); err != nil {
+		c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+		return
+	}
+
+	isLive := middleware.GetIsLiveFromContext(c.Request.Context())
+
+	logs, err := h.service.ListLogs(c.Request.Context(), projectID.(string), isLive, query.Limit, query.Offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success("Webhook logs retrieved successfully", logs))
+}
+
 func RegisterRoutes(rg *gin.RouterGroup, publicRg *gin.RouterGroup, h *WebhookHandler) {
 	// Private CRUD endpoints (authenticated)
 	webhooks := rg.Group("/webhooks/configs")
@@ -224,6 +263,7 @@ func RegisterRoutes(rg *gin.RouterGroup, publicRg *gin.RouterGroup, h *WebhookHa
 		webhooks.PUT("/:id", h.UpdateWebhookHandler)
 		webhooks.DELETE("/:id", h.DeleteWebhookHandler)
 	}
+	rg.GET("/webhooks/logs", h.ListWebhookLogsHandler)
 
 	// Public Webhook proxy receiver endpoint (non-authenticated)
 	publicRg.POST("/webhooks/receive/:slug", h.ReceiveWebhookHandler)

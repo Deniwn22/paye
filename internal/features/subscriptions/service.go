@@ -11,6 +11,7 @@ import (
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/providers/flutterwave"
 	"github.com/ttomsin/paye/internal/features/providers/paystack"
+	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
 	"github.com/ttomsin/paye/pkg/paye"
 	"gorm.io/gorm"
@@ -127,7 +128,10 @@ func (s *SubscriptionService) chargeSubscription(ctx context.Context, sub *model
 		return fmt.Errorf("active provider config not found: %w", err)
 	}
 
-	decryptedSecret, err := crypto.Decrypt(pc.SecretKey, s.encryptionKey)
+	isLive := sub.IsLive || middleware.GetIsLiveFromContext(ctx)
+	encSecret, _ := pc.GetKeysForMode(isLive)
+
+	decryptedSecret, err := crypto.Decrypt(encSecret, s.encryptionKey)
 	if err != nil {
 		return fmt.Errorf("failed to decrypt provider secret key: %w", err)
 	}

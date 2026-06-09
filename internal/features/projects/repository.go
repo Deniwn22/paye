@@ -38,7 +38,7 @@ func (r *ProjectRepo) FindByID(ctx context.Context, id string) (*models.Project,
 
 func (r *ProjectRepo) FindByApiKey(ctx context.Context, apiKey string) (*models.Project, error) {
 	var project models.Project
-	err := r.db.WithContext(ctx).Where("api_key = ?", apiKey).First(&project).Error
+	err := r.db.WithContext(ctx).Where("api_key = ? OR test_api_key = ?", apiKey, apiKey).First(&project).Error
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (r *ProjectRepo) FindByApiKey(ctx context.Context, apiKey string) (*models.
 
 func (r *ProjectRepo) FindByPublicID(ctx context.Context, publicID string) (*models.Project, error) {
 	var project models.Project
-	err := r.db.WithContext(ctx).Where("public_id = ?", publicID).First(&project).Error
+	err := r.db.WithContext(ctx).Where("public_id = ? OR test_public_id = ?", publicID, publicID).First(&project).Error
 	if err != nil {
 		return nil, err
 	}

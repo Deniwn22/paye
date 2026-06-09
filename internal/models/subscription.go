@@ -18,4 +18,5 @@ type Subscription struct {
 	StartDate        time.Time `json:"start_date"`
 	NextBillingDate  time.Time `json:"next_billing_date"`
 	Provider         string    `gorm:"not null" json:"provider"`
+	IsLive           bool      `gorm:"default:false;index" json:"is_live"`
 }

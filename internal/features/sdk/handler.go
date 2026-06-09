@@ -183,15 +183,26 @@ func (h *SDKHandler) resolveProjectByPublicID(ctx context.Context, publicID stri
 	}
 
 	// Auto-create default project
-	apiKey, err := crypto.GenerateAPIKey()
+	liveApiKey, err := crypto.GenerateAPIKey(true)
 	if err != nil {
 		return nil, err
 	}
+	testApiKey, err := crypto.GenerateAPIKey(false)
+	if err != nil {
+		return nil, err
+	}
+	testPublicID, err := crypto.GeneratePublicID(false)
+	if err != nil {
+		return nil, err
+	}
+
 	defaultProject := &models.Project{
-		Name:     "Default Project",
-		ApiKey:   apiKey,
-		PublicID: merchant.PublicID,
-		UserID:   merchant.Base.ID,
+		Name:         "Default Project",
+		ApiKey:       liveApiKey,
+		PublicID:     merchant.PublicID,
+		TestApiKey:   testApiKey,
+		TestPublicID: testPublicID,
+		UserID:       merchant.Base.ID,
 	}
 	if err := h.projectRepo.CreateProject(ctx, defaultProject); err != nil {
 		return nil, err

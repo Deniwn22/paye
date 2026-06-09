@@ -1,17 +1,12 @@
 import { redirect } from "next/navigation"
-import { getToken, getActiveProjectID } from "@/lib/cookies"
+import { getToken } from "@/lib/cookies"
 import PlansList from "@/components/plans-list"
-import { BACKEND_URL } from "@/lib/config"
+import { fetchBackend } from "@/lib/api"
 import { AlertTriangle } from "lucide-react"
 
-async function getPlans(token: string, projectID: string | null) {
+async function getPlans() {
   try {
-    const headers: Record<string, string> = { Authorization: `Bearer ${token}` }
-    if (projectID) {
-      headers["X-Project-ID"] = projectID
-    }
-    const res = await fetch(`${BACKEND_URL}/plans`, {
-      headers,
+    const res = await fetchBackend("/plans", {
       cache: "no-store",
     })
     if (!res.ok) return null
@@ -28,8 +23,7 @@ export default async function PlansPage() {
     redirect("/signin")
   }
 
-  const projectID = await getActiveProjectID()
-  const plans = await getPlans(token, projectID)
+  const plans = await getPlans()
 
   return (
     <div className="space-y-6">

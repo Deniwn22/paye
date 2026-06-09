@@ -38,10 +38,9 @@ func (r *TransactionRepo) UpdateTransaction(ctx context.Context, tx *models.Tran
 	return r.db.WithContext(ctx).Save(tx).Error
 }
 
-// ListTransactions returns a paginated list of transactions for a project sorted by creation date
-func (r *TransactionRepo) ListTransactions(ctx context.Context, projectID string, limit int, offset int) ([]*models.Transaction, error) {
+// ListTransactions returns a paginated list of transactions for a project sorted by creation date and scoped by mode
+func (r *TransactionRepo) ListTransactions(ctx context.Context, projectID string, limit int, offset int, isLive bool) ([]*models.Transaction, error) {
 	var txs []*models.Transaction
-	err := r.db.WithContext(ctx).Where("project_id = ?", projectID).Order("created_at DESC").Limit(limit).Offset(offset).Find(&txs).Error
+	err := r.db.WithContext(ctx).Where("project_id = ? AND is_live = ?", projectID, isLive).Order("created_at DESC").Limit(limit).Offset(offset).Find(&txs).Error
 	return txs, err
 }
-

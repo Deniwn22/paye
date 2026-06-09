@@ -8,6 +8,8 @@ import {
   getActiveProjectID,
   setActiveProjectID,
   deleteActiveProjectID,
+  getActiveMode,
+  setActiveMode,
 } from "@/lib/cookies"
 import { BACKEND_URL } from "@/lib/config"
 
@@ -85,10 +87,13 @@ async function fetchWithAuth(path: string, options: RequestInit = {}) {
   if (!token) throw new Error("Unauthorized")
 
   const projectID = await getActiveProjectID()
+  const mode = await getActiveMode()
+  const isLive = mode === "live"
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
+    "X-Live-Mode": isLive ? "true" : "false",
   }
 
   if (projectID) {
@@ -163,6 +168,11 @@ export async function switchProjectAction(id: string) {
   return { success: true }
 }
 
+export async function switchModeAction(mode: "live" | "test") {
+  await setActiveMode(mode)
+  return { success: true }
+}
+
 export async function getProjectsAction() {
   try {
     const res = await fetchWithAuth("/projects")
@@ -181,11 +191,17 @@ export async function getProjectsAction() {
 export async function addProviderAction(prevState: any, formData: FormData) {
   const label = formData.get("label") as string
   const providerName = formData.get("providerName") as string
-  const secretKey = formData.get("secretKey") as string
-  const publicKey = formData.get("publicKey") as string
+  const testSecretKey = formData.get("testSecretKey") as string
+  const testPublicKey = formData.get("testPublicKey") as string
+  const liveSecretKey = formData.get("liveSecretKey") as string
+  const livePublicKey = formData.get("livePublicKey") as string
 
-  if (!label || !providerName || !secretKey) {
-    return { success: false, error: "Label, provider type, and secret key are required" }
+  if (!label || !providerName) {
+    return { success: false, error: "Name and provider type are required" }
+  }
+
+  if (!testSecretKey && !liveSecretKey) {
+    return { success: false, error: "At least one Secret Key (Test or Live) is required" }
   }
 
   try {
@@ -194,8 +210,10 @@ export async function addProviderAction(prevState: any, formData: FormData) {
       body: JSON.stringify({
         label,
         provider_name: providerName,
-        secret_key: secretKey,
-        public_key: publicKey,
+        test_secret_key: testSecretKey,
+        test_public_key: testPublicKey,
+        live_secret_key: liveSecretKey,
+        live_public_key: livePublicKey,
         is_active: true,
       }),
     })

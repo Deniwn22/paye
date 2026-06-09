@@ -58,18 +58,32 @@ func (m *ProjectScopeMiddleware) Handle(c *gin.Context) {
 					return
 				}
 
-				apiKey, err := crypto.GenerateAPIKey()
+				liveApiKey, err := crypto.GenerateAPIKey(true)
 				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate project api key"})
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate live project api key"})
+					c.Abort()
+					return
+				}
+				testApiKey, err := crypto.GenerateAPIKey(false)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate test project api key"})
+					c.Abort()
+					return
+				}
+				testPublicID, err := crypto.GeneratePublicID(false)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate test project public id"})
 					c.Abort()
 					return
 				}
 
 				project = models.Project{
-					Name:     "Default Project",
-					ApiKey:   apiKey,
-					PublicID: user.PublicID, // Align with legacy public ID
-					UserID:   user.ID,
+					Name:         "Default Project",
+					ApiKey:       liveApiKey,
+					PublicID:     user.PublicID, // Align with legacy public ID
+					TestApiKey:   testApiKey,
+					TestPublicID: testPublicID,
+					UserID:       user.ID,
 				}
 
 				if err := m.db.Create(&project).Error; err != nil {

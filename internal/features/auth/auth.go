@@ -29,8 +29,8 @@ func CheckPasswordHash(password, hashedPassword string) error {
 
 // GenerateAPIKey generates a random API key as a hex-encoded string.
 // and appends paye to the beginning of the key.
-func GenerateAPIKey() (string, error) {
-	return crypto.GenerateAPIKey()
+func GenerateAPIKey(isLive bool) (string, error) {
+	return crypto.GenerateAPIKey(isLive)
 }
 
 // GenerateJWT generates a JWT token for the given user ID, API key, and Public ID.

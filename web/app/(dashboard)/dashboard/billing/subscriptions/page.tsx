@@ -1,17 +1,12 @@
 import { redirect } from "next/navigation"
-import { getToken, getActiveProjectID } from "@/lib/cookies"
+import { getToken } from "@/lib/cookies"
 import SubscriptionsList from "@/components/subscriptions-list"
-import { BACKEND_URL } from "@/lib/config"
+import { fetchBackend } from "@/lib/api"
 import { AlertTriangle } from "lucide-react"
 
-async function getSubscriptions(token: string, projectID: string | null) {
+async function getSubscriptions() {
   try {
-    const headers: Record<string, string> = { Authorization: `Bearer ${token}` }
-    if (projectID) {
-      headers["X-Project-ID"] = projectID
-    }
-    const res = await fetch(`${BACKEND_URL}/subscriptions`, {
-      headers,
+    const res = await fetchBackend("/subscriptions", {
       cache: "no-store",
     })
     if (!res.ok) return null
@@ -22,14 +17,9 @@ async function getSubscriptions(token: string, projectID: string | null) {
   }
 }
 
-async function getPlans(token: string, projectID: string | null) {
+async function getPlans() {
   try {
-    const headers: Record<string, string> = { Authorization: `Bearer ${token}` }
-    if (projectID) {
-      headers["X-Project-ID"] = projectID
-    }
-    const res = await fetch(`${BACKEND_URL}/plans`, {
-      headers,
+    const res = await fetchBackend("/plans", {
       cache: "no-store",
     })
     if (!res.ok) return []
@@ -46,9 +36,8 @@ export default async function SubscriptionsPage() {
     redirect("/signin")
   }
 
-  const projectID = await getActiveProjectID()
-  const subscriptions = await getSubscriptions(token, projectID)
-  const plans = await getPlans(token, projectID)
+  const subscriptions = await getSubscriptions()
+  const plans = await getPlans()
 
   return (
     <div className="space-y-6">

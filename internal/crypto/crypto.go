@@ -63,13 +63,32 @@ func Decrypt(cipherText string, key string) (string, error) {
 }
 
 // GenerateAPIKey generates a random API key as a hex-encoded string
-// and appends paye to the beginning of the key.
-func GenerateAPIKey() (string, error) {
+// and appends paye_live_ or paye_test_ to the beginning of the key.
+func GenerateAPIKey(isLive bool) (string, error) {
 	apiKey := make([]byte, 32)
 	_, err := rand.Read(apiKey)
 	if err != nil {
 		return "", err
 	}
-	return "paye_" + hex.EncodeToString(apiKey), nil
+	prefix := "paye_test_"
+	if isLive {
+		prefix = "paye_live_"
+	}
+	return prefix + hex.EncodeToString(apiKey), nil
+}
+
+// GeneratePublicID generates a random Public ID as a hex-encoded string
+// and appends paye_live_pub_ or paye_test_pub_ to the beginning.
+func GeneratePublicID(isLive bool) (string, error) {
+	pubBytes := make([]byte, 16)
+	_, err := rand.Read(pubBytes)
+	if err != nil {
+		return "", err
+	}
+	prefix := "paye_test_pub_"
+	if isLive {
+		prefix = "paye_live_pub_"
+	}
+	return prefix + hex.EncodeToString(pubBytes), nil
 }
 

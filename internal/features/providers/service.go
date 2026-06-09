@@ -3,6 +3,7 @@ package providers
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/dto"
@@ -63,20 +64,86 @@ func (s *ProviderService) ListProviders(ctx context.Context, projectID string) (
 	return res, nil
 }
 
+func validateProviderKeys(providerName string, testSecretKey, testPublicKey, liveSecretKey, livePublicKey string) error {
+	if providerName == "paystack" {
+		if testSecretKey != "" && !strings.HasPrefix(testSecretKey, "sk_test_") {
+			return fmt.Errorf("Paystack test secret key must begin with sk_test_")
+		}
+		if testPublicKey != "" && !strings.HasPrefix(testPublicKey, "pk_test_") {
+			return fmt.Errorf("Paystack test public key must begin with pk_test_")
+		}
+		if liveSecretKey != "" && !strings.HasPrefix(liveSecretKey, "sk_live_") {
+			return fmt.Errorf("Paystack live secret key must begin with sk_live_")
+		}
+		if livePublicKey != "" && !strings.HasPrefix(livePublicKey, "pk_live_") {
+			return fmt.Errorf("Paystack live public key must begin with pk_live_")
+		}
+	} else if providerName == "flutterwave" {
+		if testSecretKey != "" && !strings.HasPrefix(testSecretKey, "FLWSECK_TEST-") {
+			return fmt.Errorf("Flutterwave test secret key must begin with FLWSECK_TEST-")
+		}
+		if testPublicKey != "" && !strings.HasPrefix(testPublicKey, "FLWPUBK_TEST-") {
+			return fmt.Errorf("Flutterwave test public key must begin with FLWPUBK_TEST-")
+		}
+		if liveSecretKey != "" && (!strings.HasPrefix(liveSecretKey, "FLWSECK-") || strings.Contains(liveSecretKey, "TEST")) {
+			return fmt.Errorf("Flutterwave live secret key must begin with FLWSECK- and must not contain TEST")
+		}
+		if livePublicKey != "" && (!strings.HasPrefix(livePublicKey, "FLWPUBK-") || strings.Contains(livePublicKey, "TEST")) {
+			return fmt.Errorf("Flutterwave live public key must begin with FLWPUBK- and must not contain TEST")
+		}
+	}
+	return nil
+}
+
 // AddProvider adds a new provider configuration for the given project.
 func (s *ProviderService) AddProvider(ctx context.Context, pcreq *dto.ProviderConfigRequest, projectID string) (*dto.ProviderConfigResponse, error) {
-	// we need to encrypt the secret key and public key before saving
-	encryptedSecretKey, err := crypto.Encrypt(pcreq.SecretKey, s.encryptionKey)
-	if err != nil {
+	// Validate keys first
+	if err := validateProviderKeys(string(pcreq.ProviderName), pcreq.TestSecretKey, pcreq.TestPublicKey, pcreq.LiveSecretKey, pcreq.LivePublicKey); err != nil {
 		return nil, err
 	}
-	pcreq.SecretKey = encryptedSecretKey
 
-	encryptedPublicKey, err := crypto.Encrypt(pcreq.PublicKey, s.encryptionKey)
-	if err != nil {
-		return nil, err
+	// Legacy fallback sync
+	if pcreq.SecretKey == "" {
+		if pcreq.LiveSecretKey != "" {
+			pcreq.SecretKey = pcreq.LiveSecretKey
+		} else if pcreq.TestSecretKey != "" {
+			pcreq.SecretKey = pcreq.TestSecretKey
+		}
 	}
-	pcreq.PublicKey = encryptedPublicKey
+	if pcreq.PublicKey == "" {
+		if pcreq.LivePublicKey != "" {
+			pcreq.PublicKey = pcreq.LivePublicKey
+		} else if pcreq.TestPublicKey != "" {
+			pcreq.PublicKey = pcreq.TestPublicKey
+		}
+	}
+
+	// Encrypt keys
+	var err error
+	if pcreq.SecretKey != "" {
+		pcreq.SecretKey, err = crypto.Encrypt(pcreq.SecretKey, s.encryptionKey)
+		if err != nil { return nil, err }
+	}
+	if pcreq.PublicKey != "" {
+		pcreq.PublicKey, err = crypto.Encrypt(pcreq.PublicKey, s.encryptionKey)
+		if err != nil { return nil, err }
+	}
+	if pcreq.TestSecretKey != "" {
+		pcreq.TestSecretKey, err = crypto.Encrypt(pcreq.TestSecretKey, s.encryptionKey)
+		if err != nil { return nil, err }
+	}
+	if pcreq.TestPublicKey != "" {
+		pcreq.TestPublicKey, err = crypto.Encrypt(pcreq.TestPublicKey, s.encryptionKey)
+		if err != nil { return nil, err }
+	}
+	if pcreq.LiveSecretKey != "" {
+		pcreq.LiveSecretKey, err = crypto.Encrypt(pcreq.LiveSecretKey, s.encryptionKey)
+		if err != nil { return nil, err }
+	}
+	if pcreq.LivePublicKey != "" {
+		pcreq.LivePublicKey, err = crypto.Encrypt(pcreq.LivePublicKey, s.encryptionKey)
+		if err != nil { return nil, err }
+	}
 
 	pc := dto.ToProviderConfig(pcreq)
 	provider, err := s.repo.AddProvider(ctx, pc, projectID)
@@ -93,6 +160,27 @@ func (s *ProviderService) AddProvider(ctx context.Context, pcreq *dto.ProviderCo
 
 // UpdateProvider updates an existing provider configuration for the given project.
 func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.ProviderConfigRequest, projectID string, providerId string) (*dto.ProviderConfigResponse, error) {
+	// Validate keys first
+	if err := validateProviderKeys(string(pcreq.ProviderName), pcreq.TestSecretKey, pcreq.TestPublicKey, pcreq.LiveSecretKey, pcreq.LivePublicKey); err != nil {
+		return nil, err
+	}
+
+	// Legacy fallback sync
+	if pcreq.SecretKey == "" {
+		if pcreq.LiveSecretKey != "" {
+			pcreq.SecretKey = pcreq.LiveSecretKey
+		} else if pcreq.TestSecretKey != "" {
+			pcreq.SecretKey = pcreq.TestSecretKey
+		}
+	}
+	if pcreq.PublicKey == "" {
+		if pcreq.LivePublicKey != "" {
+			pcreq.PublicKey = pcreq.LivePublicKey
+		} else if pcreq.TestPublicKey != "" {
+			pcreq.PublicKey = pcreq.TestPublicKey
+		}
+	}
+
 	// find provider by id
 	provider, err := s.repo.FindProviderById(ctx, providerId, projectID)
 	if err != nil {
@@ -101,22 +189,43 @@ func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.Provide
 	if provider == nil {
 		return nil, fmt.Errorf("provider not found")
 	}
-	// we need to encrypt the secret key and public key before saving
-	encryptedSecretKey, err := crypto.Encrypt(pcreq.SecretKey, s.encryptionKey)
-	if err != nil {
-		return nil, err
+
+	// Encrypt keys
+	if pcreq.SecretKey != "" {
+		pcreq.SecretKey, err = crypto.Encrypt(pcreq.SecretKey, s.encryptionKey)
+		if err != nil { return nil, err }
 	}
-	pcreq.SecretKey = encryptedSecretKey
-	encryptedPublicKey, err := crypto.Encrypt(pcreq.PublicKey, s.encryptionKey)
-	if err != nil {
-		return nil, err
+	if pcreq.PublicKey != "" {
+		pcreq.PublicKey, err = crypto.Encrypt(pcreq.PublicKey, s.encryptionKey)
+		if err != nil { return nil, err }
 	}
-	pcreq.PublicKey = encryptedPublicKey
+	if pcreq.TestSecretKey != "" {
+		pcreq.TestSecretKey, err = crypto.Encrypt(pcreq.TestSecretKey, s.encryptionKey)
+		if err != nil { return nil, err }
+	}
+	if pcreq.TestPublicKey != "" {
+		pcreq.TestPublicKey, err = crypto.Encrypt(pcreq.TestPublicKey, s.encryptionKey)
+		if err != nil { return nil, err }
+	}
+	if pcreq.LiveSecretKey != "" {
+		pcreq.LiveSecretKey, err = crypto.Encrypt(pcreq.LiveSecretKey, s.encryptionKey)
+		if err != nil { return nil, err }
+	}
+	if pcreq.LivePublicKey != "" {
+		pcreq.LivePublicKey, err = crypto.Encrypt(pcreq.LivePublicKey, s.encryptionKey)
+		if err != nil { return nil, err }
+	}
+
 	// update provider fields
 	provider.SecretKey = pcreq.SecretKey
 	provider.PublicKey = pcreq.PublicKey
+	provider.TestSecretKey = pcreq.TestSecretKey
+	provider.TestPublicKey = pcreq.TestPublicKey
+	provider.LiveSecretKey = pcreq.LiveSecretKey
+	provider.LivePublicKey = pcreq.LivePublicKey
 	provider.Label = pcreq.Label
 	provider.IsActive = pcreq.IsActive
+
 	if err := s.repo.UpdateProvider(ctx, provider); err != nil {
 		return nil, err
 	}
@@ -146,17 +255,45 @@ func (s *ProviderService) DeleteProvider(ctx context.Context, providerId string)
 }
 
 func (s *ProviderService) decryptConfigKeys(config *models.ProviderConfig) (*models.ProviderConfig, error) {
-	decryptedSecret, err := crypto.Decrypt(config.SecretKey, s.encryptionKey)
-	if err != nil {
-		return nil, err
-	}
-	decryptedPublic, err := crypto.Decrypt(config.PublicKey, s.encryptionKey)
-	if err != nil {
-		return nil, err
-	}
 	cloned := *config
-	cloned.SecretKey = maskKey(decryptedSecret)
-	cloned.PublicKey = decryptedPublic
+
+	if config.SecretKey != "" {
+		decryptedSecret, err := crypto.Decrypt(config.SecretKey, s.encryptionKey)
+		if err == nil {
+			cloned.SecretKey = maskKey(decryptedSecret)
+		}
+	}
+	if config.PublicKey != "" {
+		decryptedPublic, err := crypto.Decrypt(config.PublicKey, s.encryptionKey)
+		if err == nil {
+			cloned.PublicKey = decryptedPublic
+		}
+	}
+	if config.TestSecretKey != "" {
+		decryptedSecret, err := crypto.Decrypt(config.TestSecretKey, s.encryptionKey)
+		if err == nil {
+			cloned.TestSecretKey = maskKey(decryptedSecret)
+		}
+	}
+	if config.TestPublicKey != "" {
+		decryptedPublic, err := crypto.Decrypt(config.TestPublicKey, s.encryptionKey)
+		if err == nil {
+			cloned.TestPublicKey = decryptedPublic
+		}
+	}
+	if config.LiveSecretKey != "" {
+		decryptedSecret, err := crypto.Decrypt(config.LiveSecretKey, s.encryptionKey)
+		if err == nil {
+			cloned.LiveSecretKey = maskKey(decryptedSecret)
+		}
+	}
+	if config.LivePublicKey != "" {
+		decryptedPublic, err := crypto.Decrypt(config.LivePublicKey, s.encryptionKey)
+		if err == nil {
+			cloned.LivePublicKey = decryptedPublic
+		}
+	}
+
 	return &cloned, nil
 }
 

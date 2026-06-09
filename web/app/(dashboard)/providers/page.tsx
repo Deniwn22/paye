@@ -1,16 +1,11 @@
 import { redirect } from "next/navigation"
-import { getToken, getActiveProjectID } from "@/lib/cookies"
+import { getToken } from "@/lib/cookies"
 import ProvidersManager from "@/components/providers-manager"
-import { BACKEND_URL } from "@/lib/config"
+import { fetchBackend } from "@/lib/api"
 
-async function getProviders(token: string, projectID: string | null) {
+async function getProviders() {
   try {
-    const headers: Record<string, string> = { Authorization: `Bearer ${token}` }
-    if (projectID) {
-      headers["X-Project-ID"] = projectID
-    }
-    const res = await fetch(`${BACKEND_URL}/providers`, {
-      headers,
+    const res = await fetchBackend("/providers", {
       cache: "no-store",
     })
     if (!res.ok) return []
@@ -27,8 +22,7 @@ export default async function ProvidersPage() {
     redirect("/signin")
   }
 
-  const projectID = await getActiveProjectID()
-  const initialProviders = await getProviders(token, projectID)
+  const initialProviders = await getProviders()
 
   return (
     <div className="space-y-6">

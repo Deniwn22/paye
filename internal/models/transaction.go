@@ -18,4 +18,5 @@ type Transaction struct {
 	AuthorizationCode string         // authorization code for recurring billing
 	Metadata          map[string]any `gorm:"type:jsonb;serializer:json"` // provider-specific metadata
 	RawResponse       string         // store raw provider response as JSON string
+	IsLive            bool           `gorm:"default:false;index" json:"is_live"`
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Play, RotateCw, CheckCircle, ShieldAlert, Cpu, Terminal, ArrowRight, Lock, Server, Sparkles } from "lucide-react"
+import { Play, RotateCw, CheckCircle, ShieldAlert, Cpu, Terminal, ArrowRight, Lock, Server, Sparkles, AlertCircle } from "lucide-react"
 
 interface EventTemplate {
   event: string
@@ -113,7 +113,7 @@ export default function InteractiveSimulator() {
     try {
       JSON.parse(jsonText)
     } catch (e) {
-      alert("Invalid JSON payload. Please correct it before simulating.")
+      addLog("❌ Error: Invalid JSON payload. Correct it before simulating.")
       return
     }
 
@@ -151,50 +151,55 @@ export default function InteractiveSimulator() {
   }
 
   return (
-    <div className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl relative">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-900/60 backdrop-blur">
+    <div className="w-full bg-white dark:bg-[#0c0c10] border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-2xl relative select-none">
+      
+      {/* Top Bar Navigation Dashboard-Style */}
+      <div className="flex items-center justify-between px-6 py-4.5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900/30 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-red-500/80" />
-            <span className="w-3 h-3 rounded-full bg-yellow-500/80" />
-            <span className="w-3 h-3 rounded-full bg-green-500/80" />
+            <span className="w-3 h-3 rounded-full bg-rose-500/80" />
+            <span className="w-3 h-3 rounded-full bg-amber-500/80" />
+            <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
           </div>
-          <span className="text-xs text-zinc-500 font-mono ml-3">live_proxy_simulator.sh</span>
+          <span className="text-xs text-zinc-400 dark:text-zinc-500 font-mono ml-3 font-semibold">live_webhook_sandbox.sh</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+            </span>
             Proxy Sandbox Active
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-zinc-800">
-        {/* Left pane: Controls */}
-        <div className="lg:col-span-5 p-6 bg-zinc-950 flex flex-col justify-between space-y-6">
-          <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-zinc-250 dark:divide-zinc-800 bg-zinc-50/20 dark:bg-transparent">
+        
+        {/* Left Pane: Controls */}
+        <div className="lg:col-span-5 p-6 flex flex-col justify-between space-y-6">
+          <div className="space-y-5">
             <div>
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-2">
+              <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-2.5">
                 1. Select Gateway
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => setProvider("paystack")}
-                  className={`px-3 py-2 text-sm font-semibold rounded-lg border transition-all ${
+                  onClick={() => { if (status === "idle" || status === "done") setProvider("paystack"); }}
+                  className={`px-4 py-2.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
                     provider === "paystack"
-                      ? "border-sky-500 bg-sky-500/10 text-sky-400"
-                      : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:border-zinc-700"
+                      ? "border-sky-500 bg-sky-500/10 text-sky-400 shadow-sm"
+                      : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/25 text-zinc-500 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700"
                   }`}
                 >
                   Paystack
                 </button>
                 <button
-                  onClick={() => setProvider("flutterwave")}
-                  className={`px-3 py-2 text-sm font-semibold rounded-lg border transition-all ${
+                  onClick={() => { if (status === "idle" || status === "done") setProvider("flutterwave"); }}
+                  className={`px-4 py-2.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
                     provider === "flutterwave"
-                      ? "border-sky-500 bg-sky-500/10 text-sky-400"
-                      : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:border-zinc-700"
+                      ? "border-sky-500 bg-sky-500/10 text-sky-400 shadow-sm"
+                      : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/25 text-zinc-500 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700"
                   }`}
                 >
                   Flutterwave
@@ -203,13 +208,14 @@ export default function InteractiveSimulator() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-2">
+              <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-2">
                 2. Choose Event Type
               </label>
               <select
                 value={eventType}
+                disabled={status !== "idle" && status !== "done"}
                 onChange={(e) => setEventType(e.target.value)}
-                className="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 text-zinc-100 rounded-lg text-sm font-medium focus:outline-none focus:border-sky-500 cursor-pointer"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-250 rounded-xl text-xs font-semibold focus:outline-none focus:border-sky-500 cursor-pointer shadow-sm"
               >
                 {Object.keys(TEMPLATES[provider]).map((k) => (
                   <option key={k} value={k}>
@@ -220,17 +226,18 @@ export default function InteractiveSimulator() {
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+              <div className="flex items-center justify-between mb-2 select-none">
+                <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
                   3. Customize JSON Payload
                 </label>
-                <span className="text-[10px] text-zinc-600 font-mono">Editable</span>
+                <span className="text-[9px] text-zinc-400 font-mono font-bold uppercase tracking-wider bg-zinc-200/50 dark:bg-zinc-800/50 px-1.5 py-0.5 rounded">Editable</span>
               </div>
               <textarea
                 value={jsonText}
+                disabled={status !== "idle" && status !== "done"}
                 onChange={(e) => setJsonText(e.target.value)}
-                rows={10}
-                className="w-full p-4 bg-zinc-900/60 border border-zinc-800/80 rounded-lg font-mono text-xs text-sky-400/90 focus:outline-none focus:border-sky-500 leading-relaxed resize-none transition-all selection:bg-sky-500/20"
+                rows={9}
+                className="w-full p-4 bg-white dark:bg-zinc-950/50 border border-zinc-250 dark:border-zinc-850 rounded-xl font-mono text-xs text-sky-650 dark:text-sky-400 focus:outline-none focus:border-sky-500 leading-relaxed resize-none transition-all selection:bg-sky-500/20 shadow-inner"
               />
             </div>
           </div>
@@ -238,126 +245,128 @@ export default function InteractiveSimulator() {
           <button
             onClick={handleSimulate}
             disabled={status !== "idle" && status !== "done"}
-            className="w-full py-3.5 bg-sky-500 hover:bg-sky-400 disabled:bg-zinc-800 text-black disabled:text-zinc-500 text-sm font-extrabold rounded-lg shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer select-none"
+            className="w-full relative overflow-hidden py-3.5 bg-sky-500 hover:bg-sky-450 disabled:bg-zinc-200 dark:disabled:bg-zinc-800/80 text-white disabled:text-zinc-450 dark:disabled:text-zinc-600 text-xs font-black rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer select-none"
           >
             {status === "idle" || status === "done" ? (
               <>
-                <Play className="w-3.5 h-3.5 fill-current" />
+                <Play className="w-3.5 h-3.5 fill-current shrink-0" />
                 <span>Fire Test Webhook</span>
               </>
             ) : (
               <>
-                <RotateCw className="w-3.5 h-3.5 animate-spin" />
+                <RotateCw className="w-3.5 h-3.5 animate-spin shrink-0" />
                 <span>Routing Payload...</span>
               </>
             )}
           </button>
         </div>
 
-        {/* Right pane: Visualization & Terminal logs */}
-        <div className="lg:col-span-7 bg-zinc-950 p-6 flex flex-col justify-between gap-6">
-                <div>
-            <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-4">
+        {/* Right Pane: Visualization & Terminal logs */}
+        <div className="lg:col-span-7 p-6 flex flex-col justify-between gap-6 bg-zinc-50/10 dark:bg-black/10">
+          <div>
+            <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-4.5">
               Live Flow Map
             </label>
-            <div className="relative border border-zinc-900 bg-zinc-950/80 p-6 rounded-xl overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
-              {/* Pulse trail background */}
+            <div className="relative border border-zinc-200 dark:border-zinc-900 bg-white/50 dark:bg-zinc-950/40 p-6 rounded-2xl overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+              
+              {/* Visible connection path underneath */}
+              <div className="absolute inset-x-12 top-1/2 -translate-y-1/2 h-[2px] bg-zinc-200/60 dark:bg-zinc-900 hidden md:block -z-10" />
+
+              {/* Pulse trail animation on top */}
               {status !== "idle" && status !== "done" && (
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] overflow-hidden hidden md:block">
+                <div className="absolute inset-x-12 top-1/2 -translate-y-1/2 h-[2px] overflow-hidden hidden md:block">
                   <div
-                    className="h-full bg-gradient-to-r from-transparent via-sky-400 to-transparent w-32 animate-pulse"
+                    className="h-full bg-gradient-to-r from-transparent via-sky-400 to-transparent w-24"
                     style={{
-                      animationDuration: "1.5s",
-                      animationIterationCount: "infinite",
-                      animationTimingFunction: "linear",
-                      transform: `translateX(${(progress - 30) * 4}px)`
+                      animation: "flow-pulse 1.8s linear infinite",
+                      transform: `translateX(${(progress - 30) * 3.5}px)`
                     }}
                   />
+                  <style jsx>{`
+                    @keyframes flow-pulse {
+                      0% { transform: translateX(-100px); }
+                      100% { transform: translateX(300px); }
+                    }
+                  `}</style>
                 </div>
               )}
 
               {/* Node 1: Gateway */}
               <div
-                className={`p-4 rounded-xl border flex flex-col items-center justify-center text-center gap-2 z-10 w-full md:w-32 transition-all ${
+                className={`p-3.5 rounded-xl border flex flex-col items-center justify-center text-center gap-1.5 z-10 w-full md:w-32 transition-all ${
                   status === "sending"
-                    ? "border-sky-500 bg-sky-950/20 shadow-[0_0_15px_rgba(14,165,233,0.15)] scale-105"
+                    ? "border-sky-500 bg-sky-500/10 shadow-[0_0_15px_rgba(14,165,233,0.15)] scale-[1.03]"
                     : status !== "idle"
-                    ? "border-emerald-500/50 bg-emerald-950/5"
-                    : "border-zinc-800 bg-zinc-900/20"
+                    ? "border-emerald-500/40 bg-emerald-500/5 dark:bg-emerald-500/2"
+                    : "border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950/20"
                 }`}
               >
-                <Lock className={`w-5 h-5 ${status === "sending" ? "text-sky-400" : status !== "idle" ? "text-emerald-400" : "text-zinc-500"}`} />
-                <span className="text-xs font-bold tracking-tight text-zinc-300">GATEWAY</span>
-                <span className="text-[10px] text-zinc-500 font-mono capitalize">{provider}</span>
-              </div>
-
-              {/* Arrow 1 */}
-              <div className="text-zinc-700 hidden md:block">
-                <ArrowRight className={`w-5 h-5 ${status === "sending" || status === "proxying" ? "text-sky-400 animate-pulse" : status === "delivered" || status === "done" ? "text-emerald-400" : "text-zinc-800"}`} />
+                <Lock className={`w-4 h-4 ${status === "sending" ? "text-sky-400" : status !== "idle" ? "text-emerald-500" : "text-zinc-400 dark:text-zinc-500"}`} />
+                <span className="text-xs font-black tracking-tight text-zinc-700 dark:text-zinc-300">GATEWAY</span>
+                <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-mono capitalize font-bold">{provider}</span>
               </div>
 
               {/* Node 2: Paye Engine */}
               <div
-                className={`p-4 rounded-xl border flex flex-col items-center justify-center text-center gap-2 z-10 w-full md:w-40 transition-all ${
+                className={`p-3.5 rounded-xl border flex flex-col items-center justify-center text-center gap-1.5 z-10 w-full md:w-36 transition-all ${
                   status === "proxying"
-                    ? "border-sky-500 bg-sky-950/20 shadow-[0_0_15px_rgba(14,165,233,0.15)] scale-105"
+                    ? "border-sky-500 bg-sky-500/10 shadow-[0_0_15px_rgba(14,165,233,0.15)] scale-[1.03]"
                     : status === "delivered" || status === "done"
-                    ? "border-emerald-500 bg-emerald-950/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
-                    : "border-zinc-800 bg-zinc-900/20"
+                    ? "border-emerald-500/50 bg-emerald-500/5 shadow-[0_0_12px_rgba(16,185,129,0.05)]"
+                    : "border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950/20"
                 }`}
               >
-                <Cpu className={`w-5 h-5 ${status === "proxying" ? "text-sky-400 animate-spin" : status === "delivered" || status === "done" ? "text-emerald-400" : "text-zinc-500"}`} style={{ animationDuration: "3s" }} />
-                <span className="text-xs font-bold tracking-tight text-zinc-200">PAYE PROXY</span>
-                <span className="text-[10px] font-mono text-sky-400">
-                  {status === "proxying" ? "decrypting..." : status === "delivered" || status === "done" ? "signatures ok" : "idle"}
+                <Cpu className={`w-4 h-4 ${status === "proxying" ? "text-sky-450 animate-spin" : status === "delivered" || status === "done" ? "text-emerald-500" : "text-zinc-400 dark:text-zinc-500"}`} style={{ animationDuration: "4s" }} />
+                <span className="text-xs font-black tracking-tight text-zinc-800 dark:text-zinc-200">PAYE ENGINE</span>
+                <span className="text-[9px] font-mono font-bold text-sky-500">
+                  {status === "proxying" ? "decrypting..." : status === "delivered" || status === "done" ? "signatures ok" : "waiting..."}
                 </span>
-              </div>
-
-              {/* Arrow 2 */}
-              <div className="text-zinc-700 hidden md:block">
-                <ArrowRight className={`w-5 h-5 ${status === "proxying" || status === "delivered" ? "text-sky-400 animate-pulse" : status === "done" ? "text-emerald-400" : "text-zinc-800"}`} />
               </div>
 
               {/* Node 3: Target App */}
               <div
-                className={`p-4 rounded-xl border flex flex-col items-center justify-center text-center gap-2 z-10 w-full md:w-32 transition-all ${
+                className={`p-3.5 rounded-xl border flex flex-col items-center justify-center text-center gap-1.5 z-10 w-full md:w-32 transition-all ${
                   status === "delivered"
-                    ? "border-sky-500 bg-sky-950/20 shadow-[0_0_15px_rgba(14,165,233,0.15)] scale-105"
+                    ? "border-sky-500 bg-sky-500/10 shadow-[0_0_15px_rgba(14,165,233,0.15)] scale-[1.03]"
                     : status === "done"
-                    ? "border-emerald-500 bg-emerald-950/20 shadow-[0_0_15px_rgba(16,185,129,0.15)] scale-105"
-                    : "border-zinc-800 bg-zinc-900/20"
+                    ? "border-emerald-500 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.15)] scale-[1.03]"
+                    : "border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950/20"
                 }`}
               >
-                <Server className={`w-5 h-5 ${status === "delivered" ? "text-sky-400" : status === "done" ? "text-emerald-400" : "text-zinc-500"}`} />
-                <span className="text-xs font-bold tracking-tight text-zinc-300">YOUR SERVER</span>
-                <span className="text-[10px] text-zinc-500 font-mono">
-                  {status === "done" ? "HTTP 200 OK" : status === "delivered" ? "forwarding..." : "pending"}
+                <Server className={`w-4 h-4 ${status === "delivered" ? "text-sky-400" : status === "done" ? "text-emerald-500" : "text-zinc-400 dark:text-zinc-500"}`} />
+                <span className="text-xs font-black tracking-tight text-zinc-700 dark:text-zinc-300">YOUR SERVER</span>
+                <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-mono font-bold">
+                  {status === "done" ? "HTTP 200 OK" : status === "delivered" ? "proxying..." : "pending"}
                 </span>
               </div>
             </div>
           </div>
 
           {/* Console logs */}
-          <div className="flex-1 flex flex-col bg-zinc-900/80 border border-zinc-800 rounded-xl overflow-hidden font-mono min-h-[160px]">
-            <div className="px-4 py-2 border-b border-zinc-800 bg-zinc-900 flex items-center justify-between text-xs text-zinc-500">
-              <span className="flex items-center gap-1.5">
+          <div className="flex-1 flex flex-col bg-[#050507] border border-zinc-200 dark:border-zinc-850 rounded-2xl overflow-hidden font-mono min-h-[180px] shadow-sm select-text">
+            <div className="px-4.5 py-2.5 border-b border-zinc-200/10 bg-zinc-900/60 flex items-center justify-between text-[10px] text-zinc-400 font-bold uppercase tracking-wider select-none">
+              <span className="flex items-center gap-2">
                 <Terminal className="w-3.5 h-3.5 text-zinc-400" />
                 <span>Console Log Output</span>
               </span>
               <span>{progress}% Routed</span>
             </div>
-            <div className="p-4 overflow-y-auto flex-1 text-xs leading-relaxed space-y-1.5 max-h-56 no-scrollbar selection:bg-sky-500/25 select-text">
+            <div className="p-4 overflow-y-auto flex-1 text-xs leading-relaxed space-y-1.5 max-h-56 no-scrollbar selection:bg-sky-500/25">
               {logs.length === 0 ? (
-                <div className="text-zinc-600 italic py-2">Waiting for simulation fire. Click "Fire Test Webhook" to begin routing diagnostics...</div>
+                <div className="text-zinc-600 dark:text-zinc-500 italic py-2">
+                  Waiting for simulation fire. Click "Fire Test Webhook" to begin routing diagnostics...
+                </div>
               ) : (
                 logs.map((l, i) => {
                   let textClass = "text-zinc-400"
                   if (l.includes("✅") || l.includes("🟢") || l.includes("✨")) {
-                    textClass = "text-emerald-400"
+                    textClass = "text-emerald-450 font-semibold"
+                  } else if (l.includes("❌")) {
+                    textClass = "text-rose-405 font-bold animate-pulse"
                   } else if (l.includes("📥") || l.includes("🔐") || l.includes("🔍") || l.includes("📤")) {
                     textClass = "text-sky-400"
                   } else if (l.includes("🚀")) {
-                    textClass = "text-amber-400"
+                    textClass = "text-amber-500 font-bold"
                   }
 
                   return (

@@ -77,3 +77,14 @@ func (r *WebhookRepo) UpdateTransactionAuthCode(ctx context.Context, reference s
 			"raw_response":       rawPayload,
 		}).Error
 }
+
+func (r *WebhookRepo) ListLogs(ctx context.Context, projectID string, isLive bool, limit int, offset int) ([]*models.WebhookLog, error) {
+	var logs []*models.WebhookLog
+	err := r.db.WithContext(ctx).
+		Where("project_id = ? AND is_live = ?", projectID, isLive).
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&logs).Error
+	return logs, err
+}

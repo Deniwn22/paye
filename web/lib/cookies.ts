@@ -46,3 +46,22 @@ export async function deleteActiveProjectID() {
   const cookieStore = await cookies()
   cookieStore.delete(PROJECT_ID_KEY)
 }
+
+const MODE_KEY = "paye_active_mode"
+
+export async function setActiveMode(mode: "live" | "test") {
+  const cookieStore = await cookies()
+  cookieStore.set(MODE_KEY, mode, {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 30,
+    path: "/",
+  })
+}
+
+export async function getActiveMode(): Promise<"live" | "test"> {
+  const cookieStore = await cookies()
+  const val = cookieStore.get(MODE_KEY)?.value
+  return val === "live" ? "live" : "test"
+}

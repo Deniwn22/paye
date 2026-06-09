@@ -1,17 +1,12 @@
 import { redirect } from "next/navigation"
-import { getToken, getActiveProjectID } from "@/lib/cookies"
+import { getToken } from "@/lib/cookies"
 import TransfersList from "@/components/transfers-list"
-import { BACKEND_URL } from "@/lib/config"
+import { fetchBackend } from "@/lib/api"
 import { AlertTriangle } from "lucide-react"
 
-async function getTransfers(token: string, projectID: string | null) {
+async function getTransfers() {
   try {
-    const headers: Record<string, string> = { Authorization: `Bearer ${token}` }
-    if (projectID) {
-      headers["X-Project-ID"] = projectID
-    }
-    const res = await fetch(`${BACKEND_URL}/transfers`, {
-      headers,
+    const res = await fetchBackend("/transfers", {
       cache: "no-store",
     })
     if (!res.ok) return null
@@ -22,14 +17,9 @@ async function getTransfers(token: string, projectID: string | null) {
   }
 }
 
-async function getRecipients(token: string, projectID: string | null) {
+async function getRecipients() {
   try {
-    const headers: Record<string, string> = { Authorization: `Bearer ${token}` }
-    if (projectID) {
-      headers["X-Project-ID"] = projectID
-    }
-    const res = await fetch(`${BACKEND_URL}/recipients`, {
-      headers,
+    const res = await fetchBackend("/recipients", {
       cache: "no-store",
     })
     if (!res.ok) return []
@@ -46,9 +36,8 @@ export default async function TransfersPage() {
     redirect("/signin")
   }
 
-  const projectID = await getActiveProjectID()
-  const transfers = await getTransfers(token, projectID)
-  const recipients = await getRecipients(token, projectID)
+  const transfers = await getTransfers()
+  const recipients = await getRecipients()
 
   return (
     <div className="space-y-6">

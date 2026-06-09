@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"log"
 	"os"
+	"time"
 
 	"github.com/robfig/cron/v3"
 
@@ -64,9 +65,19 @@ func main() {
 	if db_url == "" {
 		log.Fatal("DATABASE_URL is not set")
 	}
-	database, err := db.Connect(db_url)
-	if err != nil {
-		log.Fatal("failed to connect to database: ", err)
+
+	var database *db.DB
+	var dbErr error
+	for i := 0; i < 10; i++ {
+		database, dbErr = db.Connect(db_url)
+		if dbErr == nil {
+			break
+		}
+		log.Printf("Failed to connect to database (attempt %d/10): %v. Retrying in 2 seconds...", i+1, dbErr)
+		time.Sleep(2 * time.Second)
+	}
+	if dbErr != nil {
+		log.Fatal("failed to connect to database: ", dbErr)
 	}
 	if err = db.Migrate(database); err != nil {
 		log.Fatal("failed to migrate database: ", err)

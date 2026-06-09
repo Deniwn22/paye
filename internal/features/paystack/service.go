@@ -9,6 +9,7 @@ import (
 	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/providers/paystack"
+	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
 )
 
@@ -38,7 +39,10 @@ func (s *PaystackService) getPaystackClient(ctx context.Context, projectID strin
 		return nil, fmt.Errorf("active paystack provider config not found: %w", err)
 	}
 
-	decryptedSecret, err := crypto.Decrypt(pc.SecretKey, s.encryptionKey)
+	isLive := middleware.GetIsLiveFromContext(ctx)
+	encSecret, _ := pc.GetKeysForMode(isLive)
+
+	decryptedSecret, err := crypto.Decrypt(encSecret, s.encryptionKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt paystack secret key: %w", err)
 	}
@@ -85,6 +89,7 @@ func (s *PaystackService) Refund(ctx context.Context, projectID string, req prov
 		MerchantNote:         req.MerchantNote,
 		Status:               "success",
 		RawResponse:          fmt.Sprintf("Status: %t, Message: %s", resp.Status, resp.Message),
+		IsLive:               tx.IsLive,
 	}
 
 	_, err = s.repo.CreateRefund(ctx, refund)
@@ -120,6 +125,7 @@ func (s *PaystackService) CreateTransferRecipient(ctx context.Context, projectID
 		Currency:      req.Currency,
 		RecipientCode: resp.RecipientCode,
 		Provider:      "paystack",
+		IsLive:        middleware.GetIsLiveFromContext(ctx),
 	}
 
 	_, err = s.repo.CreateTransferRecipient(ctx, recipient)
@@ -157,6 +163,7 @@ func (s *PaystackService) InitiateTransfer(ctx context.Context, projectID string
 		TransferCode:  resp.TransferCode,
 		Status:        "success",
 		Provider:      "paystack",
+		IsLive:        middleware.GetIsLiveFromContext(ctx),
 	}
 	if !resp.Status {
 		transfer.Status = "failed"
@@ -196,6 +203,7 @@ func (s *PaystackService) CreatePlan(ctx context.Context, projectID string, req 
 		Currency:    req.Currency,
 		Description: req.Description,
 		Provider:    "paystack",
+		IsLive:      middleware.GetIsLiveFromContext(ctx),
 	}
 
 	_, err = s.repo.CreatePlan(ctx, plan)
@@ -238,6 +246,7 @@ func (s *PaystackService) CreateSubscription(ctx context.Context, projectID stri
 		Authorization:    req.Authorization,
 		StartDate:        time.Now(),
 		Provider:         "paystack",
+		IsLive:           middleware.GetIsLiveFromContext(ctx),
 	}
 
 	_, err = s.repo.CreateSubscription(ctx, sub)

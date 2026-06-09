@@ -11,6 +11,7 @@ import (
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/providers/flutterwave"
 	"github.com/ttomsin/paye/internal/features/providers/paystack"
+	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
 	"github.com/ttomsin/paye/pkg/paye"
 )
@@ -52,7 +53,10 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 		return nil, fmt.Errorf("active provider config not found: %w", err)
 	}
 
-	decryptedSecret, err := crypto.Decrypt(pc.SecretKey, s.encryptionKey)
+	isLive := middleware.GetIsLiveFromContext(ctx)
+	encSecret, _ := pc.GetKeysForMode(isLive)
+
+	decryptedSecret, err := crypto.Decrypt(encSecret, s.encryptionKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt provider secret key: %w", err)
 	}
@@ -109,6 +113,7 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 		AuthURL:     resp.AuthURL,
 		Metadata:    resp.Metadata,
 		RawResponse: string(rawRespBytes),
+		IsLive:      isLive,
 	}
 
 	createdTx, err := s.repo.CreateTransaction(ctx, tx)
@@ -131,7 +136,9 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 		return nil, fmt.Errorf("active provider config not found: %w", err)
 	}
 
-	decryptedSecret, err := crypto.Decrypt(pc.SecretKey, s.encryptionKey)
+	encSecret, _ := pc.GetKeysForMode(tx.IsLive)
+
+	decryptedSecret, err := crypto.Decrypt(encSecret, s.encryptionKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt provider secret key: %w", err)
 	}
@@ -191,7 +198,8 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 
 // ListTransactions retrieves a list of transaction DTOs for a project
 func (s *TransactionService) ListTransactions(ctx context.Context, projectID string, limit int, offset int) ([]*dto.VerifyTransactionResponse, error) {
-	txs, err := s.repo.ListTransactions(ctx, projectID, limit, offset)
+	isLive := middleware.GetIsLiveFromContext(ctx)
+	txs, err := s.repo.ListTransactions(ctx, projectID, limit, offset, isLive)
 	if err != nil {
 		return nil, err
 	}

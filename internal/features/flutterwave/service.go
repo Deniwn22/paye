@@ -9,6 +9,7 @@ import (
 	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/providers/flutterwave"
+	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
 )
 
@@ -38,7 +39,10 @@ func (s *FlutterwaveService) getFlutterwaveClient(ctx context.Context, projectID
 		return nil, fmt.Errorf("active flutterwave provider config not found: %w", err)
 	}
 
-	decryptedSecret, err := crypto.Decrypt(pc.SecretKey, s.encryptionKey)
+	isLive := middleware.GetIsLiveFromContext(ctx)
+	encSecret, _ := pc.GetKeysForMode(isLive)
+
+	decryptedSecret, err := crypto.Decrypt(encSecret, s.encryptionKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt flutterwave secret key: %w", err)
 	}
@@ -85,6 +89,7 @@ func (s *FlutterwaveService) Refund(ctx context.Context, projectID string, req p
 		MerchantNote:         req.MerchantNote,
 		Status:               "success",
 		RawResponse:          fmt.Sprintf("Status: %t, Message: %s", resp.Status, resp.Message),
+		IsLive:               tx.IsLive,
 	}
 
 	_, err = s.repo.CreateRefund(ctx, refund)
@@ -120,6 +125,7 @@ func (s *FlutterwaveService) CreateTransferRecipient(ctx context.Context, projec
 		Currency:      req.Currency,
 		RecipientCode: resp.RecipientCode,
 		Provider:      "flutterwave",
+		IsLive:        middleware.GetIsLiveFromContext(ctx),
 	}
 
 	_, err = s.repo.CreateTransferRecipient(ctx, recipient)
@@ -157,6 +163,7 @@ func (s *FlutterwaveService) InitiateTransfer(ctx context.Context, projectID str
 		TransferCode:  resp.TransferCode,
 		Status:        "success",
 		Provider:      "flutterwave",
+		IsLive:        middleware.GetIsLiveFromContext(ctx),
 	}
 	if !resp.Status {
 		transfer.Status = "failed"
@@ -196,6 +203,7 @@ func (s *FlutterwaveService) CreatePlan(ctx context.Context, projectID string, r
 		Currency:    req.Currency,
 		Description: req.Description,
 		Provider:    "flutterwave",
+		IsLive:      middleware.GetIsLiveFromContext(ctx),
 	}
 
 	_, err = s.repo.CreatePlan(ctx, plan)
@@ -238,6 +246,7 @@ func (s *FlutterwaveService) CreateSubscription(ctx context.Context, projectID s
 		Authorization:    req.Authorization,
 		StartDate:        time.Now(),
 		Provider:         "flutterwave",
+		IsLive:           middleware.GetIsLiveFromContext(ctx),
 	}
 
 	_, err = s.repo.CreateSubscription(ctx, sub)

@@ -39,18 +39,31 @@ func (s *ProjectService) CreateProject(ctx context.Context, userID string, name 
 		return nil, fmt.Errorf("invalid user ID: %w", err)
 	}
 
-	apiKey, err := crypto.GenerateAPIKey()
+	liveApiKey, err := crypto.GenerateAPIKey(true)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate api key: %w", err)
+		return nil, fmt.Errorf("failed to generate live api key: %w", err)
+	}
+	testApiKey, err := crypto.GenerateAPIKey(false)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate test api key: %w", err)
 	}
 
-	publicID := uuid.New().String()
+	livePublicID, err := crypto.GeneratePublicID(true)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate live public id: %w", err)
+	}
+	testPublicID, err := crypto.GeneratePublicID(false)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate test public id: %w", err)
+	}
 
 	project := &models.Project{
-		Name:     name,
-		ApiKey:   apiKey,
-		PublicID: publicID,
-		UserID:   uID,
+		Name:         name,
+		ApiKey:       liveApiKey,
+		PublicID:     livePublicID,
+		TestApiKey:   testApiKey,
+		TestPublicID: testPublicID,
+		UserID:       uID,
 	}
 
 	if err := s.repo.CreateProject(ctx, project); err != nil {

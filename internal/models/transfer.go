@@ -16,4 +16,5 @@ type Transfer struct {
 	TransferCode  string    `gorm:"index" json:"transfer_code"`
 	Status        string    `gorm:"default:pending" json:"status"` // pending, success, failed
 	Provider      string    `gorm:"not null" json:"provider"`
+	IsLive        bool      `gorm:"default:false;index" json:"is_live"`
 }

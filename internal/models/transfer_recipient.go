@@ -14,4 +14,5 @@ type TransferRecipient struct {
 	Currency      string    `gorm:"not null" json:"currency"`
 	RecipientCode string    `gorm:"unique;not null;index" json:"recipient_code"`
 	Provider      string    `gorm:"not null" json:"provider"`
+	IsLive        bool      `gorm:"default:false;index" json:"is_live"`
 }
