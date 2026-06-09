@@ -15,10 +15,11 @@ type TransactionResponse struct {
 	Reference  string
 	AuthURL    string
 	AccessCode string
-	Provider   string
-	Amount     float64
-	Currency   string
-	Metadata   map[string]any
+	Provider          string
+	Amount            float64
+	Currency          string
+	AuthorizationCode string
+	Metadata          map[string]any
 }
 
 type WebhookEvent struct {
@@ -41,12 +42,12 @@ type RefundRequest struct {
 }
 
 type RefundResponse struct {
-	Status         bool
-	Message        string
-	TransactionRef string
-	Amount         float64
-	Currency       string
-	Provider       string
+	Status         bool    `json:"status"`
+	Message        string  `json:"message"`
+	TransactionRef string  `json:"transaction_ref"`
+	Amount         float64 `json:"amount"`
+	Currency       string  `json:"currency"`
+	Provider       string  `json:"provider"`
 }
 
 // Transfer types
@@ -58,28 +59,31 @@ type TransferRecipientRequest struct {
 }
 
 type TransferRecipientResponse struct {
-	Status        bool
-	Message       string
-	RecipientCode string
-	Provider      string
+	Status        bool   `json:"status"`
+	Message       string `json:"message"`
+	RecipientCode string `json:"recipient_code"`
+	Provider      string `json:"provider"`
 }
 
 type TransferRequest struct {
-	Amount        float64
-	RecipientCode string
-	Reason        string
-	Reference     string
-	Currency      string
+	Amount           float64 `json:"amount" binding:"required"`
+	RecipientCode    string  `json:"recipient_code"`
+	RecipientAccount string  `json:"recipientAccount"`
+	BankCode         string  `json:"bankCode"`
+	Reason           string  `json:"reason"`
+	Reference        string  `json:"reference"`
+	Currency         string  `json:"currency"`
+	Provider         string  `json:"provider"`
 }
 
 type TransferResponse struct {
-	Status       bool
-	Message      string
-	TransferCode string
-	Reference    string
-	Amount       float64
-	Currency     string
-	Provider     string
+	Status       bool    `json:"status"`
+	Message      string  `json:"message"`
+	TransferCode string  `json:"transfer_code"`
+	Reference    string  `json:"reference"`
+	Amount       float64 `json:"amount"`
+	Currency     string  `json:"currency"`
+	Provider     string  `json:"provider"`
 }
 
 // Plans & Subscriptions types
@@ -92,13 +96,13 @@ type PlanRequest struct {
 }
 
 type PlanResponse struct {
-	Status   bool
-	Message  string
-	PlanCode string
-	Name     string
-	Amount   float64
-	Interval string
-	Provider string
+	Status   bool    `json:"status"`
+	Message  string  `json:"message"`
+	PlanCode string  `json:"plan_code"`
+	Name     string  `json:"name"`
+	Amount   float64 `json:"amount"`
+	Interval string  `json:"interval"`
+	Provider string  `json:"provider"`
 }
 
 type SubscriptionRequest struct {
@@ -109,12 +113,12 @@ type SubscriptionRequest struct {
 }
 
 type SubscriptionResponse struct {
-	Status           bool
-	Message          string
-	SubscriptionCode string
-	CustomerEmail    string
-	PlanCode         string
-	Provider         string
+	Status           bool   `json:"status"`
+	Message          string `json:"message"`
+	SubscriptionCode string `json:"subscription_code"`
+	CustomerEmail    string `json:"customer_email"`
+	PlanCode         string `json:"plan_code"`
+	Provider         string `json:"provider"`
 }
 
 type Provider interface {
@@ -134,4 +138,15 @@ type Provider interface {
 	CreatePlan(req PlanRequest) (*PlanResponse, error)
 	CreateSubscription(req SubscriptionRequest) (*SubscriptionResponse, error)
 	CancelSubscription(subscriptionCode string, emailToken string) error
+
+	// Custom Paye-Managed Subscription charging
+	ChargeToken(req ChargeTokenRequest) (*TransactionResponse, error)
+}
+
+type ChargeTokenRequest struct {
+	Amount        float64
+	Currency      string
+	Email         string
+	Authorization string
+	Reference     string
 }

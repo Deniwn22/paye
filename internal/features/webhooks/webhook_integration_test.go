@@ -73,7 +73,7 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 	providerRepo := providers.NewProviderRepo(db)
 	webhookRepo := webhooks.NewWebhookRepo(db)
 
-	providerService := providers.NewProviderService(providerRepo, encryptionKey)
+	providerService := providers.NewProviderService(providerRepo, encryptionKey, db)
 	webhookService := webhooks.NewWebhookService(webhookRepo, providerRepo, userRepo, encryptionKey)
 
 	providerHandler := providers.NewProviderHandler(providerService)

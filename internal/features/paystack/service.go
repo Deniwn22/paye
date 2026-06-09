@@ -3,6 +3,7 @@ package paystack
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/ttomsin/paye/internal/crypto"
@@ -235,7 +236,7 @@ func (s *PaystackService) CreateSubscription(ctx context.Context, projectID stri
 		PlanCode:         resp.PlanCode,
 		Status:           "active",
 		Authorization:    req.Authorization,
-		StartDate:        req.StartDate,
+		StartDate:        time.Now(),
 		Provider:         "paystack",
 	}
 
@@ -276,3 +277,29 @@ func (s *PaystackService) CancelSubscription(ctx context.Context, projectID stri
 
 	return nil
 }
+
+// ListRefunds lists refunds scoped by projectID
+func (s *PaystackService) ListRefunds(ctx context.Context, projectID string) ([]*models.Refund, error) {
+	return s.repo.ListRefunds(ctx, projectID)
+}
+
+// ListTransferRecipients lists recipients scoped by projectID
+func (s *PaystackService) ListTransferRecipients(ctx context.Context, projectID string) ([]*models.TransferRecipient, error) {
+	return s.repo.ListTransferRecipients(ctx, projectID)
+}
+
+// ListTransfers lists transfers scoped by projectID
+func (s *PaystackService) ListTransfers(ctx context.Context, projectID string) ([]*models.Transfer, error) {
+	return s.repo.ListTransfers(ctx, projectID)
+}
+
+// ListPlans lists subscription plans scoped by projectID
+func (s *PaystackService) ListPlans(ctx context.Context, projectID string) ([]*models.Plan, error) {
+	return s.repo.ListPlans(ctx, projectID)
+}
+
+// ListSubscriptions lists customer subscriptions scoped by projectID
+func (s *PaystackService) ListSubscriptions(ctx context.Context, projectID string) ([]*models.Subscription, error) {
+	return s.repo.ListSubscriptions(ctx, projectID)
+}
+

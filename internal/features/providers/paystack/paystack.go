@@ -57,12 +57,17 @@ type paystackCustomer struct {
 	Email string `json:"email"`
 }
 
+type paystackAuthorization struct {
+	AuthorizationCode string `json:"authorization_code"`
+}
+
 type paystackVerifyData struct {
-	Status    string           `json:"status"`
-	Reference string           `json:"reference"`
-	Amount    int              `json:"amount"`
-	Currency  string           `json:"currency"`
-	Customer  paystackCustomer `json:"customer"`
+	Status        string                `json:"status"`
+	Reference     string                `json:"reference"`
+	Amount        int                   `json:"amount"`
+	Currency      string                `json:"currency"`
+	Customer      paystackCustomer      `json:"customer"`
+	Authorization paystackAuthorization `json:"authorization"`
 }
 
 type paystackVerifyResponse struct {
@@ -118,12 +123,14 @@ func (p *Paystack) InitializeTransaction(req providers.TransactionRequest) (*pro
 		return nil, err
 	}
 	tResp := &providers.TransactionResponse{
-		Status:     result.Status,
-		Message:    result.Message,
-		Reference:  result.Data.Reference,
-		AuthURL:    result.Data.AuthorizationURL,
-		AccessCode: result.Data.AccessCode,
-		Provider:   p.Name(),
+		Status:    result.Status,
+		Message:   result.Message,
+		Reference: result.Data.Reference,
+		AuthURL:   result.Data.AuthorizationURL,
+		Provider:  p.Name(),
+		Metadata: map[string]any{
+			"access_code": result.Data.AccessCode,
+		},
 	}
 
 	return tResp, nil
@@ -147,12 +154,13 @@ func (p *Paystack) VerifyTransaction(reference string) (*providers.TransactionRe
 	}
 
 	tResp := &providers.TransactionResponse{
-		Status:    result.Status && result.Data.Status == "success",
-		Message:   result.Message,
-		Reference: result.Data.Reference,
-		Amount:    float64(result.Data.Amount) / 100,
-		Currency:  result.Data.Currency,
-		Provider:  p.Name(),
+		Status:            result.Status && result.Data.Status == "success",
+		Message:           result.Message,
+		Reference:         result.Data.Reference,
+		Amount:            float64(result.Data.Amount) / 100,
+		Currency:          result.Data.Currency,
+		Provider:          p.Name(),
+		AuthorizationCode: result.Data.Authorization.AuthorizationCode,
 	}
 
 	return tResp, nil

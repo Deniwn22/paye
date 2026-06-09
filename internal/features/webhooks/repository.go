@@ -67,3 +67,13 @@ func (r *WebhookRepo) CreateLog(ctx context.Context, wl *models.WebhookLog) erro
 func (r *WebhookRepo) UpdateLog(ctx context.Context, wl *models.WebhookLog) error {
 	return r.db.WithContext(ctx).Save(wl).Error
 }
+
+func (r *WebhookRepo) UpdateTransactionAuthCode(ctx context.Context, reference string, authCode string, status string, rawPayload string) error {
+	return r.db.WithContext(ctx).Model(&models.Transaction{}).
+		Where("reference = ?", reference).
+		Updates(map[string]any{
+			"status":             status,
+			"authorization_code": authCode,
+			"raw_response":       rawPayload,
+		}).Error
+}

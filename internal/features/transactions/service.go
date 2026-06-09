@@ -9,6 +9,7 @@ import (
 	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/features/providers"
+	"github.com/ttomsin/paye/internal/features/providers/flutterwave"
 	"github.com/ttomsin/paye/internal/features/providers/paystack"
 	"github.com/ttomsin/paye/internal/models"
 	"github.com/ttomsin/paye/pkg/paye"
@@ -66,6 +67,12 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 			pClient.BaseURL = s.paystackBaseURL
 		}
 		providerClient = pClient
+	case "flutterwave":
+		fClient := flutterwave.New(decryptedSecret)
+		if s.paystackBaseURL != "" { // reusing base url override mechanism just in case
+			fClient.BaseURL = s.paystackBaseURL
+		}
+		providerClient = fClient
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", req.Provider)
 	}
@@ -100,7 +107,7 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 		Email:       req.Email,
 		Status:      "pending",
 		AuthURL:     resp.AuthURL,
-		AccessCode:  resp.AccessCode,
+		Metadata:    resp.Metadata,
 		RawResponse: string(rawRespBytes),
 	}
 
@@ -139,6 +146,12 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 			pClient.BaseURL = s.paystackBaseURL
 		}
 		providerClient = pClient
+	case "flutterwave":
+		fClient := flutterwave.New(decryptedSecret)
+		if s.paystackBaseURL != "" {
+			fClient.BaseURL = s.paystackBaseURL
+		}
+		providerClient = fClient
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", tx.Provider)
 	}
@@ -162,6 +175,10 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 		tx.Status = "success"
 	} else {
 		tx.Status = "failed"
+	}
+
+	if resp.AuthorizationCode != "" {
+		tx.AuthorizationCode = resp.AuthorizationCode
 	}
 
 	err = s.repo.UpdateTransaction(ctx, tx)

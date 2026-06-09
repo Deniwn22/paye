@@ -8,6 +8,9 @@ import {
   LayoutDashboard,
   Settings,
   CreditCard,
+  RefreshCw,
+  FileText,
+  Send,
 } from "lucide-react"
 import HeroIllustration from "@/components/hero-illustration"
 
@@ -462,6 +465,45 @@ X-API-Key: paye_xxxx
               <p className="text-sm leading-relaxed text-[#64748b] dark:text-[#94a3b8]">
                 Toggle providers on or off without touching code. Shift traffic
                 dynamically inside the dashboard.
+              </p>
+            </div>
+
+            {/* Feature 7 */}
+            <div className="space-y-3.5 rounded-2xl border border-[#e2e8f0] bg-white p-6 shadow-sm dark:border-[#1e293b] dark:bg-zinc-900/10">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0ea5e9]/10 text-[#0ea5e9]">
+                <RefreshCw className="h-4.5 w-4.5" />
+              </div>
+              <h4 className="text-base font-extrabold text-[#0f172a] dark:text-white">
+                Refunds Control
+              </h4>
+              <p className="text-sm leading-relaxed text-[#64748b] dark:text-[#94a3b8]">
+                Process full or partial transaction refunds directly from your audit log dashboard with instant status updates.
+              </p>
+            </div>
+
+            {/* Feature 8 */}
+            <div className="space-y-3.5 rounded-2xl border border-[#e2e8f0] bg-white p-6 shadow-sm dark:border-[#1e293b] dark:bg-zinc-900/10">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0ea5e9]/10 text-[#0ea5e9]">
+                <FileText className="h-4.5 w-4.5" />
+              </div>
+              <h4 className="text-base font-extrabold text-[#0f172a] dark:text-white">
+                Plans & Subscriptions
+              </h4>
+              <p className="text-sm leading-relaxed text-[#64748b] dark:text-[#94a3b8]">
+                Deploy customized recurring billing cycles (daily, weekly, monthly, annually) and track customer subscription states.
+              </p>
+            </div>
+
+            {/* Feature 9 */}
+            <div className="space-y-3.5 rounded-2xl border border-[#e2e8f0] bg-white p-6 shadow-sm dark:border-[#1e293b] dark:bg-zinc-900/10">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0ea5e9]/10 text-[#0ea5e9]">
+                <Send className="h-4.5 w-4.5" />
+              </div>
+              <h4 className="text-base font-extrabold text-[#0f172a] dark:text-white">
+                Payout Transfers
+              </h4>
+              <p className="text-sm leading-relaxed text-[#64748b] dark:text-[#94a3b8]">
+                Save transfer recipients and initiate secure, automated payouts or balance transfers to any major Nigerian bank account.
               </p>
             </div>
           </div>

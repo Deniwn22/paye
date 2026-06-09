@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Paye SDK Subscription Checkout Test</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;750;800&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --bg: #0a0a0a;
+                --text: #f5f5f5;
+                --muted: #888888;
+                --card-bg: #111111;
+                --border: #222222;
+                --accent: #0ea5e9;
+                --accent-hover: #38bdf8;
+                --input-bg: #0a0a0a;
+            }
+
+            @media (prefers-color-scheme: light) {
+                :root {
+                    --bg: #fafafa;
+                    --text: #171717;
+                    --muted: #737373;
+                    --card-bg: #ffffff;
+                    --border: #e5e5e5;
+                    --accent: #0284c7;
+                    --accent-hover: #0369a1;
+                    --input-bg: #f9f9f9;
+                }
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                background-color: var(--bg);
+                color: var(--text);
+                font-family: "Outfit", sans-serif;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 24px;
+                transition:
+                    background-color 0.3s,
+                    color 0.3s;
+            }
+
+            .container {
+                width: 100%;
+                max-width: 460px;
+            }
+
+            .card {
+                background-color: var(--card-bg);
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                padding: 32px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+                display: flex;
+                flex-direction: column;
+                gap: 24px;
+                transition:
+                    background-color 0.3s,
+                    border-color 0.3s;
+            }
+
+            .header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 16px;
+            }
+
+            .brand {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .brand-logo {
+                width: 24px;
+                height: 24px;
+                background-color: #0ea5e9;
+                color: #000000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 800;
+                font-size: 14px;
+                border-radius: 6px;
+            }
+
+            .brand-name {
+                font-weight: 700;
+                font-size: 16px;
+                letter-spacing: -0.02em;
+            }
+
+            .badge {
+                font-size: 10px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                background-color: rgba(14, 165, 233, 0.1);
+                color: #0ea5e9;
+                padding: 4px 8px;
+                border-radius: 4px;
+                border: 1px solid rgba(14, 165, 233, 0.15);
+            }
+
+            .section-title {
+                font-size: 13px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: var(--accent);
+                margin-bottom: 4px;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .form-group label {
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: var(--muted);
+            }
+
+            .form-group input {
+                width: 100%;
+                padding: 12px 16px;
+                background-color: var(--input-bg);
+                border: 1px solid var(--border);
+                color: var(--text);
+                font-family: inherit;
+                font-size: 14px;
+                border-radius: 8px;
+                outline: none;
+                transition: border-color 0.2s;
+            }
+
+            .form-group input:focus {
+                border-color: var(--accent);
+            }
+
+            .tabs {
+                display: flex;
+                border-bottom: 1px solid var(--border);
+                margin-bottom: 8px;
+            }
+
+            .tab-btn {
+                flex: 1;
+                padding: 10px;
+                background: none;
+                border: none;
+                color: var(--muted);
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                border-bottom: 2px solid transparent;
+                transition: all 0.2s;
+            }
+
+            .tab-btn.active {
+                color: var(--text);
+                border-bottom-color: var(--accent);
+            }
+
+            .tab-content {
+                display: none;
+            }
+
+            .tab-content.active {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .checkout-wrapper {
+                width: 100%;
+                margin-top: 8px;
+            }
+
+            /* Target class style override for our SDK generated button */
+            .paye-checkout-button {
+                width: 100% !important;
+                padding: 14px 24px !important;
+                font-size: 15px !important;
+                font-weight: 600 !important;
+                border-radius: 8px !important;
+                box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15) !important;
+                transition:
+                    background-color 0.2s,
+                    transform 0.1s !important;
+            }
+
+            .paye-checkout-button:active {
+                transform: scale(0.985);
+            }
+
+            .btn-programmatic {
+                width: 100%;
+                padding: 14px 24px;
+                font-size: 15px;
+                font-weight: 600;
+                background-color: #10b981;
+                color: #000;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+                transition:
+                    background-color 0.2s,
+                    transform 0.1s;
+            }
+
+            .btn-programmatic:hover {
+                background-color: #34d399;
+            }
+
+            .btn-programmatic:active {
+                transform: scale(0.985);
+            }
+
+            .footer {
+                text-align: center;
+                margin-top: 24px;
+                font-size: 11px;
+                color: var(--muted);
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .footer code {
+                font-family: "JetBrains Mono", monospace;
+                background-color: var(--card-bg);
+                border: 1px solid var(--border);
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="card">
+                <div class="header">
+                    <div class="brand">
+                        <div class="brand-logo">P</div>
+                        <span class="brand-name">Paye Subscriptions</span>
+                    </div>
+                    <span class="badge">Test Mode</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="sub-email">Billing Email</label>
+                    <input
+                        type="email"
+                        id="sub-email"
+                        placeholder="customer@example.com"
+                        value="subscriber@gmail.com"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="plan-uuid">Plan UUID</label>
+                    <input
+                        type="text"
+                        id="plan-uuid"
+                        placeholder="Paste Plan UUID here"
+                        value=""
+                    />
+                </div>
+
+                <div class="tabs">
+                    <button
+                        class="tab-btn active"
+                        onclick="switchTab('declarative')"
+                    >
+                        Declarative
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('programmatic')">
+                        Programmatic SDK
+                    </button>
+                </div>
+
+                <!-- Declarative Mode Checkout -->
+                <div id="tab-declarative" class="tab-content active">
+                    <p
+                        style="
+                            font-size: 12px;
+                            color: var(--muted);
+                            line-height: 1.5;
+                        "
+                    >
+                        This button is injected dynamically using HTML
+                        attributes. It will automatically read plan ID and email
+                        dynamically from the data attributes when updated.
+                    </p>
+                    <div class="checkout-wrapper">
+                        <!-- Dynamic subscription checkout button -->
+                        <div
+                            id="declarative-container"
+                            data-paye-checkout
+                            data-type="subscription"
+                            data-email-source="#sub-email"
+                            data-plan-id=""
+                            data-button-text="Subscribe via Declarative Button"
+                            data-currency="NGN"
+                        ></div>
+                    </div>
+                </div>
+
+                <!-- Programmatic Mode Checkout -->
+                <div id="tab-programmatic" class="tab-content">
+                    <p
+                        style="
+                            font-size: 12px;
+                            color: var(--muted);
+                            line-height: 1.5;
+                        "
+                    >
+                        Trigger checkout directly through standard Javascript
+                        functions using the global Paye SDK API.
+                    </p>
+                    <div class="checkout-wrapper">
+                        <button
+                            class="btn-programmatic"
+                            onclick="runProgrammaticCheckout()"
+                        >
+                            Subscribe via JS SDK Call
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <span>SDK Server: <code>http://localhost:8080</code></span>
+                <span
+                    >Public ID:
+                    <code>14512497-f312-43c1-8833-2bca7b4df180</code></span
+                >
+                <span style="margin-top: 4px"
+                    ><a
+                        href="index.html"
+                        style="color: var(--accent); text-decoration: none"
+                        >&larr; Back to One-Time Checkout</a
+                    ></span
+                >
+            </div>
+        </div>
+
+        <!-- Paye Served SDK Script -->
+        <script src="http://localhost:8080/sdk/6594b789-6538-4b65-b436-9a7048e6b832.js"></script>
+        <script>
+            // Tab switching logic
+            function switchTab(mode) {
+                document
+                    .querySelectorAll(".tab-btn")
+                    .forEach((btn) => btn.classList.remove("active"));
+                document
+                    .querySelectorAll(".tab-content")
+                    .forEach((content) => content.classList.remove("active"));
+
+                if (mode === "declarative") {
+                    document
+                        .querySelectorAll(".tab-btn")[0]
+                        .classList.add("active");
+                    document
+                        .getElementById("tab-declarative")
+                        .classList.add("active");
+                } else {
+                    document
+                        .querySelectorAll(".tab-btn")[1]
+                        .classList.add("active");
+                    document
+                        .getElementById("tab-programmatic")
+                        .classList.add("active");
+                }
+            }
+
+            // Keep declarative attribute synchronized with input box
+            const planInput = document.getElementById("plan-uuid");
+            const container = document.getElementById("declarative-container");
+
+            planInput.addEventListener("input", function () {
+                container.setAttribute("data-plan-id", planInput.value.trim());
+            });
+
+            // Programmatic trigger flow
+            function runProgrammaticCheckout() {
+                const emailVal = document
+                    .getElementById("sub-email")
+                    .value.trim();
+                const planUuidVal = document
+                    .getElementById("plan-uuid")
+                    .value.trim();
+
+                if (!emailVal || !planUuidVal) {
+                    alert(
+                        "Please fill in both the Billing Email and Plan UUID.",
+                    );
+                    return;
+                }
+
+                if (typeof window.Paye === "undefined") {
+                    alert(
+                        "Paye SDK script failed to load or has not finished loading.",
+                    );
+                    return;
+                }
+
+                window.Paye.pay({
+                    type: "subscription",
+                    planId: planUuidVal,
+                    email: emailVal,
+                    currency: "NGN",
+                    onSuccess: function (ref) {
+                        alert(
+                            "Subscription created successfully! Reference: " +
+                                ref,
+                        );
+                    },
+                    onFailure: function (err) {
+                        alert("Subscription setup failed: " + err);
+                    },
+                });
+            }
+        </script>
+    </body>
+</html>

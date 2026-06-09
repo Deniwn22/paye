@@ -34,3 +34,11 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# go binaries
+/paye
+/api
+
+# test DB
+/web/sandbox_db.json
+

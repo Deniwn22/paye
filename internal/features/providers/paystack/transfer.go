@@ -32,7 +32,33 @@ type paystackCreateRecipientResponse struct {
 	Data    paystackRecipientData `json:"data"`
 }
 
+type paystackResolveAccountResponse struct {
+	Status  bool   `json:"status"`
+	Message string `json:"message"`
+	Data    struct {
+		AccountNumber string `json:"account_number"`
+		AccountName   string `json:"account_name"`
+	} `json:"data"`
+}
+
 func (p *Paystack) CreateTransferRecipient(req providers.TransferRecipientRequest) (*providers.TransferRecipientResponse, error) {
+	if req.Name == "" {
+		resolvedName := "Recipient (" + req.AccountNumber + ")"
+		respResolve, errResolve := p.makeRequest("GET", p.getBaseURL()+"/bank/resolve?account_number="+req.AccountNumber+"&bank_code="+req.BankCode, nil)
+		if errResolve == nil {
+			defer respResolve.Body.Close()
+			if respResolve.StatusCode == http.StatusOK {
+				var resData paystackResolveAccountResponse
+				if errDec := json.NewDecoder(respResolve.Body).Decode(&resData); errDec == nil && resData.Status {
+					if resData.Data.AccountName != "" {
+						resolvedName = resData.Data.AccountName
+					}
+				}
+			}
+		}
+		req.Name = resolvedName
+	}
+
 	pReq := paystackCreateRecipientRequest{
 		Type:          "nuban",
 		Name:          req.Name,

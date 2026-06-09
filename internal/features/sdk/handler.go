@@ -2,6 +2,7 @@ package sdk
 
 import (
 	"context"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -13,17 +14,24 @@ import (
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/features/projects"
 	"github.com/ttomsin/paye/internal/features/providers"
+	"github.com/ttomsin/paye/internal/features/subscriptions"
 	"github.com/ttomsin/paye/internal/features/transactions"
 	"github.com/ttomsin/paye/internal/features/user"
 	"github.com/ttomsin/paye/internal/models"
+	"gorm.io/gorm"
 )
 
+//go:embed paye.js
+var payeJSTemplate string
+
 type SDKHandler struct {
-	userRepo           user.IUserRepo
-	projectRepo        projects.IProjectRepo
-	providerRepo       *providers.ProviderRepo
-	transactionService *transactions.TransactionService
-	encryptionKey      string
+	userRepo            user.IUserRepo
+	projectRepo         projects.IProjectRepo
+	providerRepo        *providers.ProviderRepo
+	transactionService  *transactions.TransactionService
+	subscriptionService *subscriptions.SubscriptionService
+	encryptionKey       string
+	db                  *gorm.DB
 }
 
 func NewSDKHandler(
@@ -32,22 +40,27 @@ func NewSDKHandler(
 	providerRepo *providers.ProviderRepo,
 	transactionService *transactions.TransactionService,
 	encryptionKey string,
+	db *gorm.DB,
+	subscriptionService *subscriptions.SubscriptionService,
 ) *SDKHandler {
 	return &SDKHandler{
-		userRepo:           userRepo,
-		projectRepo:        projectRepo,
-		providerRepo:       providerRepo,
-		transactionService: transactionService,
-		encryptionKey:      encryptionKey,
+		userRepo:            userRepo,
+		projectRepo:         projectRepo,
+		providerRepo:        providerRepo,
+		transactionService:  transactionService,
+		subscriptionService: subscriptionService,
+		encryptionKey:       encryptionKey,
+		db:                  db,
 	}
 }
 
 type InitializeSDKTransactionRequest struct {
-	PublicID string  `json:"publicId" binding:"required"`
-	Amount   float64 `json:"amount" binding:"required"`
-	Email    string  `json:"email" binding:"required,email"`
-	Currency string  `json:"currency"`
-	Provider string  `json:"provider"`
+	PublicID  string  `json:"publicId" binding:"required"`
+	Amount    float64 `json:"amount" binding:"required"`
+	Email     string  `json:"email" binding:"required,email"`
+	Currency  string  `json:"currency"`
+	Provider  string  `json:"provider"`
+	Reference string  `json:"reference"`
 }
 
 // ServeSDK serves the dynamic Javascript SDK script file for the merchant
@@ -97,212 +110,13 @@ func (h *SDKHandler) ServeSDK(c *gin.Context) {
 	}
 	papiEndpoint := fmt.Sprintf("%s://%s/api/v1", scheme, c.Request.Host)
 
-	// Build dynamic JS SDK script string (Paystack pop inline checkout)
-	jsCode := fmt.Sprintf(`(function() {
-    var config = {
-        merchantId: "%s",
-        providers: %s,
-        publicKey: "%s",
-        papiEndpoint: "%s"
-    };
-
-    function loadPaystack(callback) {
-        if (window.PaystackPop) {
-            callback();
-            return;
-        }
-        var existingScript = document.querySelector('script[src="https://js.paystack.co/v1/inline.js"]');
-        if (existingScript) {
-            var oldOnload = existingScript.onload;
-            existingScript.onload = function() {
-                if (oldOnload) oldOnload();
-                callback();
-            };
-            return;
-        }
-        var s = document.createElement('script');
-        s.src = "https://js.paystack.co/v1/inline.js";
-        s.onload = function() {
-            callback();
-        };
-        s.onerror = function() {
-            console.error("Paye SDK Error: Failed to load Paystack inline script");
-        };
-        document.head.appendChild(s);
-    }
-
-    // Pre-load Paystack script if Paystack is an active provider
-    if (config.providers && config.providers.indexOf('paystack') !== -1) {
-        loadPaystack(function(){});
-    }
-
-    window.Paye = {
-        config: config,
-        pay: function(options) {
-            if (!options || !options.email || !options.amount) {
-                console.error("Paye SDK Error: email and amount are required fields");
-                if (options.onFailure) options.onFailure("Missing required fields");
-                return;
-            }
-
-            var rawAmount = options.amount;
-            var provider = options.provider || (config.providers && config.providers[0]) || 'paystack';
-
-            var payload = {
-                publicId: config.merchantId,
-                amount: rawAmount,
-                email: options.email,
-                currency: options.currency || 'NGN',
-                provider: provider
-            };
-
-            // Call Paye public transactions initialize endpoint
-            fetch(config.papiEndpoint + "/sdk/transactions/initialize", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(function(res) {
-                if (!res.ok) {
-                    throw new Error("HTTP error " + res.status);
-                }
-                return res.json();
-            })
-            .then(function(data) {
-                if (!data || !data.status || !data.data) {
-                    throw new Error(data.message || "Failed to initialize transaction");
-                }
-                
-                var txData = data.data;
-                
-                if (provider === 'paystack') {
-                    loadPaystack(function() {
-                        if (typeof PaystackPop === 'undefined') {
-                            throw new Error("Paystack SDK not loaded yet. Please retry in a moment.");
-                        }
-                        
-                        var handler = PaystackPop.setup({
-                            key: config.publicKey,
-                            access_code: txData.access_code,
-                            email: options.email,
-                            amount: Math.round(options.amount * 100),
-                            ref: txData.reference,
-                            onSuccess: function(transaction) {
-                                if (options.onSuccess) options.onSuccess(txData.reference);
-                            },
-                            onCancel: function() {
-                                if (options.onCancel) options.onCancel();
-                            }
-                        });
-                        handler.openIframe();
-                    });
-                } else {
-                    throw new Error("Unsupported payment gateway provider: " + provider);
-                }
-            })
-            .catch(function(err) {
-                console.error("Paye SDK Checkout Error:", err);
-                if (options.onFailure) options.onFailure(err.message || err);
-            });
-        }
-    };
-
-    function injectButtons() {
-        var targets = document.querySelectorAll('[data-paye-checkout]');
-        targets.forEach(function(el) {
-            var amount = el.getAttribute('data-amount');
-            var email = el.getAttribute('data-email');
-            var amountSource = el.getAttribute('data-amount-source');
-            var emailSource = el.getAttribute('data-email-source');
-            var currency = el.getAttribute('data-currency') || 'NGN';
-            var buttonText = el.getAttribute('data-button-text') || 'Pay Now';
-            var successRedirect = el.getAttribute('data-success-redirect');
-
-            if ((amount || amountSource) && (email || emailSource)) {
-                // Avoid injecting multiple buttons in the same container
-                if (el.querySelector('.paye-checkout-button')) return;
-
-                var btn = document.createElement('button');
-                btn.innerText = buttonText;
-                btn.className = 'paye-checkout-button';
-                btn.style.backgroundColor = '#0ea5e9';
-                btn.style.color = '#000000';
-                btn.style.border = 'none';
-                btn.style.padding = '10px 20px';
-                btn.style.fontSize = '14px';
-                btn.style.fontWeight = 'bold';
-                btn.style.borderRadius = '6px';
-                btn.style.cursor = 'pointer';
-                btn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                btn.style.transition = 'background-color 0.2s';
-                btn.onmouseover = function() { btn.style.backgroundColor = '#38bdf8'; };
-                btn.onmouseout = function() { btn.style.backgroundColor = '#0ea5e9'; };
-
-                btn.onclick = function() {
-                    var finalEmail = email;
-                    if (!finalEmail && emailSource) {
-                        var emailInput = document.querySelector(emailSource);
-                        if (emailInput) {
-                            finalEmail = emailInput.value || emailInput.innerText || emailInput.textContent || '';
-                        }
-                    }
-
-                    var finalAmount = amount;
-                    if (!finalAmount && amountSource) {
-                        var amountInput = document.querySelector(amountSource);
-                        if (amountInput) {
-                            var rawVal = amountInput.value || amountInput.innerText || amountInput.textContent || '';
-                            finalAmount = rawVal.replace(/[^\d.]/g, '');
-                        }
-                    }
-
-                    if (!finalEmail || !finalAmount || isNaN(parseFloat(finalAmount)) || parseFloat(finalAmount) <= 0) {
-                        alert('Please enter a valid email address and payment amount.');
-                        return;
-                    }
-
-                    btn.disabled = true;
-                    var origText = btn.innerText;
-                    btn.innerText = 'Processing...';
-                    
-                    window.Paye.pay({
-                        amount: parseFloat(finalAmount),
-                        email: finalEmail,
-                        currency: currency,
-                        onSuccess: function(ref) {
-                            btn.disabled = false;
-                            btn.innerText = origText;
-                            if (successRedirect) {
-                                window.location.href = successRedirect + (successRedirect.indexOf('?') === -1 ? '?' : '&') + "reference=" + ref;
-                            } else {
-                                alert('Payment successful! Reference: ' + ref);
-                            }
-                        },
-                        onFailure: function(err) {
-                            btn.disabled = false;
-                            btn.innerText = origText;
-                            alert('Payment failed: ' + err);
-                        },
-                        onCancel: function() {
-                            btn.disabled = false;
-                            btn.innerText = origText;
-                        }
-                    });
-                };
-                el.appendChild(btn);
-            }
-        });
-    }
-
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        injectButtons();
-    } else {
-        window.addEventListener('DOMContentLoaded', injectButtons);
-        window.addEventListener('load', injectButtons);
-    }
-})();`, project.PublicID, providersJSON, activePublicKey, papiEndpoint)
+	replacer := strings.NewReplacer(
+		"{{merchantId}}", project.PublicID,
+		"{{providers}}", string(providersJSON),
+		"{{publicKey}}", activePublicKey,
+		"{{papiEndpoint}}", papiEndpoint,
+	)
+	jsCode := replacer.Replace(payeJSTemplate)
 
 	c.Header("Content-Type", "application/javascript")
 	c.String(http.StatusOK, jsCode)
@@ -330,10 +144,11 @@ func (h *SDKHandler) InitializeSDKTransaction(c *gin.Context) {
 
 	// 2. Delegate transaction initialization to TransactionService
 	initReq := &dto.InitializeTransactionRequest{
-		Amount:   req.Amount,
-		Email:    req.Email,
-		Currency: req.Currency,
-		Provider: provider,
+		Amount:    req.Amount,
+		Email:     req.Email,
+		Currency:  req.Currency,
+		Provider:  provider,
+		Reference: req.Reference,
 	}
 	if initReq.Currency == "" {
 		initReq.Currency = "NGN"
@@ -384,3 +199,95 @@ func (h *SDKHandler) resolveProjectByPublicID(ctx context.Context, publicID stri
 	return defaultProject, nil
 }
 
+type CreateSDKSubscriptionRequest struct {
+	PublicID      string `json:"publicId" binding:"required"`
+	CustomerEmail string `json:"customerEmail" binding:"required,email"`
+	PlanID        string `json:"planId" binding:"required"`
+	Reference     string `json:"reference" binding:"required"`
+}
+
+func (h *SDKHandler) CreateSDKSubscription(c *gin.Context) {
+	var req CreateSDKSubscriptionRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+		return
+	}
+
+	// 1. Resolve project by PublicID
+	project, err := h.resolveProjectByPublicID(c.Request.Context(), req.PublicID)
+	if err != nil || project == nil {
+		c.JSON(http.StatusNotFound, api.Error(fmt.Sprintf("Project/Merchant not found for Public ID: %s", req.PublicID)))
+		return
+	}
+
+	// 2. Look up the plan by planId scoped to that project
+	var plan models.Plan
+	if err := h.db.WithContext(c.Request.Context()).
+		Where("id = ? AND project_id = ?", req.PlanID, project.Base.ID).
+		First(&plan).Error; err != nil {
+		c.JSON(http.StatusNotFound, api.Error("Billing plan not found or doesn't belong to this project"))
+		return
+	}
+
+	// 3. Look up the authorization_code stored against customerEmail for that project
+	var tx models.Transaction
+	err = h.db.WithContext(c.Request.Context()).
+		Where("project_id = ? AND email = ? AND status = ? AND authorization_code <> ''", project.Base.ID, req.CustomerEmail, "success").
+		Order("created_at DESC").
+		First(&tx).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, api.Error("No authorization code found on file for this customer email. The customer must complete a successful one-time payment before subscribing."))
+		return
+	}
+
+	// 4. Call the Paye local subscription service's CreateSubscription
+	sub, err := h.subscriptionService.CreateSubscription(
+		c.Request.Context(),
+		project.Base.ID,
+		req.CustomerEmail,
+		plan.ID.String(),
+		tx.AuthorizationCode,
+		tx.Provider, // We use the provider from the successful initial transaction
+	)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	response := map[string]interface{}{
+		"subscription_code": sub.SubscriptionCode,
+		"customer":          sub.CustomerEmail,
+		"plan":              sub.PlanCode,
+		"status":            sub.Status,
+		"next_billing_date": sub.NextBillingDate,
+	}
+
+	c.JSON(http.StatusOK, api.Success("Subscription successfully created", response))
+}
+
+// VerifySDKTransaction verifies the transaction status publicly (used by JS SDK)
+func (h *SDKHandler) VerifySDKTransaction(c *gin.Context) {
+	reference := c.Param("reference")
+	if reference == "" {
+		c.JSON(http.StatusBadRequest, api.Error("Reference parameter is required"))
+		return
+	}
+
+	// Query transaction by reference across all projects
+	var tx models.Transaction
+	err := h.db.WithContext(c.Request.Context()).Where("reference = ?", reference).First(&tx).Error
+	if err != nil {
+		c.JSON(http.StatusNotFound, api.Error("Transaction not found"))
+		return
+	}
+
+	// Call the transaction service to verify the transaction
+	resp, err := h.transactionService.VerifyTransaction(c.Request.Context(), tx.ProjectID.String(), reference)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success("Transaction verified successfully", resp))
+}

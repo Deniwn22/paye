@@ -89,3 +89,38 @@ func (r *PaystackRepository) FindTransactionByRef(ctx context.Context, projectID
 	}
 	return &tx, nil
 }
+
+// ListRefunds retrieves all refunds for a project sorted by creation date
+func (r *PaystackRepository) ListRefunds(ctx context.Context, projectID string) ([]*models.Refund, error) {
+	var refunds []*models.Refund
+	err := r.db.WithContext(ctx).Where("project_id = ?", projectID).Order("created_at DESC").Find(&refunds).Error
+	return refunds, err
+}
+
+// ListTransferRecipients retrieves all transfer recipients for a project
+func (r *PaystackRepository) ListTransferRecipients(ctx context.Context, projectID string) ([]*models.TransferRecipient, error) {
+	var recipients []*models.TransferRecipient
+	err := r.db.WithContext(ctx).Where("project_id = ?", projectID).Order("created_at DESC").Find(&recipients).Error
+	return recipients, err
+}
+
+// ListTransfers retrieves all transfers for a project sorted by creation date
+func (r *PaystackRepository) ListTransfers(ctx context.Context, projectID string) ([]*models.Transfer, error) {
+	var transfers []*models.Transfer
+	err := r.db.WithContext(ctx).Where("project_id = ?", projectID).Order("created_at DESC").Find(&transfers).Error
+	return transfers, err
+}
+
+// ListPlans retrieves all subscription plans for a project sorted by creation date
+func (r *PaystackRepository) ListPlans(ctx context.Context, projectID string) ([]*models.Plan, error) {
+	var plans []*models.Plan
+	err := r.db.WithContext(ctx).Where("project_id = ?", projectID).Order("created_at DESC").Find(&plans).Error
+	return plans, err
+}
+
+// ListSubscriptions retrieves all subscriptions for a project sorted by creation date
+func (r *PaystackRepository) ListSubscriptions(ctx context.Context, projectID string) ([]*models.Subscription, error) {
+	var subs []*models.Subscription
+	err := r.db.WithContext(ctx).Where("project_id = ?", projectID).Order("created_at DESC").Find(&subs).Error
+	return subs, err
+}

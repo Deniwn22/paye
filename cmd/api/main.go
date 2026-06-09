@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"crypto/sha256"
 	"log"
 	"os"
+
+	"github.com/robfig/cron/v3"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -14,11 +17,12 @@ import (
 	"github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/features/auth"
 	"github.com/ttomsin/paye/internal/features/dashboard"
-	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/paystack"
-	"github.com/ttomsin/paye/internal/features/transactions"
 	"github.com/ttomsin/paye/internal/features/projects"
+	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/sdk"
+	"github.com/ttomsin/paye/internal/features/subscriptions"
+	"github.com/ttomsin/paye/internal/features/transactions"
 	"github.com/ttomsin/paye/internal/features/user"
 	"github.com/ttomsin/paye/internal/features/webhooks"
 	"github.com/ttomsin/paye/internal/middleware"
@@ -83,11 +87,26 @@ func main() {
 	authService := auth.NewAuthService(userRepo, projectRepo, jwtSecret)
 	projectService := projects.NewProjectService(projectRepo)
 	paystackService := paystack.NewPaystackService(paystackRepo, providerRepo, derivedEncryptionKey)
-	providerService := providers.NewProviderService(providerRepo, derivedEncryptionKey)
+	providerService := providers.NewProviderService(providerRepo, derivedEncryptionKey, database.DB)
 	providerService.SetPaystackService(paystackService)
 	webhookService := webhooks.NewWebhookService(webhookRepo, providerRepo, userRepo, derivedEncryptionKey)
 	dashboardService := dashboard.NewDashboardService(dashboardRepo)
 	transactionService := transactions.NewTransactionService(transactionRepo, providerRepo, derivedEncryptionKey)
+	subscriptionService := subscriptions.NewSubscriptionService(database.DB, providerRepo, derivedEncryptionKey)
+
+	// Background worker for processing due subscriptions
+	c := cron.New()
+	_, err = c.AddFunc("@hourly", func() {
+		log.Println("Running cron job: ProcessDueSubscriptions")
+		err := subscriptionService.ProcessDueSubscriptions(context.Background())
+		if err != nil {
+			log.Printf("Cron error (ProcessDueSubscriptions): %v", err)
+		}
+	})
+	if err != nil {
+		log.Fatalf("failed to add cron job: %v", err)
+	}
+	c.Start()
 
 	//init handlers
 	authHandler := auth.NewAuthHandler(*authService)
@@ -96,7 +115,7 @@ func main() {
 	webhookHandler := webhooks.NewWebhookHandler(webhookService)
 	dashboardHandler := dashboard.NewDashboardHandler(dashboardService)
 	transactionHandler := transactions.NewTransactionHandler(transactionService)
-	sdkHandler := sdk.NewSDKHandler(userRepo, projectRepo, providerRepo, transactionService, derivedEncryptionKey)
+	sdkHandler := sdk.NewSDKHandler(userRepo, projectRepo, providerRepo, transactionService, derivedEncryptionKey, database.DB, subscriptionService)
 
 	// Gin config
 	r := gin.Default()
@@ -127,6 +146,8 @@ func main() {
 
 	// Public SDK Initialize Endpoint (Public)
 	v1.POST("/sdk/transactions/initialize", sdkHandler.InitializeSDKTransaction)
+	v1.POST("/sdk/subscriptions/create", sdkHandler.CreateSDKSubscription)
+	v1.GET("/sdk/transactions/verify/:reference", sdkHandler.VerifySDKTransaction)
 
 	// Protected Group (Requires JWT token)
 	jwtMiddleware := middleware.NewApiJwtMiddleware(jwtSecret)

@@ -194,6 +194,8 @@ func (h *WebhookHandler) ReceiveWebhookHandler(c *gin.Context) {
 	switch wc.ProviderName {
 	case "paystack":
 		signature = c.GetHeader("X-Paystack-Signature")
+	case "flutterwave":
+		signature = c.GetHeader("verif-hash")
 	default:
 		signature = c.GetHeader("X-Webhook-Signature")
 	}

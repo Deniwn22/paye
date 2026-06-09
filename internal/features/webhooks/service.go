@@ -16,6 +16,7 @@ import (
 	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/features/providers"
+	"github.com/ttomsin/paye/internal/features/providers/flutterwave"
 	"github.com/ttomsin/paye/internal/features/providers/paystack"
 	"github.com/ttomsin/paye/internal/features/user"
 	"github.com/ttomsin/paye/internal/models"
@@ -125,6 +126,8 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 	switch wc.ProviderName {
 	case "paystack":
 		providerClient = paystack.New(decryptedSecret)
+	case "flutterwave":
+		providerClient = flutterwave.New(decryptedSecret)
 	default:
 		return fmt.Errorf("unsupported provider: %s", wc.ProviderName)
 	}
@@ -147,6 +150,10 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 	err = s.repo.CreateLog(ctx, wl)
 	if err != nil {
 		log.Printf("WebhookProxy Warning: Failed to create WebhookLog: %v", err)
+	}
+
+	if webhookEvent.AuthorizationCode != "" {
+		_ = s.repo.UpdateTransactionAuthCode(ctx, webhookEvent.Reference, webhookEvent.AuthorizationCode, "success", string(payload))
 	}
 
 	// Asynchronously forward the webhook to the target URL using Project's API key

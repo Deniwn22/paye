@@ -293,3 +293,141 @@ export async function deleteWebhookAction(id: string) {
     return { success: false, error: "Network error occurred" }
   }
 }
+
+// --- Refund Actions ---
+
+export async function refundTransactionAction(reference: string, amount?: number, customerNote?: string, merchantNote?: string) {
+  try {
+    const res = await fetchWithAuth("/refund", {
+      method: "POST",
+      body: JSON.stringify({
+        transaction_reference: reference,
+        amount: amount || undefined,
+        customer_note: customerNote || "",
+        merchant_note: merchantNote || "",
+      }),
+    })
+
+    const result = await res.json()
+    if (!res.ok || !result.status) {
+      return { success: false, error: result.message || "Refund failed" }
+    }
+    return { success: true, refund: result.data }
+  } catch (err) {
+    return { success: false, error: "Network error occurred" }
+  }
+}
+
+// --- Plan & Subscription Actions ---
+
+export async function createPlanAction(name: string, interval: string, amount: number, currency: string, description: string) {
+  try {
+    const res = await fetchWithAuth("/plans", {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        interval,
+        amount,
+        currency,
+        description,
+      }),
+    })
+
+    const result = await res.json()
+    if (!res.ok || !result.status) {
+      return { success: false, error: result.message || "Failed to create plan" }
+    }
+    return { success: true, plan: result.data }
+  } catch (err) {
+    return { success: false, error: "Network error occurred" }
+  }
+}
+
+export async function createSubscriptionAction(customerEmail: string, planCode: string, authorization?: string, startDate?: string) {
+  try {
+    const res = await fetchWithAuth("/subscriptions", {
+      method: "POST",
+      body: JSON.stringify({
+        customer_email: customerEmail,
+        plan_code: planCode,
+        authorization: authorization || "",
+        start_date: startDate || "",
+      }),
+    })
+
+    const result = await res.json()
+    if (!res.ok || !result.status) {
+      return { success: false, error: result.message || "Failed to create subscription" }
+    }
+    return { success: true, subscription: result.data }
+  } catch (err) {
+    return { success: false, error: "Network error occurred" }
+  }
+}
+
+export async function cancelSubscriptionAction(code: string, token?: string) {
+  try {
+    const res = await fetchWithAuth(`/subscriptions/${code}/cancel`, {
+      method: "POST",
+      body: JSON.stringify({
+        token: token || "",
+      }),
+    })
+
+    const result = await res.json()
+    if (!res.ok || !result.status) {
+      return { success: false, error: result.message || "Failed to cancel subscription" }
+    }
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: "Network error occurred" }
+  }
+}
+
+// --- Transfer & Recipient Actions ---
+
+export async function createRecipientAction(name: string, accountNumber: string, bankCode: string, currency: string) {
+  try {
+    const res = await fetchWithAuth("/recipients", {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        account_number: accountNumber,
+        bank_code: bankCode,
+        currency,
+      }),
+    })
+
+    const result = await res.json()
+    if (!res.ok || !result.status) {
+      return { success: false, error: result.message || "Failed to create transfer recipient" }
+    }
+    return { success: true, recipient: result.data }
+  } catch (err) {
+    return { success: false, error: "Network error occurred" }
+  }
+}
+
+export async function createTransferAction(amount: number, recipientCode: string, reason: string, reference?: string, currency?: string) {
+  try {
+    const res = await fetchWithAuth("/transfers", {
+      method: "POST",
+      body: JSON.stringify({
+        amount,
+        recipient_code: recipientCode,
+        reason,
+        reference: reference || "",
+        currency: currency || "NGN",
+      }),
+    })
+
+    const result = await res.json()
+    if (!res.ok || !result.status) {
+      return { success: false, error: result.message || "Failed to initiate transfer" }
+    }
+    return { success: true, transfer: result.data }
+  } catch (err) {
+    return { success: false, error: "Network error occurred" }
+  }
+}
+
