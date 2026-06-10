@@ -270,8 +270,8 @@ export async function addWebhookAction(prevState: any, formData: FormData) {
   const targetUrl = formData.get("targetUrl") as string
   const slug = formData.get("slug") as string
 
-  if (!providerName || !targetUrl) {
-    return { success: false, error: "Provider and target URL are required" }
+  if (!providerName) {
+    return { success: false, error: "Provider name is required" }
   }
 
   try {

@@ -125,6 +125,11 @@ export default async function DashboardLayout({
                 <span className="text-zinc-400">Dashboard</span>
                 <ChevronRight className="h-3 w-3 text-zinc-400" />
                 <span className="font-black text-foreground">Workspace</span>
+                {activeMode === "test" && (
+                  <span className="ml-2 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/10 text-amber-550 dark:text-amber-400 border border-amber-500/20 shadow-[0_0_8px_rgba(245,158,11,0.2)] animate-pulse">
+                    Test Mode
+                  </span>
+                )}
               </div>
             </div>
 

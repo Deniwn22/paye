@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { getToken } from "@/lib/cookies"
+import { getToken, getActiveMode } from "@/lib/cookies"
 import WebhookLogsTable from "@/components/webhook-logs-table"
 import { AlertTriangle } from "lucide-react"
 import { fetchBackend } from "@/lib/api"
@@ -38,6 +38,9 @@ export default async function DashboardPage() {
     redirect("/signin")
   }
 
+  const mode = await getActiveMode()
+  const isLive = mode === "live"
+
   const stats = await getStats()
   const logs = await getLogs()
 
@@ -60,8 +63,13 @@ export default async function DashboardPage() {
     <div className="space-y-8 select-text">
       {/* Title Header Section */}
       <div className="border-b border-border/80 pb-5">
-        <h1 className="text-2xl font-black tracking-tight text-foreground">
-          Overview
+        <h1 className="text-2xl font-black tracking-tight text-foreground flex items-center gap-2">
+          <span>Overview</span>
+          {!isLive && (
+            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+              Test Mode
+            </span>
+          )}
         </h1>
         <p className="mt-1 text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
           Real-time transaction overview and delivery status

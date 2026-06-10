@@ -4,7 +4,7 @@ import "github.com/ttomsin/paye/internal/models"
 
 type WebhookConfigRequest struct {
 	ProviderName    string `json:"provider_name" binding:"required"`
-	TargetURL       string `json:"target_url" binding:"required,url"`
+	TargetURL       string `json:"target_url" binding:"omitempty,url"`
 	PayeWebhookSlug string `json:"paye_webhook_slug"`
 }
 

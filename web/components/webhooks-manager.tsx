@@ -133,7 +133,7 @@ export default function WebhooksManager({
                     <span>Add Webhook Route</span>
                   </DialogTitle>
                   <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
-                    Configure where you want Paye to send your payment notifications. Leave the URL blank if you only want to inspect notifications in Paye's Delivery Logs.
+                    Configure where you want Paye to send your payment notifications. Or click "Generate Webhook" to let Paye manage it and log events locally.
                   </DialogDescription>
                 </DialogHeader>
 
@@ -171,6 +171,11 @@ export default function WebhooksManager({
                       placeholder="e.g. https://my-backend-server.com/api/payment-webhook"
                       className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 rounded-lg text-sm font-mono transition-colors"
                     />
+                    {targetUrl === "" && (
+                      <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1">
+                        Leave blank to generate a Paye webhook URL to inspect logs directly on Paye.
+                      </p>
+                    )}
                   </div>
 
                   <div className="pt-2 flex justify-end gap-2">
@@ -186,7 +191,7 @@ export default function WebhooksManager({
                       disabled={isPending}
                       className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-black font-extrabold rounded-lg shadow-md shadow-sky-500/10 hover:shadow-sky-500/20 cursor-pointer disabled:opacity-50 transition-all text-sm"
                     >
-                      {isPending ? "Saving..." : "Save Webhook Route"}
+                      {isPending ? "Saving..." : targetUrl ? "Save Webhook Route" : "Generate Webhook"}
                     </button>
                   </div>
                 </form>

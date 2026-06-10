@@ -336,12 +336,12 @@ func TestDashboardStatsAndLogs(t *testing.T) {
 	encPublicKey, _ := crypto.Encrypt("pk_test_val", encryptionKey)
 
 	provConfig := &models.ProviderConfig{
-		Label:        "paystack-main",
-		ProviderName: "paystack",
-		SecretKey:    encSecretKey,
-		PublicKey:    encPublicKey,
-		IsActive:     true,
-		ProjectID:    testProject.Base.ID,
+		Label:         "paystack-main",
+		ProviderName:  "paystack",
+		TestSecretKey: encSecretKey,
+		TestPublicKey: encPublicKey,
+		IsActive:      true,
+		ProjectID:     testProject.Base.ID,
 	}
 	db.Create(provConfig)
 

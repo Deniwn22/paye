@@ -17,6 +17,7 @@ import (
 	"github.com/ttomsin/paye/internal/features/subscriptions"
 	"github.com/ttomsin/paye/internal/features/transactions"
 	"github.com/ttomsin/paye/internal/features/user"
+	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
 	"gorm.io/gorm"
 )
@@ -82,6 +83,11 @@ func (h *SDKHandler) ServeSDK(c *gin.Context) {
 		return
 	}
 
+	isLive := true
+	if project.TestPublicID != "" && publicID == project.TestPublicID {
+		isLive = false
+	}
+
 	// 2. Fetch project provider configurations
 	configs := h.providerRepo.ListProviders(c.Request.Context(), project.Base.ID.String())
 
@@ -92,10 +98,9 @@ func (h *SDKHandler) ServeSDK(c *gin.Context) {
 		if pc.IsActive {
 			activeProviders = append(activeProviders, pc.ProviderName)
 
-			// Decrypt public key using key derivation
-			decryptedPublic, err := crypto.Decrypt(pc.PublicKey, h.encryptionKey)
+			_, pubKeyEncrypted := pc.GetKeysForMode(isLive)
+			decryptedPublic, err := crypto.Decrypt(pubKeyEncrypted, h.encryptionKey)
 			if err == nil && activePublicKey == "" {
-				// Pick first active provider's public key (e.g. Paystack) to embed
 				activePublicKey = decryptedPublic
 			}
 		}
@@ -136,6 +141,10 @@ func (h *SDKHandler) InitializeSDKTransaction(c *gin.Context) {
 		c.JSON(http.StatusNotFound, api.Error(fmt.Sprintf("Project/Merchant not found for Public ID: %s", req.PublicID)))
 		return
 	}
+
+	isLive := (req.PublicID == project.PublicID)
+	reqCtx := context.WithValue(c.Request.Context(), middleware.IsLiveCtxKey, isLive)
+	c.Request = c.Request.WithContext(reqCtx)
 
 	provider := req.Provider
 	if provider == "" {
@@ -230,6 +239,10 @@ func (h *SDKHandler) CreateSDKSubscription(c *gin.Context) {
 		c.JSON(http.StatusNotFound, api.Error(fmt.Sprintf("Project/Merchant not found for Public ID: %s", req.PublicID)))
 		return
 	}
+
+	isLive := (req.PublicID == project.PublicID)
+	reqCtx := context.WithValue(c.Request.Context(), middleware.IsLiveCtxKey, isLive)
+	c.Request = c.Request.WithContext(reqCtx)
 
 	// 2. Look up the plan by planId scoped to that project
 	var plan models.Plan
