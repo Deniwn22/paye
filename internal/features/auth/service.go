@@ -77,29 +77,26 @@ func (s *AuthService) RegisterUser(req *SignupRequest) (*AuthResponse, error) {
 	}
 
 	user := &models.User{
-		Name:         req.Name,
-		Email:        req.Email,
-		Password:     hashedPassword,
-		ApiKey:       liveApiKey,
-		PublicID:     livePublicID,
-		TestApiKey:   testApiKey,
-		TestPublicID: testPublicID,
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: hashedPassword,
+		PublicID: livePublicID,
 	}
 	if err := s.userRepo.CreateUser(user); err != nil {
 		return nil, err
 	}
 	defaultProject := &models.Project{
 		Name:         "Default Project",
-		ApiKey:       user.ApiKey,
-		PublicID:     user.PublicID,
-		TestApiKey:   user.TestApiKey,
-		TestPublicID: user.TestPublicID,
+		ApiKey:       liveApiKey,
+		PublicID:     livePublicID,
+		TestApiKey:   testApiKey,
+		TestPublicID: testPublicID,
 		UserID:       user.Base.ID,
 	}
 	if err := s.projectRepo.CreateProject(context.Background(), defaultProject); err != nil {
 		return nil, err
 	}
-	token, err := GenerateJWT(user.Base.ID.String(), user.Email, user.ApiKey, user.PublicID, s.jwtSecret)
+	token, err := GenerateJWT(user.Base.ID.String(), user.Email, liveApiKey, livePublicID, s.jwtSecret)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +104,7 @@ func (s *AuthService) RegisterUser(req *SignupRequest) (*AuthResponse, error) {
 		ID:     user.Base.ID.String(),
 		Name:   user.Name,
 		Email:  user.Email,
-		ApiKey: user.ApiKey,
+		ApiKey: liveApiKey,
 		Token:  token,
 	}, nil
 }
@@ -128,7 +125,44 @@ func (s *AuthService) LoginUser(req *LoginRequest) (*AuthResponse, error) {
 	if err := CheckPasswordHash(req.Password, user.Password); err != nil {
 		return nil, errors.New("invalid password")
 	}
-	token, err := GenerateJWT(user.Base.ID.String(), user.Email, user.ApiKey, user.PublicID, s.jwtSecret)
+
+	// Retrieve user's projects to get active ApiKey and PublicID
+	projs, err := s.projectRepo.ListProjects(context.Background(), user.Base.ID.String())
+	var apiKey, publicID string
+	if err == nil && len(projs) > 0 {
+		apiKey = projs[0].ApiKey
+		publicID = projs[0].PublicID
+	} else {
+		// Fallback/Auto-migrate if no project found
+		liveApiKey, err := crypto.GenerateAPIKey(true)
+		if err != nil {
+			return nil, err
+		}
+		testApiKey, err := crypto.GenerateAPIKey(false)
+		if err != nil {
+			return nil, err
+		}
+		testPublicID, err := crypto.GeneratePublicID(false)
+		if err != nil {
+			return nil, err
+		}
+
+		defaultProject := &models.Project{
+			Name:         "Default Project",
+			ApiKey:       liveApiKey,
+			PublicID:     user.PublicID,
+			TestApiKey:   testApiKey,
+			TestPublicID: testPublicID,
+			UserID:       user.Base.ID,
+		}
+		if err := s.projectRepo.CreateProject(context.Background(), defaultProject); err != nil {
+			return nil, err
+		}
+		apiKey = liveApiKey
+		publicID = user.PublicID
+	}
+
+	token, err := GenerateJWT(user.Base.ID.String(), user.Email, apiKey, publicID, s.jwtSecret)
 	if err != nil {
 		return nil, err
 	}
@@ -136,40 +170,21 @@ func (s *AuthService) LoginUser(req *LoginRequest) (*AuthResponse, error) {
 		ID:     user.Base.ID.String(),
 		Name:   user.Name,
 		Email:  user.Email,
-		ApiKey: user.ApiKey,
+		ApiKey: apiKey,
 		Token:  token,
 	}, nil
 }
 
 // verify API key
 func (s *AuthService) VerifyAPIKey(apiKey string) (*models.User, *models.Project, error) {
-	// 1. Try to find project by API key
+	// Try to find project by API key
 	project, err := s.projectRepo.FindByApiKey(context.Background(), apiKey)
-	if err == nil && project != nil {
-		user, err := s.userRepo.FindByID(project.UserID.String())
-		if err != nil {
-			return nil, nil, err
-		}
-		return user, project, nil
-	}
-
-	// 2. Legacy fallback: look up user by API key
-	user, err := s.userRepo.FindByApiKey(apiKey)
 	if err != nil {
-		return nil, nil, err
-	}
-	if user == nil {
 		return nil, nil, errors.New("invalid API key")
 	}
 
-	// Migrate this legacy user by dynamically creating a Default Project
-	project = &models.Project{
-		Name:     "Default Project",
-		ApiKey:   user.ApiKey,
-		PublicID: user.PublicID,
-		UserID:   user.Base.ID,
-	}
-	if err := s.projectRepo.CreateProject(context.Background(), project); err != nil {
+	user, err := s.userRepo.FindByID(project.UserID.String())
+	if err != nil {
 		return nil, nil, err
 	}
 

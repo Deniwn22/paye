@@ -8,7 +8,6 @@ import (
 type IUserRepo interface {
 	CreateUser(user *models.User) error
 	FindByEmail(email string) (*models.User, error)
-	FindByApiKey(apiKey string) (*models.User, error)
 	FindByID(id string) (*models.User, error)
 	FindByPublicID(publicID string) (*models.User, error)
 }
@@ -32,12 +31,6 @@ func (r *UserRepo) FindByEmail(email string) (*models.User, error) {
 	return &user, r.db.Where("email = ?", email).First(&user).Error
 }
 
-// FindByApiKey finds a user by API key
-func (r *UserRepo) FindByApiKey(apiKey string) (*models.User, error) {
-	var user models.User
-	return &user, r.db.Where("api_key = ? OR test_api_key = ?", apiKey, apiKey).First(&user).Error
-}
-
 // FindByID finds a user by ID
 func (r *UserRepo) FindByID(id string) (*models.User, error) {
 	var user models.User
@@ -47,5 +40,5 @@ func (r *UserRepo) FindByID(id string) (*models.User, error) {
 // FindByPublicID finds a user by Public ID
 func (r *UserRepo) FindByPublicID(publicID string) (*models.User, error) {
 	var user models.User
-	return &user, r.db.Where("public_id = ? OR test_public_id = ?", publicID, publicID).First(&user).Error
+	return &user, r.db.Where("public_id = ?", publicID).First(&user).Error
 }

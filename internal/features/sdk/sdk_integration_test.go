@@ -38,7 +38,6 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 		Name:     "Test Merchant",
 		Email:    "merchant@example.com",
 		Password: hashedPassword,
-
 		PublicID: "paye_pub_test_12345",
 	}
 	if err := db.Create(testUser).Error; err != nil {
@@ -46,10 +45,12 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 	}
 
 	testProject := &models.Project{
-		Name: "Default Project",
-
-		PublicID: testUser.PublicID,
-		UserID:   testUser.Base.ID,
+		Name:         "Default Project",
+		ApiKey:       "paye_live_merchant_api_key_54321",
+		PublicID:     testUser.PublicID,
+		TestApiKey:   "paye_test_merchant_api_key_54321",
+		TestPublicID: "paye_pub_test_12345",
+		UserID:       testUser.Base.ID,
 	}
 	if err := db.Create(testProject).Error; err != nil {
 		t.Fatalf("failed to create test project: %v", err)

@@ -50,16 +50,19 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 	}
 
 	testProject := &models.Project{
-		Name:     "Default Project",
-		PublicID: testUser.PublicID,
-		UserID:   testUser.Base.ID,
+		Name:         "Default Project",
+		ApiKey:       "paye_live_api_key_12345",
+		TestApiKey:   "paye_test_api_key_12345",
+		PublicID:     testUser.PublicID,
+		TestPublicID: "paye_test_pub_12345",
+		UserID:       testUser.Base.ID,
 	}
 	if err := db.Create(testProject).Error; err != nil {
 		t.Fatalf("failed to create test project: %v", err)
 	}
 
 	jwtSecret := "test_jwt_secret_key_32_bytes_long_xxxx"
-	token, err := auth.GenerateJWT(testUser.Base.ID.String(), testUser.Email, "", testUser.PublicID, jwtSecret)
+	token, err := auth.GenerateJWT(testUser.Base.ID.String(), testUser.Email, "paye_live_api_key_12345", testUser.PublicID, jwtSecret)
 	if err != nil {
 		t.Fatalf("failed to generate JWT: %v", err)
 	}
@@ -236,7 +239,7 @@ func TestWebhookConfigCRUD(t *testing.T) {
 }
 
 func TestWebhookProxyForwarding(t *testing.T) {
-	db, r, token, testUser, testProject := setupTestEnvironment(t)
+	db, r, token, _, testProject := setupTestEnvironment(t)
 	encryptionKey := "12345678901234567890123456789012"
 
 	// Create active ProviderConfig for Paystack with decrypted key
@@ -314,7 +317,7 @@ func TestWebhookProxyForwarding(t *testing.T) {
 		t.Errorf("Proxy body mismatch: got %s, want %s", string(lastReceivedBody), string(payload))
 	}
 
-	mac := hmac.New(sha256.New, []byte(""))
+	mac := hmac.New(sha256.New, []byte("paye_test_api_key_12345"))
 	mac.Write(payload)
 	expectedPayeSignature := hex.EncodeToString(mac.Sum(nil))
 
