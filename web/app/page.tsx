@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { getToken } from "@/lib/cookies"
-import { ThemeToggle } from "@/components/theme-toggle"
+import LandingNav from "@/components/landing-nav"
 
 export default async function Page() {
   const token = await getToken()
@@ -352,53 +352,60 @@ export default async function Page() {
             }
             .biz-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary); }
             .biz-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+            /* ── RESPONSIVE NAV ── */
+            @media (max-width: 768px) {
+              .desktop-nav-links { display: none !important; }
+              .desktop-nav-actions { display: none !important; }
+              .mobile-menu-btn { display: flex !important; }
+            }
+            .mobile-menu-btn {
+              display: none;
+              align-items: center; justify-content: center;
+              width: 36px; height: 36px;
+              border: 0.5px solid var(--border);
+              border-radius: var(--radius-sm);
+              background: var(--bg-secondary);
+              color: var(--text-primary);
+              cursor: pointer;
+              transition: background 0.15s;
+            }
+            .mobile-menu-btn:hover {
+              background: var(--bg-surface);
+            }
+            .mobile-menu-overlay {
+              position: absolute; top: 60px; left: 0; right: 0;
+              background: var(--bg-surface);
+              border-bottom: 0.5px solid var(--border);
+              padding: 1.5rem;
+              display: flex; flex-direction: column; gap: 1.25rem;
+              z-index: 40;
+              box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+            }
+            .mobile-menu-links {
+              display: flex; flex-direction: column; gap: 1rem;
+              list-style: none;
+            }
+            .mobile-menu-links a {
+              font-size: 15px; font-weight: 500;
+              color: var(--text-secondary);
+              text-decoration: none;
+            }
+            .mobile-menu-links a:hover {
+              color: var(--text-primary);
+            }
+            .mobile-menu-actions {
+              display: flex; flex-direction: column; gap: 0.75rem;
+              padding-top: 1.25rem;
+              border-top: 0.5px solid var(--border);
+            }
           `,
         }}
       />
 
       <div className="home-body">
         {/* NAV */}
-        <nav className="home-nav">
-          <div className="wrap nav-inner">
-            <Link href="/" className="logo">
-              Paye<span>.</span>
-            </Link>
-            <ul className="nav-links">
-              <li>
-                <a href="#product">Product</a>
-              </li>
-              <li>
-                <a href="#how-it-works">How it works</a>
-              </li>
-              <li>
-                <a href="#business">Business</a>
-              </li>
-              <li>
-                <a href="#developers">Developers</a>
-              </li>
-              <li>
-                <Link href="/docs">Docs</Link>
-              </li>
-            </ul>
-            <div className="nav-actions">
-              <ThemeToggle />
-              {token ? (
-                <Link href="/dashboard" className="btn-primary">
-                  Dashboard
-                </Link>
-              ) : (
-                <>
-                  <Link href="/signin" className="btn-ghost">
-                    Sign in
-                  </Link>
-                  <Link href="/signup" className="btn-primary">
-                    Get started
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </nav>
+        <LandingNav token={token} />
 
         {/* HERO */}
         <section className="hero">
