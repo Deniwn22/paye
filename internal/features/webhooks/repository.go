@@ -88,3 +88,13 @@ func (r *WebhookRepo) ListLogs(ctx context.Context, projectID string, isLive boo
 		Find(&logs).Error
 	return logs, err
 }
+
+func (r *WebhookRepo) ListAllLogs(ctx context.Context, projectID string, limit int, offset int) ([]*models.WebhookLog, error) {
+	var logs []*models.WebhookLog
+	err := r.db.WithContext(ctx).
+		Where("project_id = ?", projectID).
+		Order("created_at DESC").
+		Limit(limit).Offset(offset).
+		Find(&logs).Error
+	return logs, err
+}

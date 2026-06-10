@@ -228,30 +228,29 @@ func (h *WebhookHandler) ReceiveWebhookHandler(c *gin.Context) {
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /webhooks/logs [get]
 func (h *WebhookHandler) ListWebhookLogsHandler(c *gin.Context) {
-	projectID, exists := c.Get(middleware.ProjectIDContextKey)
-	if !exists {
-		c.JSON(http.StatusUnauthorized, api.Error("Project context missing"))
-		return
-	}
+    projectID, exists := c.Get(middleware.ProjectIDContextKey)
+    if !exists {
+        c.JSON(http.StatusUnauthorized, api.Error("Project context missing"))
+        return
+    }
 
-	var query struct {
-		Limit  int `form:"limit,default=50"`
-		Offset int `form:"offset,default=0"`
-	}
-	if err := c.ShouldBindQuery(&query); err != nil {
-		c.JSON(http.StatusBadRequest, api.Error(err.Error()))
-		return
-	}
+    var query struct {
+        Limit  int `form:"limit,default=50"`
+        Offset int `form:"offset,default=0"`
+    }
+    if err := c.ShouldBindQuery(&query); err != nil {
+        c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+        return
+    }
 
-	isLive := middleware.GetIsLiveFromContext(c.Request.Context())
+    // Remove isLive filter — show all logs regardless of mode
+    logs, err := h.service.ListAllLogs(c.Request.Context(), projectID.(string), query.Limit, query.Offset)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+        return
+    }
 
-	logs, err := h.service.ListLogs(c.Request.Context(), projectID.(string), isLive, query.Limit, query.Offset)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
-		return
-	}
-
-	c.JSON(http.StatusOK, api.Success("Webhook logs retrieved successfully", logs))
+    c.JSON(http.StatusOK, api.Success("Webhook logs retrieved successfully", logs))
 }
 
 func RegisterRoutes(rg *gin.RouterGroup, publicRg *gin.RouterGroup, h *WebhookHandler) {

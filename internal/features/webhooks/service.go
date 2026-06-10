@@ -121,8 +121,8 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 	var isLive bool
 	var verifyErr error
 
-	// Try Live key
-	liveSecret, _ := pc.GetKeysForMode(true)
+	// Try Live key — only if explicitly configured, no legacy fallback
+	liveSecret := pc.LiveSecretKey
 	if liveSecret != "" {
 		decryptedSecret, err := crypto.Decrypt(liveSecret, s.encryptionKey)
 		if err == nil {
@@ -142,9 +142,12 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 		}
 	}
 
-	// Try Test key if live verification failed or was not configured
+	// Try Test key — with legacy fallback
 	if webhookEvent == nil {
-		testSecret, _ := pc.GetKeysForMode(false)
+		testSecret := pc.TestSecretKey
+		if testSecret == "" {
+			testSecret = pc.SecretKey // legacy fallback
+		}
 		if testSecret != "" {
 			decryptedSecret, err := crypto.Decrypt(testSecret, s.encryptionKey)
 			if err == nil {
@@ -310,4 +313,8 @@ func (s *WebhookService) forwardWebhook(wl *models.WebhookLog, targetURL string,
 
 func (s *WebhookService) ListLogs(ctx context.Context, projectID string, isLive bool, limit int, offset int) ([]*models.WebhookLog, error) {
 	return s.repo.ListLogs(ctx, projectID, isLive, limit, offset)
+}
+
+func (s *WebhookService) ListAllLogs(ctx context.Context, projectID string, limit int, offset int) ([]*models.WebhookLog, error) {
+	return s.repo.ListAllLogs(ctx, projectID, limit, offset)
 }
