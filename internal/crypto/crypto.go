@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 )
 
 // Encrypt encrypts the plain text using the given key and returns the cipher text and nonce as a hex string.
@@ -39,6 +40,10 @@ func Decrypt(cipherText string, key string) (string, error) {
 	byteCipherText, err := hex.DecodeString(cipherText)
 	if err != nil {
 		return "", err
+	}
+
+	if len(byteCipherText) < 12 {
+		return "", errors.New("ciphertext too short")
 	}
 
 	nonce := byteCipherText[:12]

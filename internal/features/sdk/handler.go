@@ -99,9 +99,11 @@ func (h *SDKHandler) ServeSDK(c *gin.Context) {
 			activeProviders = append(activeProviders, pc.ProviderName)
 
 			_, pubKeyEncrypted := pc.GetKeysForMode(isLive)
-			decryptedPublic, err := crypto.Decrypt(pubKeyEncrypted, h.encryptionKey)
-			if err == nil && activePublicKey == "" {
-				activePublicKey = decryptedPublic
+			if pubKeyEncrypted != "" {
+				decryptedPublic, err := crypto.Decrypt(pubKeyEncrypted, h.encryptionKey)
+				if err == nil && activePublicKey == "" {
+					activePublicKey = decryptedPublic
+				}
 			}
 		}
 	}
