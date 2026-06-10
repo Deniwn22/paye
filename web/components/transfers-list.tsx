@@ -149,7 +149,7 @@ export default function TransfersList({
             }
             setIsOpen(true)
           }}
-          className="flex items-center gap-1.5 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-black font-extrabold text-sm rounded-lg shadow-md shadow-sky-500/10 hover:shadow-sky-500/20 cursor-pointer transition-all"
+          className="flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold text-sm rounded-lg cursor-pointer transition-all"
         >
           <ArrowUpRight className="w-4.5 h-4.5 shrink-0" />
           <span>New Transfer</span>
@@ -238,8 +238,8 @@ export default function TransfersList({
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-md bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-2xl p-6 font-sans">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-base font-extrabold text-zinc-900 dark:text-zinc-100">
-              <Send className="w-4.5 h-4.5 text-sky-500" />
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-zinc-900 dark:text-zinc-100">
+              <Send className="w-4.5 h-4.5 text-[#2563eb]" />
               <span>Initiate New Payout Transfer</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
@@ -254,7 +254,7 @@ export default function TransfersList({
                 value={recipientCode}
                 required
                 onChange={(e) => setRecipientCode(e.target.value)}
-                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-sky-500 rounded-lg font-semibold h-[38px] cursor-pointer"
+                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-[#2563eb] rounded-lg font-semibold h-[38px] cursor-pointer"
               >
                 <option value="" disabled>-- Choose Recipient --</option>
                 {recipients.map((r) => (
@@ -274,7 +274,7 @@ export default function TransfersList({
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="e.g. 15000"
-                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 rounded-lg font-semibold font-mono"
+                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg font-semibold font-mono"
               />
             </div>
 
@@ -286,7 +286,7 @@ export default function TransfersList({
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="e.g. Supplier payment"
-                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 rounded-lg font-semibold"
+                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg font-semibold"
               />
             </div>
 
@@ -297,7 +297,7 @@ export default function TransfersList({
                 value={reference}
                 onChange={(e) => setReference(e.target.value)}
                 placeholder="Unique transfer reference prefix"
-                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 rounded-lg font-semibold font-mono"
+                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg font-semibold font-mono"
               />
             </div>
 
@@ -312,7 +312,7 @@ export default function TransfersList({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-black font-extrabold rounded-lg shadow-md shadow-sky-500/10 hover:shadow-sky-500/20 cursor-pointer disabled:opacity-50 transition-all flex items-center gap-1.5"
+                className="px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg cursor-pointer disabled:opacity-50 transition-all flex items-center gap-1.5"
               >
                 {isSubmitting ? (
                   <>

@@ -107,29 +107,25 @@ export default function TransactionsTable({ transactions }: { transactions: Tran
     switch (status) {
       case "success":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#f0fdf4] text-[#16a34a] dark:bg-[#14291a] dark:text-[#22c55e]">
             Success
           </span>
         )
       case "refunded":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-sky-500 dark:bg-sky-400" />
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#eff6ff] text-[#2563eb] dark:bg-[#1e3a5f] dark:text-[#3b82f6]">
             Refunded
           </span>
         )
       case "failed":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 dark:bg-rose-400" />
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#fef2f2] text-[#dc2626] dark:bg-[#2a0a0a] dark:text-[#ef4444]">
             Failed
           </span>
         )
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400" />
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#fffbeb] text-[#b45309] dark:bg-[#2a1f05] dark:text-[#f59e0b]">
             Pending
           </span>
         )
@@ -148,20 +144,20 @@ export default function TransactionsTable({ transactions }: { transactions: Tran
 
   return (
     <>
-      <div className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#111] rounded-xl overflow-hidden text-sm font-sans shadow-sm transition-colors">
+      <div className="border-[0.5px] border-border bg-card rounded-xl overflow-hidden text-sm font-sans transition-colors">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-zinc-200 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/40 text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider text-xs select-none">
-                <th className="px-6 py-3.5">Reference</th>
-                <th className="px-6 py-3.5">Provider</th>
-                <th className="px-6 py-3.5">Amount</th>
-                <th className="px-6 py-3.5">Currency</th>
-                <th className="px-6 py-3.5">Status</th>
-                <th className="px-6 py-3.5 text-right">Actions</th>
+              <tr className="border-b-[0.5px] border-border bg-secondary text-zinc-400 dark:text-zinc-550 font-semibold uppercase tracking-[0.05em] text-[11px] select-none">
+                <th className="px-6 py-3">Reference</th>
+                <th className="px-6 py-3">Provider</th>
+                <th className="px-6 py-3 text-right">Amount</th>
+                <th className="px-6 py-3 text-right">Currency</th>
+                <th className="px-6 py-3">Status</th>
+                <th className="px-6 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200/60 dark:divide-zinc-900/60">
+            <tbody className="divide-y-[0.5px] divide-border">
               {localTransactions.map((tx) => {
                 const isExpanded = expandedRef === tx.reference
                 const isCopied = copiedRef === tx.reference
@@ -170,9 +166,9 @@ export default function TransactionsTable({ transactions }: { transactions: Tran
                   <React.Fragment key={tx.reference}>
                     <tr
                       onClick={() => toggleExpand(tx.reference)}
-                      className="hover:bg-zinc-50/40 dark:hover:bg-zinc-900/30 cursor-pointer transition-colors"
+                      className="hover:bg-secondary cursor-pointer transition-colors"
                     >
-                      <td className="px-6 py-3.5 font-bold text-zinc-900 dark:text-zinc-100 font-mono flex items-center gap-2 group">
+                      <td className="px-6 py-3.5 font-mono text-[12px] text-zinc-500 dark:text-zinc-400 flex items-center gap-2 group">
                         <span className="truncate max-w-[150px]">{tx.reference}</span>
                         <button
                           onClick={(e) => handleCopyText(tx.reference, tx.reference, e)}
@@ -183,22 +179,25 @@ export default function TransactionsTable({ transactions }: { transactions: Tran
                         </button>
                       </td>
                       <td className="px-6 py-3.5">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 bg-sky-500/10 px-2.5 py-0.5 rounded border border-sky-500/20">
+                        <span className="text-[11px] font-medium uppercase tracking-wider text-zinc-650 dark:text-zinc-400 bg-secondary px-2 py-0.5 rounded-[6px] border-[0.5px] border-border">
                           {tx.provider}
                         </span>
                       </td>
-                      <td className="px-6 py-3.5 font-bold text-zinc-700 dark:text-zinc-300 font-mono">
+                      <td className="px-6 py-3.5 text-right font-semibold text-zinc-900 dark:text-zinc-100 font-mono">
                         ₦{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="px-6 py-3.5 font-extrabold text-zinc-400 dark:text-zinc-500 font-mono">{tx.currency}</td>
+                      <td className="px-6 py-3.5 text-right font-medium text-zinc-500 dark:text-zinc-400 font-mono">{tx.currency}</td>
                       <td className="px-6 py-3.5">{getStatusBadge(tx.status)}</td>
                       <td className="px-6 py-3.5 text-right flex items-center justify-end gap-3" onClick={(e) => e.stopPropagation()}>
                         {tx.status === "success" && (
                           <button
-                            onClick={(e) => handleOpenRefund(tx, e)}
-                            className="px-2.5 py-1 text-xs font-bold border border-sky-500/20 bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 rounded transition-all cursor-pointer flex items-center gap-1"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toast("Refunds is an upcoming feature. We are working on it.")
+                            }}
+                            className="px-2.5 py-1 text-xs font-semibold border-[0.5px] border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 text-zinc-400 dark:text-zinc-500 rounded transition-all cursor-not-allowed flex items-center gap-1"
                           >
-                            <RefreshCw className="w-3 h-3" />
+                            <RefreshCw className="w-3 h-3 text-zinc-400 dark:text-zinc-500" />
                             <span>Refund</span>
                           </button>
                         )}
@@ -212,22 +211,22 @@ export default function TransactionsTable({ transactions }: { transactions: Tran
                     </tr>
 
                     {isExpanded && (
-                      <tr className="bg-zinc-50/30 dark:bg-zinc-900/40 border-t border-zinc-200 dark:border-zinc-800 animate-in fade-in duration-150">
+                      <tr className="bg-zinc-50/10 dark:bg-zinc-900/10 border-t-[0.5px] border-border animate-in fade-in duration-150">
                         <td colSpan={6} className="px-6 py-4">
                           <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                              <span className="font-bold text-zinc-400 dark:text-zinc-500 block uppercase tracking-wider text-[10px]">
+                              <span className="font-semibold text-zinc-400 dark:text-zinc-500 block uppercase tracking-wider text-[10px] select-none">
                                 Transaction details
                               </span>
                               <button
                                 onClick={(e) => handleCopyText(JSON.stringify(tx, null, 2), tx.reference, e)}
-                                className="text-sm text-sky-600 dark:text-sky-400 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+                                className="text-xs text-[#2563eb] dark:text-[#3b82f6] font-semibold hover:underline flex items-center gap-1 cursor-pointer"
                               >
                                 {isCopied ? <Check className="w-3 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                                 <span>{isCopied ? "Copied" : "Copy details"}</span>
                               </button>
                             </div>
-                            <div className="p-4 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl max-h-56 overflow-y-auto">
+                            <div className="p-4 bg-zinc-50 dark:bg-zinc-950 border-[0.5px] border-border rounded-xl max-h-56 overflow-y-auto">
                               <pre className="text-zinc-800 dark:text-zinc-100 leading-relaxed font-mono text-xs whitespace-pre-wrap select-all">
                                 {JSON.stringify(tx, null, 2)}
                               </pre>
@@ -246,14 +245,14 @@ export default function TransactionsTable({ transactions }: { transactions: Tran
 
       {/* Refund Modal */}
       <Dialog open={isRefundModalOpen} onOpenChange={setIsRefundModalOpen}>
-        <DialogContent className="max-w-md bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-2xl p-6 font-sans">
+        <DialogContent className="max-w-md bg-card border-[0.5px] border-border rounded-xl p-6 font-sans shadow-none">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-base font-extrabold text-zinc-900 dark:text-zinc-100">
-              <RefreshCw className="w-4.5 h-4.5 text-sky-500" />
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-zinc-900 dark:text-zinc-100">
+              <RefreshCw className="w-4.5 h-4.5 text-[#2563eb] dark:text-[#3b82f6]" />
               <span>Refund Transaction</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
-              Initiate a refund for transaction <code className="font-mono font-bold text-zinc-800 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-900 px-1 py-0.5 rounded">{selectedTx?.reference}</code>.
+              Initiate a refund for transaction <code className="font-mono font-bold text-zinc-800 dark:text-zinc-200 bg-secondary px-1 py-0.5 rounded">{selectedTx?.reference}</code>.
             </DialogDescription>
           </DialogHeader>
 
@@ -270,7 +269,7 @@ export default function TransactionsTable({ transactions }: { transactions: Tran
                       setRefundType("full")
                       if (selectedTx) setRefundAmount(selectedTx.amount.toString())
                     }}
-                    className="accent-sky-500"
+                    className="accent-[#2563eb] dark:accent-[#3b82f6]"
                   />
                   <span>Full Refund (₦{selectedTx?.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })})</span>
                 </label>
@@ -283,7 +282,7 @@ export default function TransactionsTable({ transactions }: { transactions: Tran
                       setRefundType("partial")
                       setRefundAmount("")
                     }}
-                    className="accent-sky-500"
+                    className="accent-[#2563eb] dark:accent-[#3b82f6]"
                   />
                   <span>Partial Refund</span>
                 </label>
@@ -300,7 +299,7 @@ export default function TransactionsTable({ transactions }: { transactions: Tran
                   value={refundAmount}
                   onChange={(e) => setRefundAmount(e.target.value)}
                   placeholder="e.g. 2500"
-                  className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-sky-500 rounded-lg font-semibold font-mono"
+                  className="w-full px-3.5 py-2 bg-secondary border-[0.5px] border-border text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-[#2563eb] dark:focus:border-[#3b82f6] rounded-lg font-semibold font-mono"
                 />
               </div>
             )}
@@ -312,7 +311,7 @@ export default function TransactionsTable({ transactions }: { transactions: Tran
                 value={customerNote}
                 onChange={(e) => setCustomerNote(e.target.value)}
                 placeholder="Reason sent to the customer"
-                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 rounded-lg font-medium"
+                className="w-full px-3.5 py-2 bg-secondary border-[0.5px] border-border text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-[#2563eb] dark:focus:border-[#3b82f6] rounded-lg font-medium"
               />
             </div>
 
@@ -323,7 +322,7 @@ export default function TransactionsTable({ transactions }: { transactions: Tran
                 value={merchantNote}
                 onChange={(e) => setMerchantNote(e.target.value)}
                 placeholder="Internal note for your team"
-                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 rounded-lg font-medium"
+                className="w-full px-3.5 py-2 bg-secondary border-[0.5px] border-border text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-[#2563eb] dark:focus:border-[#3b82f6] rounded-lg font-medium"
               />
             </div>
 
@@ -331,14 +330,14 @@ export default function TransactionsTable({ transactions }: { transactions: Tran
               <button
                 type="button"
                 onClick={() => setIsRefundModalOpen(false)}
-                className="px-4 py-2 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg font-bold text-zinc-700 dark:text-zinc-300 transition-all cursor-pointer"
+                className="px-4 py-2 border-[0.5px] border-border hover:bg-secondary rounded-[10px] font-semibold text-zinc-700 dark:text-zinc-300 transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isRefunding}
-                className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-black font-extrabold rounded-lg shadow-md shadow-sky-500/10 hover:shadow-sky-500/20 cursor-pointer disabled:opacity-50 transition-all"
+                className="px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb] text-white font-semibold rounded-[10px] cursor-pointer disabled:opacity-50 transition-all shadow-none"
               >
                 {isRefunding ? "Refunding..." : "Confirm Refund"}
               </button>

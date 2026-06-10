@@ -1,21 +1,5 @@
 import { redirect } from "next/navigation"
 import { getToken } from "@/lib/cookies"
-import PlansList from "@/components/plans-list"
-import { fetchBackend } from "@/lib/api"
-import { AlertTriangle } from "lucide-react"
-
-async function getPlans() {
-  try {
-    const res = await fetchBackend("/plans", {
-      cache: "no-store",
-    })
-    if (!res.ok) return null
-    const result = await res.json()
-    return result.status ? (result.data || []) : null
-  } catch (err) {
-    return null
-  }
-}
 
 export default async function PlansPage() {
   const token = await getToken()
@@ -23,23 +7,22 @@ export default async function PlansPage() {
     redirect("/signin")
   }
 
-  const plans = await getPlans()
-
   return (
-    <div className="space-y-6">
-      {!plans && (
-        <div className="flex items-start gap-3 rounded-xl border border-rose-500/25 bg-rose-500/5 p-4 text-sm font-semibold text-rose-600 shadow-sm dark:text-rose-400">
-          <AlertTriangle className="h-5 w-5 shrink-0 text-rose-500" />
-          <div className="space-y-1">
-            <h4 className="text-sm font-bold">Connection error</h4>
-            <p className="text-xs leading-normal text-zinc-500 dark:text-zinc-400">
-              Unable to load billing plans. Make sure the API server is online.
-            </p>
-          </div>
-        </div>
-      )}
+    <div className="space-y-6 font-sans">
+      <div className="border-b border-border pb-5">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground select-none">Billing Plans</h1>
+        <p className="text-sm text-muted-foreground mt-1 select-none">Manage subscription plans and recurring pricing models.</p>
+      </div>
 
-      {plans && <PlansList plans={plans} />}
+      <div className="rounded-xl border-[0.5px] border-border bg-card p-12 text-center max-w-xl mx-auto mt-12">
+        <div className="mx-auto w-12 h-12 rounded-lg bg-blue-subtle text-[#2563eb] dark:text-[#3b82f6] flex items-center justify-center mb-4 text-lg select-none">
+          ⚙️
+        </div>
+        <h2 className="text-base font-semibold text-foreground mb-2 select-none">Upcoming Feature</h2>
+        <p className="text-xs text-muted-foreground leading-relaxed select-none">
+          We are actively working on the billing infrastructure to make recurring subscription management robust and secure. This tab will soon allow you to define billing schedules, customize trial periods, and view plan performance metrics.
+        </p>
+      </div>
     </div>
   )
 }

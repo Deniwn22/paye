@@ -114,7 +114,7 @@ export default function RecipientsList({ recipients }: { recipients: TransferRec
         </div>
         <button
           onClick={() => setIsOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-black font-extrabold text-sm rounded-lg shadow-md shadow-sky-500/10 hover:shadow-sky-500/20 cursor-pointer transition-all"
+          className="flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold text-sm rounded-lg cursor-pointer transition-all"
         >
           <Plus className="w-4 h-4 shrink-0" />
           <span>Add Recipient</span>
@@ -171,7 +171,7 @@ export default function RecipientsList({ recipients }: { recipients: TransferRec
                         </button>
                       </td>
                       <td className="px-6 py-3.5">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#2563eb] dark:text-[#3b82f6] bg-[#eff6ff] dark:bg-[#1e3a5f]/30 px-2 py-0.5 rounded border border-[#2563eb]/20 dark:border-[#3b82f6]/20">
                           {rec.provider}
                         </span>
                       </td>
@@ -191,8 +191,8 @@ export default function RecipientsList({ recipients }: { recipients: TransferRec
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-md bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-2xl p-6 font-sans">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-base font-extrabold text-zinc-900 dark:text-zinc-100">
-              <Plus className="w-4.5 h-4.5 text-sky-500" />
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-zinc-900 dark:text-zinc-100">
+              <Plus className="w-4.5 h-4.5 text-[#2563eb]" />
               <span>Add Payout Recipient</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
@@ -209,7 +209,7 @@ export default function RecipientsList({ recipients }: { recipients: TransferRec
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. John Doe"
-                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 rounded-lg font-semibold"
+                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg font-semibold"
               />
             </div>
 
@@ -224,7 +224,7 @@ export default function RecipientsList({ recipients }: { recipients: TransferRec
                   value={accountNumber}
                   onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ""))}
                   placeholder="10-digit number"
-                  className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 rounded-lg font-semibold font-mono"
+                  className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg font-semibold font-mono"
                 />
               </div>
 
@@ -233,7 +233,7 @@ export default function RecipientsList({ recipients }: { recipients: TransferRec
                 <select
                   value={bankCode}
                   onChange={(e) => setBankCode(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-sky-500 rounded-lg font-semibold h-[38px] cursor-pointer"
+                  className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-[#2563eb] rounded-lg font-semibold h-[38px] cursor-pointer"
                 >
                   {NIGERIAN_BANKS.map((b) => (
                     <option key={b.code} value={b.code}>
@@ -266,7 +266,7 @@ export default function RecipientsList({ recipients }: { recipients: TransferRec
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-black font-extrabold rounded-lg shadow-md shadow-sky-500/10 hover:shadow-sky-500/20 cursor-pointer disabled:opacity-50 transition-all flex items-center gap-1.5"
+                className="px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg cursor-pointer disabled:opacity-50 transition-all flex items-center gap-1.5"
               >
                 {isSubmitting ? (
                   <>

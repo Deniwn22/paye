@@ -17,39 +17,16 @@ interface ModeSwitcherProps {
 }
 
 export default function ModeSwitcher({ initialMode }: ModeSwitcherProps) {
-  const [mode, setMode] = useState<"live" | "test">(initialMode)
+  const [mode, setMode] = useState<"live" | "test">("test") // Enforce test mode as active
   const [showWarning, setShowWarning] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   const handleToggleClick = (targetMode: "live" | "test") => {
-    if (targetMode === mode) return
-
     if (targetMode === "live") {
       setShowWarning(true)
     } else {
-      performSwitch("test")
+      setMode("test")
     }
-  }
-
-  const performSwitch = (targetMode: "live" | "test") => {
-    startTransition(async () => {
-      try {
-        const res = await switchModeAction(targetMode)
-        if (res.success) {
-          setMode(targetMode)
-          toast.success(`Switched to ${targetMode === "live" ? "Live Production" : "Test Sandbox"} Mode`)
-          setShowWarning(false)
-          // Reload page to re-fetch data for the new mode
-          setTimeout(() => {
-            window.location.reload()
-          }, 400)
-        } else {
-          toast.error("Failed to switch environment mode")
-        }
-      } catch (err) {
-        toast.error("An error occurred while switching modes")
-      }
-    })
   }
 
   return (
@@ -70,56 +47,38 @@ export default function ModeSwitcher({ initialMode }: ModeSwitcherProps) {
       {/* Live Mode Option */}
       <button
         onClick={() => handleToggleClick("live")}
-        className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all select-none cursor-pointer ${
-          mode === "live"
-            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shadow-sm border border-emerald-500/10"
-            : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 border border-transparent"
-        }`}
+        className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all select-none cursor-pointer text-zinc-450 dark:text-zinc-500 opacity-60 hover:opacity-100`}
       >
-        <span className={`w-1.5 h-1.5 rounded-full ${mode === "live" ? "bg-emerald-500 animate-pulse" : "bg-zinc-400"}`} />
+        <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
         <span>Live Mode</span>
       </button>
 
       {/* Encouraging Warning Modal */}
       <Dialog open={showWarning} onOpenChange={setShowWarning}>
-        <DialogContent className="max-w-md bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-2xl p-6 shadow-2xl animate-in fade-in duration-200">
+        <DialogContent className="max-w-md bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-xl p-6 shadow-none animate-in fade-in duration-150">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2.5 text-base font-extrabold text-amber-600 dark:text-amber-400">
-              <ShieldAlert className="w-5.5 h-5.5 text-amber-500 shrink-0" />
-              <span>Activate Live Production Mode</span>
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-zinc-900 dark:text-zinc-100">
+              <ShieldAlert className="w-5.5 h-5.5 text-[#2563eb] shrink-0" />
+              <span>Live Mode Coming Soon</span>
             </DialogTitle>
             <DialogDescription asChild>
-              <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-2.5 leading-relaxed space-y-3 font-sans">
-                <p className="font-semibold text-zinc-800 dark:text-zinc-200">
-                  ⚠️ Production Mode Active
+              <div className="text-xs text-zinc-550 dark:text-zinc-400 mt-2.5 leading-relaxed space-y-3 font-sans">
+                <p>
+                  Live Mode is temporarily unavailable. We are actively working on Paye. to make it robust for real transactions.
                 </p>
                 <p>
-                  Production gateway services are active. Please note that we are actively building and expanding production features. We recommend testing your integration flows thoroughly in test mode first.
+                  Right now, you can start integrating and testing your payment flows in <strong>Test Mode</strong>. We will make Live Mode available again soon.
                 </p>
               </div>
             </DialogDescription>
           </DialogHeader>
 
-          <div className="pt-4 flex justify-end gap-2.5">
+          <div className="pt-4 flex justify-end">
             <button
               onClick={() => setShowWarning(false)}
-              className="px-4 py-2 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg font-bold text-zinc-700 dark:text-zinc-300 text-xs transition-all cursor-pointer"
+              className="px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg text-xs transition-colors cursor-pointer"
             >
-              Cancel
-            </button>
-            <button
-              onClick={() => performSwitch("live")}
-              disabled={isPending}
-              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold rounded-lg shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20 cursor-pointer disabled:opacity-50 transition-all text-xs flex items-center gap-1.5"
-            >
-              {isPending ? (
-                "Activating..."
-              ) : (
-                <>
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Activate Live Mode</span>
-                </>
-              )}
+              Okay
             </button>
           </div>
         </DialogContent>

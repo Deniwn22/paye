@@ -121,7 +121,7 @@ export default function ApiKeyPanel({ apiKey, publicId }: { apiKey: string; publ
       {/* API Key Panel Card */}
       <div className="p-6 border border-zinc-200 dark:border-[#222] bg-zinc-50 dark:bg-[#111] rounded-lg relative">
         <h2 className="font-bold text-zinc-800 dark:text-slate-200 text-base mb-2 uppercase tracking-wide flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-sky-500" />
+          <ShieldCheck className="w-5 h-5 text-[#2563eb] dark:text-[#3b82f6]" />
           <span>Merchant API Key</span>
         </h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed mb-6">
@@ -129,16 +129,16 @@ export default function ApiKeyPanel({ apiKey, publicId }: { apiKey: string; publ
         </p>
 
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {/* The Key Value Box */}
-            <div className="flex-1 px-4.5 py-3 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-[#222] font-mono text-base text-sky-700 dark:text-sky-400 select-all truncate rounded-md">
+            <div className="flex-1 px-3.5 py-2 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-zinc-800 font-mono text-sm text-foreground select-all truncate rounded-lg">
               {showKey ? apiKey : `${apiKey.slice(0, 10)}••••••••••••••••••••••••••••••••`}
             </div>
 
             {/* Show/Hide Button */}
             <button
               onClick={() => setShowKey(!showKey)}
-              className="px-5 py-3 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-[#222] hover:border-sky-500 text-zinc-700 dark:text-zinc-300 text-base font-bold transition-all cursor-pointer select-none rounded-md flex items-center gap-1.5"
+              className="px-3.5 py-2 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-xs font-semibold transition-all cursor-pointer select-none rounded-lg flex items-center gap-1.5 shrink-0"
             >
               {showKey ? (
                 <>
@@ -156,10 +156,10 @@ export default function ApiKeyPanel({ apiKey, publicId }: { apiKey: string; publ
             {/* Copy Button */}
             <button
               onClick={() => handleCopyToClipboard(apiKey, "apiKey", "Secret API key copied to clipboard")}
-              className={`px-5 py-3 text-base font-bold transition-all border cursor-pointer rounded-md flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 text-xs font-semibold transition-all border cursor-pointer rounded-lg flex items-center gap-1.5 shrink-0 ${
                 copiedStates["apiKey"]
                   ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                  : "bg-sky-500 border-sky-500 hover:bg-sky-400 text-white"
+                  : "bg-[#2563eb] border-[#2563eb] hover:bg-[#1d4ed8] text-white"
               }`}
             >
               {copiedStates["apiKey"] ? (

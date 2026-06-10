@@ -10,6 +10,8 @@ import {
   deleteActiveProjectID,
   getActiveMode,
   setActiveMode,
+  setUserName,
+  deleteUserName,
 } from "@/lib/cookies"
 import { BACKEND_URL } from "@/lib/config"
 
@@ -38,6 +40,9 @@ export async function signUpAction(prevState: any, formData: FormData) {
 
     const token = result.data.token
     await setToken(token)
+    if (result.data.name) {
+      await setUserName(result.data.name)
+    }
   } catch (err: any) {
     return { success: false, error: "Network error. Make sure Go API is running." }
   }
@@ -67,6 +72,9 @@ export async function signInAction(prevState: any, formData: FormData) {
 
     const token = result.data.token
     await setToken(token)
+    if (result.data.name) {
+      await setUserName(result.data.name)
+    }
   } catch (err: any) {
     return { success: false, error: "Network error. Make sure Go API is running." }
   }
@@ -77,6 +85,7 @@ export async function signInAction(prevState: any, formData: FormData) {
 export async function signOutAction() {
   await deleteToken()
   await deleteActiveProjectID()
+  await deleteUserName()
   redirect("/signin")
 }
 

@@ -1,21 +1,5 @@
 import { redirect } from "next/navigation"
 import { getToken } from "@/lib/cookies"
-import RefundsTable from "@/components/refunds-table"
-import { fetchBackend } from "@/lib/api"
-import { AlertTriangle } from "lucide-react"
-
-async function getRefunds() {
-  try {
-    const res = await fetchBackend("/refunds", {
-      cache: "no-store",
-    })
-    if (!res.ok) return null
-    const result = await res.json()
-    return result.status ? (result.data || []) : null
-  } catch (err) {
-    return null
-  }
-}
 
 export default async function RefundsPage() {
   const token = await getToken()
@@ -23,28 +7,22 @@ export default async function RefundsPage() {
     redirect("/signin")
   }
 
-  const refunds = await getRefunds()
-
   return (
-    <div className="space-y-6">
-      <div className="border-b border-zinc-200/60 pb-5 dark:border-zinc-900/60">
-        <h1 className="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white">Refunds</h1>
-        <p className="text-sm text-slate-400 mt-1">Audit log of all processed payment refunds.</p>
+    <div className="space-y-6 font-sans">
+      <div className="border-b border-border pb-5">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground select-none">Refunds</h1>
+        <p className="text-sm text-muted-foreground mt-1 select-none">Audit log of all processed payment refunds.</p>
       </div>
 
-      {!refunds && (
-        <div className="flex items-start gap-3 rounded-xl border border-rose-500/25 bg-rose-500/5 p-4 text-sm font-semibold text-rose-600 shadow-sm dark:text-rose-400">
-          <AlertTriangle className="h-5 w-5 shrink-0 text-rose-500" />
-          <div className="space-y-1">
-            <h4 className="text-sm font-bold">Connection error</h4>
-            <p className="text-xs leading-normal text-zinc-500 dark:text-zinc-400">
-              Unable to load refunds. Make sure the API server is online.
-            </p>
-          </div>
+      <div className="rounded-xl border-[0.5px] border-border bg-card p-12 text-center max-w-xl mx-auto mt-12">
+        <div className="mx-auto w-12 h-12 rounded-lg bg-blue-subtle text-[#2563eb] dark:text-[#3b82f6] flex items-center justify-center mb-4 text-lg select-none">
+          💸
         </div>
-      )}
-
-      {refunds && <RefundsTable refunds={refunds} />}
+        <h2 className="text-base font-semibold text-foreground mb-2 select-none">Upcoming Feature</h2>
+        <p className="text-xs text-muted-foreground leading-relaxed select-none">
+          Refund management is coming soon. We are finalizing our proxy handlers for upstream refund APIs so you can process complete and partial returns safely across all active payment gateways directly from your dashboard.
+        </p>
+      </div>
     </div>
   )
 }

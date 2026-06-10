@@ -65,3 +65,26 @@ export async function getActiveMode(): Promise<"live" | "test"> {
   const val = cookieStore.get(MODE_KEY)?.value
   return val === "live" ? "live" : "test"
 }
+
+const USER_NAME_KEY = "paye_user_name"
+
+export async function setUserName(name: string) {
+  const cookieStore = await cookies()
+  cookieStore.set(USER_NAME_KEY, name, {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+    path: "/",
+  })
+}
+
+export async function getUserName(): Promise<string | null> {
+  const cookieStore = await cookies()
+  return cookieStore.get(USER_NAME_KEY)?.value ?? null
+}
+
+export async function deleteUserName() {
+  const cookieStore = await cookies()
+  cookieStore.delete(USER_NAME_KEY)
+}

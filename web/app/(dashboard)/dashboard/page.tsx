@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { getToken, getActiveMode } from "@/lib/cookies"
+import { getToken, getActiveMode, getUserName } from "@/lib/cookies"
 import WebhookLogsTable from "@/components/webhook-logs-table"
 import { AlertTriangle } from "lucide-react"
 import { fetchBackend } from "@/lib/api"
@@ -44,6 +44,23 @@ export default async function DashboardPage() {
   const stats = await getStats()
   const logs = await getLogs()
 
+  const userName = await getUserName()
+  // Derivation fallback: if name cookie doesn't exist, extract name from email or default to Thompson
+  let name = userName
+  if (!name && token) {
+    try {
+      const { decodeJWT } = require("@/lib/jwt")
+      const claims = decodeJWT(token)
+      if (claims?.user_email) {
+        const localPart = claims.user_email.split("@")[0]
+        if (localPart !== "paye") {
+          name = localPart.charAt(0).toUpperCase() + localPart.slice(1)
+        }
+      }
+    } catch (e) {}
+  }
+  if (!name) name = "Thompson"
+
   const totalVolume = stats?.total_volume || 0
   const totalTransactions = stats?.total_transactions || 0
   const failedTransactions = stats?.failed_transactions || 0
@@ -62,17 +79,14 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8 select-text">
       {/* Title Header Section */}
-      <div className="border-b border-border/80 pb-5">
-        <h1 className="text-2xl font-black tracking-tight text-foreground flex items-center gap-2">
-          <span>Overview</span>
-          {!isLive && (
-            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-              Test Mode
-            </span>
-          )}
-        </h1>
-        <p className="mt-1 text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
-          Real-time transaction overview and delivery status
+      <div className="border-b border-border pb-5">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground select-none">
+            Good morning, {name}.
+          </h2>
+        </div>
+        <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400 select-none">
+          Here&apos;s what&apos;s happening across your connected providers.
         </p>
       </div>
 
@@ -90,92 +104,68 @@ export default async function DashboardPage() {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         
         {/* Total Volume Card */}
-        <div className="relative flex h-32 flex-col justify-between rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-sky-500/30 group">
-          {/* Subtle top indicator bar */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-400 to-sky-550 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div>
-            <span className="block text-[10px] font-bold tracking-widest text-zinc-400 uppercase dark:text-zinc-500 select-none">
-              Total Volume
-            </span>
-          </div>
-          <div>
-            <span className="block font-mono text-2xl font-black tracking-tight text-foreground">
-              ₦
-              {totalVolume.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
-            </span>
-            <span className="mt-1 block text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider select-none">
-              Across connected providers
-            </span>
-          </div>
+        <div className="rounded-xl border-[0.5px] border-border bg-card p-5">
+          <span className="block text-[11px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase select-none">
+            Total Volume
+          </span>
+          <span className="block text-2xl font-bold tracking-tight text-foreground mt-2">
+            ₦{totalVolume.toLocaleString(undefined, { minimumFractionDigits: 0 })}
+          </span>
+          <span className="block text-[11px] text-zinc-400 dark:text-zinc-500 mt-1 select-none">
+            Across all providers
+          </span>
         </div>
 
         {/* Transactions count Card */}
-        <div className="relative flex h-32 flex-col justify-between rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-sky-500/30 group">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-400 to-sky-550 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div>
-            <span className="block text-[10px] font-bold tracking-widest text-zinc-400 uppercase dark:text-zinc-500 select-none">
-              Transactions
-            </span>
-          </div>
-          <div>
-            <span className="block font-mono text-2xl font-black tracking-tight text-foreground">
-              {totalTransactions}
-            </span>
-            <span className="mt-1 block text-[10px] text-rose-500 font-bold uppercase tracking-wider select-none">
-              {failedTransactions} failed transactions
-            </span>
-          </div>
+        <div className="rounded-xl border-[0.5px] border-border bg-card p-5">
+          <span className="block text-[11px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase select-none">
+            Transactions
+          </span>
+          <span className="block text-2xl font-bold tracking-tight text-foreground mt-2">
+            {totalTransactions}
+          </span>
+          <span className={`block text-[11px] font-semibold mt-1 select-none ${failedTransactions > 0 ? "text-[#dc2626] dark:text-[#ef4444]" : "text-[#16a34a] dark:text-[#22c55e]"}`}>
+            {failedTransactions} failed
+          </span>
         </div>
 
         {/* Delivery Success Rate Card */}
-        <div className="relative flex h-32 flex-col justify-between rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-sky-500/30 group">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-400 to-sky-550 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div>
-            <span className="block text-[10px] font-bold tracking-widest text-zinc-400 uppercase dark:text-zinc-500 select-none">
-              Delivery Rate
-            </span>
-          </div>
-          <div>
-            <span className="block font-mono text-2xl font-black tracking-tight text-foreground">
-              {deliverySuccessRate}%
-            </span>
-            <span className="mt-1 block text-[10px] text-emerald-500 font-bold uppercase tracking-wider select-none truncate">
-              {successfulDeliveries} OK / {failedDeliveries} failed
-            </span>
-          </div>
+        <div className="rounded-xl border-[0.5px] border-border bg-card p-5">
+          <span className="block text-[11px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase select-none">
+            Delivery Rate
+          </span>
+          <span className="block text-2xl font-bold tracking-tight text-foreground mt-2">
+            {deliverySuccessRate}%
+          </span>
+          <span className={`block text-[11px] font-semibold mt-1 select-none truncate ${failedDeliveries > 0 ? "text-[#dc2626] dark:text-[#ef4444]" : "text-[#16a34a] dark:text-[#22c55e]"}`}>
+            {successfulDeliveries} OK · {failedDeliveries} failed
+          </span>
         </div>
 
-        {/* Active Providers count Card */}
-        <div className="relative flex h-32 flex-col justify-between rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-sky-500/30 group">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-400 to-sky-550 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div>
-            <span className="block text-[10px] font-bold tracking-widest text-zinc-400 uppercase dark:text-zinc-500 select-none">
-              Active Routing
-            </span>
-          </div>
-          <div>
-            <span className="block font-mono text-2xl font-black tracking-tight text-foreground">
-              {activeProviders}
-            </span>
-            <span className="mt-1 block text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider select-none">
-              connected channels
-            </span>
-          </div>
+        {/* Active Routing count Card */}
+        <div className="rounded-xl border-[0.5px] border-border bg-card p-5">
+          <span className="block text-[11px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase select-none">
+            Active Routing
+          </span>
+          <span className="block text-2xl font-bold tracking-tight text-foreground mt-2">
+            {activeProviders}
+          </span>
+          <span className="block text-[11px] text-zinc-400 dark:text-zinc-500 mt-1 select-none">
+            {activeProviders === 1 ? "Connected provider" : "Connected providers"}
+          </span>
         </div>
       </div>
 
       {/* Webhook Log List */}
       <div className="space-y-4">
         <div className="flex items-center justify-between border-b border-border pb-3 select-none">
-          <h2 className="text-[10px] font-bold tracking-widest text-zinc-450 uppercase">
+          <h2 className="text-[11px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
             Recent Activity Log
           </h2>
-          <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
+          <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase tracking-wider">
             Latest 10 audit logs
           </span>
         </div>

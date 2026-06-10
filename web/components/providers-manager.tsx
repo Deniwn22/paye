@@ -172,15 +172,15 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <button className="px-4 py-2.5 rounded-lg border border-sky-500/25 bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:border-sky-500/40 text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer">
-              <Plus className="w-4 h-4" />
+            <button className="px-3.5 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-all cursor-pointer select-none">
+              <Plus className="w-4.5 h-4.5" />
               <span>Add Provider</span>
             </button>
           </DialogTrigger>
           <DialogContent className="max-w-md bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-2xl p-6">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-base font-extrabold text-zinc-900 dark:text-zinc-100">
-                <Key className="w-4.5 h-4.5 text-sky-500" />
+                <Key className="w-4.5 h-4.5 text-[#2563eb] dark:text-[#3b82f6]" />
                 <span>Add Payment Provider</span>
               </DialogTitle>
               <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
@@ -197,7 +197,7 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                     value={label}
                     onChange={(e) => setLabel(e.target.value)}
                     placeholder="e.g. core-keys"
-                    className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-sky-500 rounded-lg text-sm font-sans transition-colors"
+                    className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-sans transition-colors"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -205,7 +205,7 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                   <select
                     value={providerName}
                     onChange={(e) => setProviderName(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-sky-500 rounded-lg text-sm font-semibold cursor-pointer transition-colors"
+                    className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-semibold cursor-pointer transition-colors"
                   >
                     <option value="paystack">Paystack</option>
                     <option value="flutterwave">Flutterwave</option>
@@ -248,7 +248,7 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                       value={testSecretKey}
                       onChange={(e) => setTestSecretKey(e.target.value)}
                       placeholder={providerName === "paystack" ? "sk_test_..." : "FLWSECK_TEST-..."}
-                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-sky-500 rounded-lg text-sm font-mono transition-colors"
+                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -258,7 +258,7 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                       value={testPublicKey}
                       onChange={(e) => setTestPublicKey(e.target.value)}
                       placeholder={providerName === "paystack" ? "pk_test_..." : "FLWPUBK_TEST-..."}
-                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-sky-500 rounded-lg text-sm font-mono transition-colors"
+                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
                     />
                   </div>
                 </div>
@@ -271,7 +271,7 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                       value={liveSecretKey}
                       onChange={(e) => setLiveSecretKey(e.target.value)}
                       placeholder={providerName === "paystack" ? "sk_live_..." : "FLWSECK-..."}
-                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-sky-500 rounded-lg text-sm font-mono transition-colors"
+                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -281,7 +281,7 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                       value={livePublicKey}
                       onChange={(e) => setLivePublicKey(e.target.value)}
                       placeholder={providerName === "paystack" ? "pk_live_..." : "FLWPUBK-..."}
-                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-sky-500 rounded-lg text-sm font-mono transition-colors"
+                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
                     />
                   </div>
                 </div>
@@ -291,14 +291,14 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                 <button
                   type="button"
                   onClick={() => setDialogOpen(false)}
-                  className="px-4 py-2 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg font-bold text-zinc-700 dark:text-zinc-300 text-sm transition-all cursor-pointer"
+                  className="px-3.5 py-1.5 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg font-semibold text-zinc-700 dark:text-zinc-300 text-xs transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-black font-extrabold rounded-lg shadow-md shadow-sky-500/10 hover:shadow-sky-500/20 cursor-pointer disabled:opacity-50 transition-all text-sm"
+                  className="px-3.5 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg cursor-pointer disabled:opacity-50 transition-all text-xs"
                 >
                   {isPending ? "Saving..." : "Save Provider"}
                 </button>
@@ -336,7 +336,7 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                     <div>
                       <h3 className="font-extrabold text-zinc-900 dark:text-zinc-100 text-base tracking-tight">{p.label}</h3>
                       <div className="flex items-center gap-1.5 mt-1.5">
-                        <span className="text-[10px] font-bold text-sky-600 dark:text-sky-400 bg-sky-500/10 px-2.5 py-0.5 rounded border border-sky-500/20 uppercase tracking-wide">
+                        <span className="text-[10px] font-bold text-[#2563eb] dark:text-[#3b82f6] bg-[#2563eb]/10 px-2.5 py-0.5 rounded border border-[#2563eb]/20 uppercase tracking-wide">
                           {p.provider_name}
                         </span>
                       </div>
@@ -352,10 +352,10 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                       </span>
                       <button
                         onClick={() => handleToggle(p.id)}
-                        className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
+                        className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
                           p.is_active
-                            ? "border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-500/20"
-                            : "border-zinc-300 dark:border-zinc-800 hover:border-zinc-400 text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900/40"
+                            ? "border-red-500/20 bg-red-500/5 text-red-650 dark:text-red-400 hover:bg-red-500/10"
+                            : "border-[#2563eb] bg-[#2563eb] hover:bg-[#1d4ed8] text-white"
                         }`}
                       >
                         {p.is_active ? "Disable" : "Enable"}

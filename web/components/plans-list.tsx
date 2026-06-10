@@ -93,7 +93,7 @@ export default function PlansList({ plans }: { plans: Plan[] }) {
         </div>
         <button
           onClick={() => setIsOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-black font-extrabold text-sm rounded-lg shadow-md shadow-sky-500/10 hover:shadow-sky-500/20 cursor-pointer transition-all"
+          className="flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold text-sm rounded-lg cursor-pointer transition-all"
         >
           <Plus className="w-4 h-4 shrink-0" />
           <span>Create Plan</span>
@@ -111,12 +111,12 @@ export default function PlansList({ plans }: { plans: Plan[] }) {
           {localPlans.map((plan) => (
             <div
               key={plan.id}
-              className="flex flex-col justify-between rounded-xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-900 dark:bg-[#111111] hover:border-[#0ea5e9]/40 hover:dark:border-[#0ea5e9]/40 transition-all shadow-sm group"
+              className="flex flex-col justify-between rounded-xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-900 dark:bg-[#111111] hover:border-[#2563eb]/40 hover:dark:border-[#2563eb]/40 transition-all shadow-sm group"
             >
               <div>
                 <div className="flex justify-between items-start gap-2">
-                  <h3 className="font-extrabold text-base text-zinc-900 dark:text-zinc-100 line-clamp-1">{plan.name}</h3>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 uppercase tracking-wider">
+                  <h3 className="font-semibold text-base text-zinc-900 dark:text-zinc-100 line-clamp-1">{plan.name}</h3>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#eff6ff] text-[#2563eb] dark:bg-[#1e3a5f]/30 dark:text-[#3b82f6] border border-[#2563eb]/20 dark:border-[#3b82f6]/20 uppercase tracking-wider">
                     {plan.interval}
                   </span>
                 </div>
@@ -163,8 +163,8 @@ export default function PlansList({ plans }: { plans: Plan[] }) {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-md bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-2xl p-6 font-sans">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-base font-extrabold text-zinc-900 dark:text-zinc-100">
-              <Plus className="w-4.5 h-4.5 text-sky-500" />
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-zinc-900 dark:text-zinc-100">
+              <Plus className="w-4.5 h-4.5 text-[#2563eb]" />
               <span>Create Billing Plan</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
@@ -181,7 +181,7 @@ export default function PlansList({ plans }: { plans: Plan[] }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Premium Monthly Plan"
-                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 rounded-lg font-semibold"
+                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg font-semibold"
               />
             </div>
 
@@ -195,7 +195,7 @@ export default function PlansList({ plans }: { plans: Plan[] }) {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="e.g. 5000"
-                  className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 rounded-lg font-semibold font-mono"
+                  className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-655 focus:outline-none focus:border-[#2563eb] rounded-lg font-semibold font-mono"
                 />
               </div>
 
@@ -204,7 +204,7 @@ export default function PlansList({ plans }: { plans: Plan[] }) {
                 <select
                   value={interval}
                   onChange={(e) => setInterval(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-sky-500 rounded-lg font-semibold h-[38px] cursor-pointer"
+                  className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-[#2563eb] rounded-lg font-semibold h-[38px] cursor-pointer"
                 >
                   <option value="daily">Daily</option>
                   <option value="weekly">Weekly</option>
@@ -232,7 +232,7 @@ export default function PlansList({ plans }: { plans: Plan[] }) {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Brief plan description for your reference."
                 rows={3}
-                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 rounded-lg font-medium"
+                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg font-medium"
               />
             </div>
 
@@ -247,7 +247,7 @@ export default function PlansList({ plans }: { plans: Plan[] }) {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-black font-extrabold rounded-lg shadow-md shadow-sky-500/10 hover:shadow-sky-500/20 cursor-pointer disabled:opacity-50 transition-all flex items-center gap-1.5"
+                className="px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg cursor-pointer disabled:opacity-50 transition-all flex items-center gap-1.5"
               >
                 {isSubmitting ? (
                   <>

@@ -92,7 +92,7 @@ export default function WebhooksManager({
           onClick={() => setActiveTab("routes")}
           className={`px-4 py-2.5 text-sm font-bold border-b-2 cursor-pointer transition-all ${
             activeTab === "routes"
-              ? "border-sky-500 text-sky-600 dark:text-sky-400"
+              ? "border-[#2563eb] text-[#2563eb] dark:border-[#3b82f6] dark:text-[#3b82f6]"
               : "border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
           }`}
         >
@@ -102,7 +102,7 @@ export default function WebhooksManager({
           onClick={() => setActiveTab("logs")}
           className={`px-4 py-2.5 text-sm font-bold border-b-2 cursor-pointer transition-all ${
             activeTab === "logs"
-              ? "border-sky-500 text-sky-600 dark:text-sky-400"
+              ? "border-[#2563eb] text-[#2563eb] dark:border-[#3b82f6] dark:text-[#3b82f6]"
               : "border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
           }`}
         >
@@ -121,7 +121,7 @@ export default function WebhooksManager({
 
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <button className="px-4 py-2.5 rounded-lg border border-sky-500/25 bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:border-sky-500/40 text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer">
+                <button className="px-3.5 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-all cursor-pointer select-none">
                   <Plus className="w-4 h-4" />
                   <span>Add Webhook Route</span>
                 </button>
@@ -129,7 +129,7 @@ export default function WebhooksManager({
               <DialogContent className="max-w-md bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-2xl p-6">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2 text-base font-extrabold text-zinc-900 dark:text-zinc-100">
-                    <Link2 className="w-4.5 h-4.5 text-sky-500" />
+                    <Link2 className="w-4.5 h-4.5 text-[#2563eb] dark:text-[#3b82f6]" />
                     <span>Add Webhook Route</span>
                   </DialogTitle>
                   <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
@@ -144,7 +144,7 @@ export default function WebhooksManager({
                       <select
                         value={providerName}
                         onChange={(e) => setProviderName(e.target.value)}
-                        className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-sky-500 rounded-lg text-sm font-semibold cursor-pointer transition-colors"
+                        className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-semibold cursor-pointer transition-colors"
                       >
                         <option value="paystack">Paystack</option>
                         <option value="flutterwave">Flutterwave</option>
@@ -157,7 +157,7 @@ export default function WebhooksManager({
                         value={slug}
                         onChange={(e) => setSlug(e.target.value)}
                         placeholder="e.g. core-callback-1"
-                        className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 rounded-lg text-sm font-sans transition-colors"
+                        className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-sans transition-colors"
                       />
                     </div>
                   </div>
@@ -169,7 +169,7 @@ export default function WebhooksManager({
                       value={targetUrl}
                       onChange={(e) => setTargetUrl(e.target.value)}
                       placeholder="e.g. https://my-backend-server.com/api/payment-webhook"
-                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 rounded-lg text-sm font-mono transition-colors"
+                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
                     />
                     {targetUrl === "" && (
                       <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1">
@@ -182,14 +182,14 @@ export default function WebhooksManager({
                     <button
                       type="button"
                       onClick={() => setDialogOpen(false)}
-                      className="px-4 py-2 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg font-bold text-zinc-700 dark:text-zinc-300 text-sm transition-all cursor-pointer"
+                      className="px-3.5 py-1.5 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg font-semibold text-zinc-700 dark:text-zinc-300 text-xs transition-all cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isPending}
-                      className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-black font-extrabold rounded-lg shadow-md shadow-sky-500/10 hover:shadow-sky-500/20 cursor-pointer disabled:opacity-50 transition-all text-sm"
+                      className="px-3.5 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg cursor-pointer disabled:opacity-50 transition-all text-xs"
                     >
                       {isPending ? "Saving..." : targetUrl ? "Save Webhook Route" : "Generate Webhook"}
                     </button>
@@ -215,11 +215,11 @@ export default function WebhooksManager({
                 return (
                   <div
                     key={c.id}
-                    className="p-6 border border-zinc-200 dark:border-zinc-900 bg-white/40 dark:bg-zinc-900/10 backdrop-blur rounded-xl shadow-sm hover:shadow-md hover:border-sky-500/20 transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-6"
+                    className="p-6 border border-zinc-200 dark:border-zinc-900 bg-white/40 dark:bg-zinc-900/10 backdrop-blur rounded-xl shadow-sm hover:shadow-md hover:border-[#2563eb]/20 transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-6"
                   >
                     <div className="space-y-4 flex-1">
                       <div className="flex items-center gap-2.5">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 bg-sky-500/10 px-2.5 py-0.5 rounded border border-sky-500/20">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#2563eb] dark:text-[#3b82f6] bg-[#2563eb]/10 px-2.5 py-0.5 rounded border border-[#2563eb]/20">
                           {c.provider_name}
                         </span>
                         <span className="text-xs text-zinc-400 dark:text-zinc-500 font-bold font-mono">ID: {c.id.slice(0, 8)}...</span>
@@ -231,16 +231,16 @@ export default function WebhooksManager({
                           <span className="text-zinc-400 dark:text-zinc-500 uppercase font-bold text-[10px] tracking-wider block">
                             Gateway Webhook URL (Copy and paste this into your Paystack or Flutterwave dashboard)
                           </span>
-                          <div className="flex items-center gap-2.5 w-full max-w-3xl">
-                            <div className="flex-1 px-3.5 py-2.5 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 font-mono text-xs text-sky-600 dark:text-sky-400 truncate select-all rounded-lg">
+                          <div className="flex items-center gap-2 w-full max-w-3xl">
+                            <div className="flex-1 px-3.5 py-1.5 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 font-mono text-xs text-foreground truncate select-all rounded-lg">
                               {proxyUrl}
                             </div>
                             <button
                               onClick={() => handleCopyUrl(c.paye_webhook_slug)}
-                              className={`px-4 py-2.5 rounded-lg text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
                                 isCopied
                                   ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                                  : "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-900 hover:border-sky-500 text-zinc-700 dark:text-zinc-300"
+                                  : "bg-[#2563eb] border-[#2563eb] hover:bg-[#1d4ed8] text-white"
                               }`}
                             >
                               {isCopied ? (
