@@ -6,6 +6,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -165,10 +166,58 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 	}
 
 	if webhookEvent == nil {
+		errStr := "failed to verify webhook signature: no credentials succeeded"
 		if verifyErr != nil {
-			return fmt.Errorf("invalid webhook signature: %w", verifyErr)
+			errStr = verifyErr.Error()
 		}
-		return fmt.Errorf("failed to verify webhook signature: no credentials succeeded")
+
+		// Try parsing basic info from payload for logging
+		var eventName, ref string
+		var amt float64
+		var payloadData struct {
+			Event string         `json:"event"`
+			Data  map[string]any `json:"data"`
+		}
+		if err := json.Unmarshal(payload, &payloadData); err == nil {
+			eventName = payloadData.Event
+			if payloadData.Data != nil {
+				if r, ok := payloadData.Data["tx_ref"].(string); ok {
+					ref = r
+				} else if r, ok := payloadData.Data["reference"].(string); ok {
+					ref = r
+				}
+				if a, ok := payloadData.Data["amount"].(float64); ok {
+					amt = a
+				}
+			}
+		}
+
+		// Determine isLive based on transaction lookup
+		isLive := false
+		if ref != "" {
+			var tx models.Transaction
+			if s.repo.db.WithContext(ctx).Where("reference = ?", ref).First(&tx).Error == nil {
+				isLive = tx.IsLive
+			}
+		}
+
+		// Create a failed WebhookLog record in the database for debugging
+		wl := &models.WebhookLog{
+			ProjectID:       wc.ProjectID,
+			WebhookConfigID: &wc.Base.ID,
+			Event:           eventName,
+			Reference:       ref,
+			Amount:          amt,
+			Status:          "failed",
+			ForwardedStatus: 0,
+			Payload:         string(payload),
+			IsLive:          isLive,
+			ErrorMessage:    errStr,
+		}
+
+		_ = s.repo.CreateLog(ctx, wl)
+
+		return fmt.Errorf("%s", errStr)
 	}
 
 	// Create a WebhookLog record in the database

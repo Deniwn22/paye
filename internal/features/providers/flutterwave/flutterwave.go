@@ -175,7 +175,7 @@ func (f *Flutterwave) HandleWebhook(signature string, payload []byte) (*provider
 	// For Flutterwave, the verif-hash is a plain text secret hash you configure on your dashboard.
 	// We'll assume the user configures their Flutterwave Secret Hash to be exactly their Secret Key.
 	if signature != f.secretKey {
-		return nil, fmt.Errorf("invalid Flutterwave signature")
+		return nil, fmt.Errorf("invalid Flutterwave signature: ensure the Secret Hash on your Flutterwave webhook dashboard matches your Flutterwave Secret Key (starts with FLWSECK_)")
 	}
 
 	var webhookData flutterwaveWebhookPayload
