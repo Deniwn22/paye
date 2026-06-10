@@ -116,7 +116,7 @@ func (h *SDKHandler) ServeSDK(c *gin.Context) {
 	papiEndpoint := fmt.Sprintf("%s://%s/api/v1", scheme, c.Request.Host)
 
 	replacer := strings.NewReplacer(
-		"{{merchantId}}", project.PublicID,
+		"{{merchantId}}", publicID,
 		"{{providers}}", string(providersJSON),
 		"{{publicKey}}", activePublicKey,
 		"{{papiEndpoint}}", papiEndpoint,

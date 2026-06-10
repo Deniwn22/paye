@@ -56,7 +56,7 @@ func (r *ProjectRepo) FindByPublicID(ctx context.Context, publicID string) (*mod
 
 func (r *ProjectRepo) ListProjects(ctx context.Context, userID string) ([]*models.Project, error) {
 	var projects []*models.Project
-	err := r.db.WithContext(ctx).Where("user_id = ?", userID).Find(&projects).Error
+	err := r.db.WithContext(ctx).Where("user_id = ?", userID).Order("created_at ASC").Find(&projects).Error
 	if err != nil {
 		return nil, err
 	}

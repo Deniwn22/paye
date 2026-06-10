@@ -16,7 +16,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/paye?sslmode=disable
+      - DATABASE_URL='postgresql://neondb_owner:npg_qJOV2zh7XPKs@ep-falling-lab-aj2fzcjb-pooler.c-3.us-east-2.aws.neon.tech/payedb?sslmode=require&channel_binding=require'
       - JWT_SECRET=asfdsadfsafsfsfasfdsfsfsdfsdfsdfsdfsfsdfsdfsdfsd
       - ENCRYPTION_KEY=asfdsadfsafsfsfasfdsfsfsdfsdfsdfsdfsfsdfsdfsdfsd
     depends_on:
@@ -24,4 +24,3 @@ services:
 
 volumes:
   paye_db:
-
