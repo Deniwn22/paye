@@ -19,10 +19,12 @@ type CreateProjectRequest struct {
 }
 
 type ProjectResponse struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	ApiKey   string `json:"api_key"`
-	PublicID string `json:"public_id"`
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	ApiKey       string `json:"api_key"`
+	PublicID     string `json:"public_id"`
+	TestApiKey   string `json:"test_api_key"`
+	TestPublicID string `json:"test_public_id"`
 }
 
 func NewProjectService(repo IProjectRepo) *ProjectService {

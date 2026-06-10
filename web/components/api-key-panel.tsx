@@ -26,6 +26,8 @@ export default function ApiKeyPanel({ apiKey, publicId }: { apiKey: string; publ
   const [serverGuideTab, setServerGuideTab] = useState<"refunds" | "transfers" | "billing">("refunds")
   const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({})
 
+  
+
   const handleCopyToClipboard = (text: string, id: string, message: string) => {
     navigator.clipboard.writeText(text)
     setCopiedStates((prev) => ({ ...prev, [id]: true }))
@@ -34,6 +36,7 @@ export default function ApiKeyPanel({ apiKey, publicId }: { apiKey: string; publ
       setCopiedStates((prev) => ({ ...prev, [id]: false }))
     }, 2000)
   }
+  
 
   const scriptCode = `<script src="${PAYE_API_URL}/sdk/${publicId || "your_public_id"}.js"></script>`
 
@@ -109,6 +112,9 @@ export default function ApiKeyPanel({ apiKey, publicId }: { apiKey: string; publ
     "customer_email": "subscriber@example.com",
     "plan_code": "PLN_xxxxxxxx"
   }'`
+
+
+  
 
   return (
     <div className="space-y-8 w-full text-sm font-sans">

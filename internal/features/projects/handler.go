@@ -9,7 +9,6 @@ import (
 
 const userIDContextKey = "user_id"
 
-
 type ProjectHandler struct {
 	service *ProjectService
 }
@@ -38,10 +37,12 @@ func (h *ProjectHandler) CreateProjectHandler(c *gin.Context) {
 	}
 
 	resp := &ProjectResponse{
-		ID:       project.ID.String(),
-		Name:     project.Name,
-		ApiKey:   project.ApiKey,
-		PublicID: project.PublicID,
+		ID:           project.ID.String(),
+		Name:         project.Name,
+		ApiKey:       project.ApiKey,
+		PublicID:     project.PublicID,
+		TestApiKey:   project.TestApiKey,
+		TestPublicID: project.TestPublicID,
 	}
 
 	c.JSON(http.StatusOK, api.Success("Project created successfully", resp))
@@ -63,10 +64,12 @@ func (h *ProjectHandler) ListProjectsHandler(c *gin.Context) {
 	var resp []*ProjectResponse
 	for _, p := range projects {
 		resp = append(resp, &ProjectResponse{
-			ID:       p.ID.String(),
-			Name:     p.Name,
-			ApiKey:   p.ApiKey,
-			PublicID: p.PublicID,
+			ID:           p.ID.String(),
+			Name:         p.Name,
+			ApiKey:       p.ApiKey,
+			PublicID:     p.PublicID,
+			TestApiKey:   p.TestApiKey,
+			TestPublicID: p.TestPublicID,
 		})
 	}
 

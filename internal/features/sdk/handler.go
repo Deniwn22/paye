@@ -144,7 +144,10 @@ func (h *SDKHandler) InitializeSDKTransaction(c *gin.Context) {
 		return
 	}
 
-	isLive := (req.PublicID == project.PublicID)
+	isLive := true
+	if project.TestPublicID != "" && req.PublicID == project.TestPublicID {
+		isLive = false
+	}
 	reqCtx := context.WithValue(c.Request.Context(), middleware.IsLiveCtxKey, isLive)
 	c.Request = c.Request.WithContext(reqCtx)
 
@@ -242,7 +245,10 @@ func (h *SDKHandler) CreateSDKSubscription(c *gin.Context) {
 		return
 	}
 
-	isLive := (req.PublicID == project.PublicID)
+	isLive := true
+	if project.TestPublicID != "" && req.PublicID == project.TestPublicID {
+		isLive = false
+	}
 	reqCtx := context.WithValue(c.Request.Context(), middleware.IsLiveCtxKey, isLive)
 	c.Request = c.Request.WithContext(reqCtx)
 

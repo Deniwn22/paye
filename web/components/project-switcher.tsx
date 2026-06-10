@@ -1,9 +1,21 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { ChevronDown, Plus, Folder, Check, Trash2, Loader2, Sparkles } from "lucide-react"
+import {
+  ChevronDown,
+  Plus,
+  Folder,
+  Check,
+  Trash2,
+  Loader2,
+  Sparkles,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
-import { switchProjectAction, createProjectAction, deleteProjectAction } from "@/app/actions"
+import {
+  switchProjectAction,
+  createProjectAction,
+  deleteProjectAction,
+} from "@/app/actions"
 import { toast } from "sonner"
 
 export interface Project {
@@ -11,6 +23,8 @@ export interface Project {
   name: string
   api_key: string
   public_id: string
+  test_api_key: string // add
+  test_public_id: string // add
 }
 
 export default function ProjectSwitcher({
@@ -30,12 +44,16 @@ export default function ProjectSwitcher({
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Find active project
-  const activeProject = projects.find((p) => p.id === activeProjectID) || projects[0]
+  const activeProject =
+    projects.find((p) => p.id === activeProjectID) || projects[0]
 
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false)
       }
     }
@@ -73,9 +91,17 @@ export default function ProjectSwitcher({
     }
   }
 
-  const handleDelete = async (e: React.MouseEvent, id: string, name: string) => {
+  const handleDelete = async (
+    e: React.MouseEvent,
+    id: string,
+    name: string
+  ) => {
     e.stopPropagation() // prevent switching when clicking delete
-    if (!confirm(`Are you sure you want to delete project "${name}"? This will soft-delete the project and its configurations.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete project "${name}"? This will soft-delete the project and its configurations.`
+      )
+    ) {
       return
     }
 
@@ -96,53 +122,59 @@ export default function ProjectSwitcher({
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-zinc-200 dark:border-[#222] bg-zinc-50 dark:bg-zinc-900/30 hover:bg-zinc-100 dark:hover:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 text-sm font-semibold transition-all cursor-pointer select-none"
+        className="flex w-full cursor-pointer items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm font-semibold text-zinc-700 transition-all select-none hover:bg-zinc-100 dark:border-[#222] dark:bg-zinc-900/30 dark:text-zinc-300 dark:hover:bg-zinc-900/60"
       >
         <div className="flex items-center gap-2 truncate">
-          <Folder className="w-4 h-4 text-sky-500 flex-shrink-0" />
-          <span className="truncate">{activeProject?.name || "Select Project"}</span>
+          <Folder className="h-4 w-4 flex-shrink-0 text-sky-500" />
+          <span className="truncate">
+            {activeProject?.name || "Select Project"}
+          </span>
         </div>
-        <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown
+          className={`h-3.5 w-3.5 text-zinc-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute left-0 right-0 mt-1.5 p-1 bg-white dark:bg-[#111] border border-zinc-200 dark:border-[#222] rounded-xl shadow-xl z-50 animate-in fade-in slide-in-from-top-1 duration-200">
-          <div className="px-2.5 py-1.5 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider select-none">
+        <div className="absolute right-0 left-0 z-50 mt-1.5 animate-in rounded-xl border border-zinc-200 bg-white p-1 shadow-xl duration-200 fade-in slide-in-from-top-1 dark:border-[#222] dark:bg-[#111]">
+          <div className="px-2.5 py-1.5 text-[10px] font-bold tracking-wider text-zinc-400 uppercase select-none dark:text-zinc-500">
             Projects
           </div>
-          
-          <div className="max-h-60 overflow-y-auto space-y-0.5">
+
+          <div className="max-h-60 space-y-0.5 overflow-y-auto">
             {projects.map((project) => (
               <div
                 key={project.id}
                 onClick={() => handleSwitch(project.id)}
-                className={`flex items-center justify-between px-2.5 py-2 rounded-lg text-sm transition-all cursor-pointer group ${
+                className={`group flex cursor-pointer items-center justify-between rounded-lg px-2.5 py-2 text-sm transition-all ${
                   project.id === activeProjectID
-                    ? "bg-sky-500/10 text-sky-600 dark:text-sky-400 font-bold"
-                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-200"
+                    ? "bg-sky-500/10 font-bold text-sky-600 dark:text-sky-400"
+                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
                 }`}
               >
                 <div className="flex items-center gap-2 truncate">
-                  <Folder className={`w-3.5 h-3.5 flex-shrink-0 ${project.id === activeProjectID ? "text-sky-500" : "text-zinc-400 dark:text-zinc-500"}`} />
+                  <Folder
+                    className={`h-3.5 w-3.5 flex-shrink-0 ${project.id === activeProjectID ? "text-sky-500" : "text-zinc-400 dark:text-zinc-500"}`}
+                  />
                   <span className="truncate">{project.name}</span>
                 </div>
-                
+
                 <div className="flex items-center gap-1">
                   {project.id === activeProjectID && (
-                    <Check className="w-3.5 h-3.5 text-sky-500" />
+                    <Check className="h-3.5 w-3.5 text-sky-500" />
                   )}
                   {/* Delete button (hidden for Default Project or if only 1 project left) */}
                   {projects.length > 1 && (
                     <button
                       onClick={(e) => handleDelete(e, project.id, project.name)}
                       disabled={deletingId !== null}
-                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-500 transition-all cursor-pointer"
+                      className="cursor-pointer rounded p-1 text-zinc-400 opacity-0 transition-all group-hover:opacity-100 hover:bg-red-500/10 hover:text-red-500"
                     >
                       {deletingId === project.id ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <Loader2 className="h-3 w-3 animate-spin" />
                       ) : (
-                        <Trash2 className="w-3 h-3" />
+                        <Trash2 className="h-3 w-3" />
                       )}
                     </button>
                   )}
@@ -151,7 +183,7 @@ export default function ProjectSwitcher({
             ))}
           </div>
 
-          <div className="h-px bg-zinc-200 dark:bg-[#222] my-1" />
+          <div className="my-1 h-px bg-zinc-200 dark:bg-[#222]" />
 
           {/* Create Button */}
           <button
@@ -159,9 +191,9 @@ export default function ProjectSwitcher({
               setIsOpen(false)
               setShowCreateDialog(true)
             }}
-            className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-200 font-semibold transition-all cursor-pointer"
+            className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-semibold text-zinc-500 transition-all hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
           >
-            <Plus className="w-4 h-4 text-zinc-400" />
+            <Plus className="h-4 w-4 text-zinc-400" />
             <span>Create New Project</span>
           </button>
         </div>
@@ -169,19 +201,19 @@ export default function ProjectSwitcher({
 
       {/* Create Project Modal Dialog */}
       {showCreateDialog && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#111] border border-zinc-200 dark:border-[#222] rounded-xl max-w-md w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-zinc-200 dark:border-[#222] flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-sky-500" />
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wide">
+        <div className="fixed inset-0 z-50 flex animate-in items-center justify-center bg-black/60 p-4 backdrop-blur-sm duration-200 fade-in">
+          <div className="w-full max-w-md animate-in overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl duration-200 zoom-in-95 dark:border-[#222] dark:bg-[#111]">
+            <div className="flex items-center gap-2 border-b border-zinc-200 p-6 dark:border-[#222]">
+              <Sparkles className="h-5 w-5 text-sky-500" />
+              <h3 className="text-base font-bold tracking-wide text-zinc-900 uppercase dark:text-white">
                 New Project
               </h3>
             </div>
-            
+
             <form onSubmit={handleCreate}>
-              <div className="p-6 space-y-4">
+              <div className="space-y-4 p-6">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+                  <label className="text-xs font-bold tracking-wider text-zinc-400 uppercase dark:text-zinc-500">
                     Project Name
                   </label>
                   <input
@@ -190,30 +222,30 @@ export default function ProjectSwitcher({
                     placeholder="e.g. My E-commerce Shop"
                     value={newProjectName}
                     onChange={(e) => setNewProjectName(e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-[#222] focus:border-sky-500 dark:focus:border-sky-500 text-zinc-800 dark:text-zinc-200 text-sm rounded-lg outline-none transition-colors"
+                    className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 transition-colors outline-none focus:border-sky-500 dark:border-[#222] dark:bg-[#0a0a0a] dark:text-zinc-200 dark:focus:border-sky-500"
                   />
                 </div>
               </div>
 
-              <div className="px-6 py-4 bg-zinc-50 dark:bg-zinc-900/30 border-t border-zinc-200 dark:border-[#222] flex items-center justify-end gap-3">
+              <div className="flex items-center justify-end gap-3 border-t border-zinc-200 bg-zinc-50 px-6 py-4 dark:border-[#222] dark:bg-zinc-900/30">
                 <button
                   type="button"
                   onClick={() => {
                     setShowCreateDialog(false)
                     setNewProjectName("")
                   }}
-                  className="px-4 py-2 border border-zinc-200 dark:border-[#222] hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-sm font-semibold rounded-lg transition-colors cursor-pointer"
+                  className="cursor-pointer rounded-lg border border-zinc-200 px-4 py-2 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-[#222] dark:text-zinc-300 dark:hover:bg-zinc-900"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isCreating || !newProjectName.trim()}
-                  className="px-4 py-2 bg-sky-500 hover:bg-sky-400 disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-sky-500 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-sky-400 disabled:opacity-50"
                 >
                   {isCreating ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                       <span>Creating...</span>
                     </>
                   ) : (
