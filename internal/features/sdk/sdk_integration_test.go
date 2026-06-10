@@ -34,12 +34,11 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 	}
 
 	hashedPassword, _ := auth.HashPassword("password123")
-	apiKey := "paye_test_merchant_api_key_54321"
 	testUser := &models.User{
 		Name:     "Test Merchant",
 		Email:    "merchant@example.com",
 		Password: hashedPassword,
-		ApiKey:   apiKey,
+
 		PublicID: "paye_pub_test_12345",
 	}
 	if err := db.Create(testUser).Error; err != nil {
@@ -47,8 +46,8 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 	}
 
 	testProject := &models.Project{
-		Name:     "Default Project",
-		ApiKey:   testUser.ApiKey,
+		Name: "Default Project",
+
 		PublicID: testUser.PublicID,
 		UserID:   testUser.Base.ID,
 	}
@@ -317,4 +316,3 @@ func TestCreateSDKSubscriptionNoAuthCode(t *testing.T) {
 		t.Errorf("expected status false, got true")
 	}
 }
-

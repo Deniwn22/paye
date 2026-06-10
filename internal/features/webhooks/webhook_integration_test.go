@@ -39,12 +39,10 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 	}
 
 	hashedPassword, _ := auth.HashPassword("password123")
-	apiKey := "paye_test_api_key_12345"
 	testUser := &models.User{
 		Name:     "Test User",
 		Email:    "test@example.com",
 		Password: hashedPassword,
-		ApiKey:   apiKey,
 		PublicID: "paye_pub_test_12345",
 	}
 	if err := db.Create(testUser).Error; err != nil {
@@ -53,7 +51,6 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 
 	testProject := &models.Project{
 		Name:     "Default Project",
-		ApiKey:   testUser.ApiKey,
 		PublicID: testUser.PublicID,
 		UserID:   testUser.Base.ID,
 	}
@@ -62,7 +59,7 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 	}
 
 	jwtSecret := "test_jwt_secret_key_32_bytes_long_xxxx"
-	token, err := auth.GenerateJWT(testUser.Base.ID.String(), testUser.Email, testUser.ApiKey, testUser.PublicID, jwtSecret)
+	token, err := auth.GenerateJWT(testUser.Base.ID.String(), testUser.Email, "", testUser.PublicID, jwtSecret)
 	if err != nil {
 		t.Fatalf("failed to generate JWT: %v", err)
 	}
@@ -317,7 +314,7 @@ func TestWebhookProxyForwarding(t *testing.T) {
 		t.Errorf("Proxy body mismatch: got %s, want %s", string(lastReceivedBody), string(payload))
 	}
 
-	mac := hmac.New(sha256.New, []byte(testUser.ApiKey))
+	mac := hmac.New(sha256.New, []byte(""))
 	mac.Write(payload)
 	expectedPayeSignature := hex.EncodeToString(mac.Sum(nil))
 
@@ -438,4 +435,3 @@ func TestDashboardStatsAndLogs(t *testing.T) {
 		t.Errorf("Expected forwarded status 200, got %v", firstLog["forwarded_status"])
 	}
 }
-

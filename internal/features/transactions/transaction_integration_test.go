@@ -39,7 +39,6 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 		Name:     "Test Merchant",
 		Email:    "merchant@example.com",
 		Password: hashedPassword,
-		ApiKey:   apiKey,
 	}
 	if err := db.Create(testUser).Error; err != nil {
 		t.Fatalf("failed to create test user: %v", err)
@@ -47,7 +46,6 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 
 	testProject := &models.Project{
 		Name:     "Default Project",
-		ApiKey:   testUser.ApiKey,
 		PublicID: "paye_pub_test_12345", // Mock public ID
 		UserID:   testUser.Base.ID,
 	}
