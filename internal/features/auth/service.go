@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/features/projects"
@@ -44,6 +45,7 @@ func NewAuthService(userRepo user.IUserRepo, projectRepo projects.IProjectRepo, 
 }
 
 func (s *AuthService) RegisterUser(req *SignupRequest) (*AuthResponse, error) {
+	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
 	// verify password meets requirements
 	if len(req.Password) < 8 {
 		return nil, errors.New("password must be at least 8 characters")
@@ -110,6 +112,7 @@ func (s *AuthService) RegisterUser(req *SignupRequest) (*AuthResponse, error) {
 }
 
 func (s *AuthService) LoginUser(req *LoginRequest) (*AuthResponse, error) {
+	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
 	// check password length
 	if len(req.Password) < 8 {
 		return nil, errors.New("password must be at least 8 characters")
@@ -117,6 +120,9 @@ func (s *AuthService) LoginUser(req *LoginRequest) (*AuthResponse, error) {
 
 	user, err := s.userRepo.FindByEmail(req.Email)
 	if err != nil {
+		if err.Error() == "record not found" {
+			return nil, errors.New("user not found")
+		}
 		return nil, err
 	}
 	if user == nil {
