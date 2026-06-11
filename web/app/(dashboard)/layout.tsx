@@ -90,12 +90,12 @@ export default async function DashboardLayout({
 
           {/* Footer Merchant Info & Logout */}
           <SidebarFooter className="border-t border-border bg-background p-4">
-            <div className="px-2.5 truncate">
+            <div className="truncate px-2.5">
               <span className="block text-[10px] tracking-wider text-muted-foreground uppercase select-none">
                 Active Merchant
               </span>
               <span
-                className="block truncate font-mono text-xs text-foreground mt-0.5"
+                className="mt-0.5 block truncate font-mono text-xs text-foreground"
                 title={email}
               >
                 {email}
@@ -105,7 +105,7 @@ export default async function DashboardLayout({
             <form action={signOutAction} className="mt-3">
               <button
                 type="submit"
-                className="flex w-full cursor-pointer items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-red-650 dark:text-red-450 hover:bg-red-500/5 dark:hover:bg-red-950/15 transition-all select-none"
+                className="text-red-650 dark:text-red-450 flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium transition-all select-none hover:bg-red-500/5 dark:hover:bg-red-950/15"
               >
                 <LogOut className="h-3.5 w-3.5" />
                 <span>Sign Out</span>
