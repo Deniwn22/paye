@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -243,7 +243,7 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 
 	err = s.repo.CreateLog(ctx, wl)
 	if err != nil {
-		log.Printf("WebhookProxy Warning: Failed to create WebhookLog: %v", err)
+		slog.Warn("WebhookProxy: Failed to create WebhookLog", "error", err)
 	}
 
 	if webhookEvent.AuthorizationCode != "" {
@@ -272,7 +272,7 @@ func (s *WebhookService) forwardWebhook(wl *models.WebhookLog, targetURL string,
 
 	req, err := http.NewRequest("POST", targetURL, bytes.NewBuffer(payload))
 	if err != nil {
-		log.Printf("WebhookProxy Error: Failed to create request to %s: %v", targetURL, err)
+		slog.Error("WebhookProxy: Failed to create request", "target_url", targetURL, "error", err)
 		if wl != nil {
 			wl.ForwardedStatus = 0
 			wl.ErrorMessage = fmt.Sprintf("failed to create request: %v", err)
@@ -286,7 +286,7 @@ func (s *WebhookService) forwardWebhook(wl *models.WebhookLog, targetURL string,
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
-		log.Printf("WebhookProxy Error: Failed to forward payload to %s: %v", targetURL, err)
+		slog.Error("WebhookProxy: Failed to forward payload", "target_url", targetURL, "error", err)
 		if wl != nil {
 			wl.ForwardedStatus = 0
 			wl.ErrorMessage = fmt.Sprintf("network error: %v", err)
@@ -305,9 +305,9 @@ func (s *WebhookService) forwardWebhook(wl *models.WebhookLog, targetURL string,
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		log.Printf("WebhookProxy Warning: Target %s responded with status %s", targetURL, resp.Status)
+		slog.Warn("WebhookProxy: Target responded with warning status", "target_url", targetURL, "status", resp.Status)
 	} else {
-		log.Printf("WebhookProxy Success: Successfully forwarded event to %s with status %s", targetURL, resp.Status)
+		slog.Info("WebhookProxy: Successfully forwarded event", "target_url", targetURL, "status", resp.Status)
 	}
 }
 

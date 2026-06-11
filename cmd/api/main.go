@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"crypto/sha256"
-	"log"
+	"log/slog"
 	"os"
 	"time"
 
@@ -41,19 +41,29 @@ import (
 // @description Type "Bearer <your-jwt-token>" to authenticate.
 
 func main() {
+	// Configure structured logger
+	var logHandler slog.Handler
+	if os.Getenv("LOG_FORMAT") == "json" || os.Getenv("GIN_MODE") == "release" {
+		logHandler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})
+	} else {
+		logHandler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})
+	}
+	slog.SetDefault(slog.New(logHandler))
+
 	// load env, using dotenv
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Note: .env file not found, using environment variables")
+		slog.Info("Note: .env file not found, using environment variables")
 	}
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if jwtSecret == "" {
-		log.Fatal("JWT_SECRET is not set")
+		slog.Error("JWT_SECRET is not set")
+		os.Exit(1)
 	}
 
 	encKey := os.Getenv("ENCRYPTION_KEY")
 	if encKey == "" {
-		log.Println("WARNING: ENCRYPTION_KEY is not set. Falling back to JWT_SECRET for derivation.")
+		slog.Warn("WARNING: ENCRYPTION_KEY is not set. Falling back to JWT_SECRET for derivation.")
 		encKey = jwtSecret
 	}
 	// Derive a 32-byte encryption key using SHA-256 to prevent AES block size errors
@@ -63,7 +73,8 @@ func main() {
 	// load database url
 	db_url := os.Getenv("DATABASE_URL")
 	if db_url == "" {
-		log.Fatal("DATABASE_URL is not set")
+		slog.Error("DATABASE_URL is not set")
+		os.Exit(1)
 	}
 
 	var database *db.DB
@@ -73,17 +84,19 @@ func main() {
 		if dbErr == nil {
 			break
 		}
-		log.Printf("Failed to connect to database (attempt %d/10): %v. Retrying in 2 seconds...", i+1, dbErr)
+		slog.Warn("Failed to connect to database", "attempt", i+1, "error", dbErr)
 		time.Sleep(2 * time.Second)
 	}
 	if dbErr != nil {
-		log.Fatal("failed to connect to database: ", dbErr)
+		slog.Error("failed to connect to database", "error", dbErr)
+		os.Exit(1)
 	}
 	if err = db.Migrate(database); err != nil {
-		log.Fatal("failed to migrate database: ", err)
+		slog.Error("failed to migrate database", "error", err)
+		os.Exit(1)
 	}
 
-	log.Println("database connected and migrated successfully")
+	slog.Info("database connected and migrated successfully")
 
 	// init repos
 	userRepo := user.NewUserRepo(database.DB)
@@ -108,14 +121,15 @@ func main() {
 	// Background worker for processing due subscriptions
 	c := cron.New()
 	_, err = c.AddFunc("@hourly", func() {
-		log.Println("Running cron job: ProcessDueSubscriptions")
+		slog.Info("Running cron job: ProcessDueSubscriptions")
 		err := subscriptionService.ProcessDueSubscriptions(context.Background())
 		if err != nil {
-			log.Printf("Cron error (ProcessDueSubscriptions): %v", err)
+			slog.Error("Cron error (ProcessDueSubscriptions)", "error", err)
 		}
 	})
 	if err != nil {
-		log.Fatalf("failed to add cron job: %v", err)
+		slog.Error("failed to add cron job", "error", err)
+		os.Exit(1)
 	}
 	c.Start()
 
@@ -195,6 +209,7 @@ func main() {
 		port = "8080"
 	}
 	if err := r.Run(":" + port); err != nil {
-		log.Fatal("failed to start server: ", err)
+		slog.Error("failed to start server", "error", err)
+		os.Exit(1)
 	}
 }

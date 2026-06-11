@@ -3,7 +3,7 @@ package subscriptions
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/google/uuid"
@@ -83,10 +83,10 @@ func (s *SubscriptionService) ProcessDueSubscriptions(ctx context.Context) error
 	}
 
 	for _, sub := range dueSubs {
-		log.Printf("Processing subscription %s for %s", sub.SubscriptionCode, sub.CustomerEmail)
+		slog.Info("Processing subscription", "subscription_code", sub.SubscriptionCode, "customer", sub.CustomerEmail)
 		err := s.chargeSubscription(ctx, &sub)
 		if err != nil {
-			log.Printf("Failed to charge subscription %s: %v", sub.SubscriptionCode, err)
+			slog.Error("Failed to charge subscription", "subscription_code", sub.SubscriptionCode, "error", err)
 			sub.Status = "past_due"
 			s.db.WithContext(ctx).Save(&sub)
 			continue
