@@ -9,90 +9,105 @@ export default function LandingNav({ token }: { token: string | null }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <nav className="home-nav relative">
-      <div className="wrap nav-inner">
-        <Link href="/" className="logo select-none">
-          Paye<span>.</span>
+    <nav className="sticky top-0 z-50 border-b border-black/[0.08] bg-white dark:border-white/[0.08] dark:bg-[#141414]">
+      <div className="mx-auto flex h-[60px] max-w-[1100px] items-center justify-between px-8">
+        {/* Logo */}
+        <Link
+          href="/"
+          className="text-[19px] font-bold tracking-[-0.5px] text-[#0A0A0A] select-none dark:text-[#F9FAFB]"
+        >
+          Paye<span className="text-[#2563EB]">.</span>
         </Link>
 
-        {/* Desktop Links */}
-        <ul className="nav-links desktop-nav-links">
-          <li>
-            <a href="#product">Product</a>
-          </li>
-          <li>
-            <a href="#how-it-works">How it works</a>
-          </li>
-          <li>
-            <a href="#business">Business</a>
-          </li>
-          <li>
-            <a href="#developers">Developers</a>
-          </li>
-          <li>
-            <Link href="/docs">Docs</Link>
-          </li>
+        {/* Desktop links */}
+        <ul className="hidden list-none items-center gap-8 md:flex">
+          {[
+            { label: "Product", href: "#product" },
+            { label: "How it works", href: "#how-it-works" },
+            { label: "Business", href: "#business" },
+            { label: "Developers", href: "#developers" },
+            { label: "Docs", href: "/docs" },
+          ].map((l) => (
+            <li key={l.label}>
+              <a
+                href={l.href}
+                className="text-[14px] text-[#6B7280] transition-colors hover:text-[#0A0A0A] dark:text-[#9CA3AF] dark:hover:text-[#F9FAFB]"
+              >
+                {l.label}
+              </a>
+            </li>
+          ))}
         </ul>
 
-        {/* Desktop Actions */}
-        <div className="nav-actions desktop-nav-actions">
+        {/* Desktop actions */}
+        <div className="hidden items-center gap-4 md:flex">
           <ThemeToggle />
           {token ? (
-            <Link href="/dashboard" className="btn-primary">
+            <Link
+              href="/dashboard"
+              className="rounded-[8px] bg-[#2563EB] px-5 py-2 text-[14px] font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+            >
               Dashboard
             </Link>
           ) : (
             <>
-              <Link href="/signin" className="btn-ghost">
+              <Link
+                href="/signin"
+                className="text-[14px] text-[#6B7280] transition-colors hover:text-[#0A0A0A] dark:text-[#9CA3AF] dark:hover:text-[#F9FAFB]"
+              >
                 Sign in
               </Link>
-              <Link href="/signup" className="btn-primary">
+              <Link
+                href="/signup"
+                className="rounded-[8px] bg-[#2563EB] px-5 py-2 text-[14px] font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+              >
                 Get started
               </Link>
             </>
           )}
         </div>
 
-        {/* Mobile Control Section */}
+        {/* Mobile controls */}
         <div className="flex items-center gap-2 md:hidden">
           <ThemeToggle />
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="mobile-menu-btn"
+            className="flex h-[36px] w-[36px] items-center justify-center rounded-[8px] border border-black/[0.08] bg-[#F3F4F6] text-[#0A0A0A] transition-colors hover:bg-white dark:border-white/[0.08] dark:bg-[#1F1F1F] dark:text-[#F9FAFB] dark:hover:bg-[#141414]"
             aria-label="Toggle menu"
           >
-            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Dropdown Menu Overlay */}
+      {/* Mobile dropdown */}
       {isOpen && (
-        <div className="mobile-menu-overlay animate-in slide-in-from-top-2 duration-150">
-          <ul className="mobile-menu-links">
-            <li>
-              <a href="#product" onClick={() => setIsOpen(false)}>Product</a>
-            </li>
-            <li>
-              <a href="#how-it-works" onClick={() => setIsOpen(false)}>How it works</a>
-            </li>
-            <li>
-              <a href="#business" onClick={() => setIsOpen(false)}>Business</a>
-            </li>
-            <li>
-              <a href="#developers" onClick={() => setIsOpen(false)}>Developers</a>
-            </li>
-            <li>
-              <Link href="/docs" onClick={() => setIsOpen(false)}>Docs</Link>
-            </li>
+        <div className="absolute top-[60px] right-0 left-0 z-40 flex animate-in flex-col gap-5 border-b border-black/[0.08] bg-white px-8 py-6 duration-150 slide-in-from-top-2 md:hidden dark:border-white/[0.08] dark:bg-[#141414]">
+          <ul className="flex list-none flex-col gap-4">
+            {[
+              { label: "Product", href: "#product" },
+              { label: "How it works", href: "#how-it-works" },
+              { label: "Business", href: "#business" },
+              { label: "Developers", href: "#developers" },
+              { label: "Docs", href: "/docs" },
+            ].map((l) => (
+              <li key={l.label}>
+                <a
+                  href={l.href}
+                  onClick={() => setIsOpen(false)}
+                  className="text-[15px] font-medium text-[#6B7280] transition-colors hover:text-[#0A0A0A] dark:text-[#9CA3AF] dark:hover:text-[#F9FAFB]"
+                >
+                  {l.label}
+                </a>
+              </li>
+            ))}
           </ul>
-
-          <div className="mobile-menu-actions">
+          <div className="flex flex-col gap-3 border-t border-black/[0.08] pt-5 dark:border-white/[0.08]">
             {token ? (
               <Link
                 href="/dashboard"
-                className="btn-primary text-center w-full"
                 onClick={() => setIsOpen(false)}
+                className="rounded-[8px] bg-[#2563EB] px-5 py-2.5 text-center text-[14px] font-medium text-white transition-colors hover:bg-[#1D4ED8]"
               >
                 Dashboard
               </Link>
@@ -100,15 +115,15 @@ export default function LandingNav({ token }: { token: string | null }) {
               <>
                 <Link
                   href="/signin"
-                  className="btn-ghost text-center w-full py-2"
                   onClick={() => setIsOpen(false)}
+                  className="py-2.5 text-center text-[14px] font-medium text-[#6B7280] transition-colors hover:text-[#0A0A0A] dark:text-[#9CA3AF] dark:hover:text-[#F9FAFB]"
                 >
                   Sign in
                 </Link>
                 <Link
                   href="/signup"
-                  className="btn-primary text-center w-full"
                   onClick={() => setIsOpen(false)}
+                  className="rounded-[8px] bg-[#2563EB] px-5 py-2.5 text-center text-[14px] font-medium text-white transition-colors hover:bg-[#1D4ED8]"
                 >
                   Get started
                 </Link>

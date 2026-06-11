@@ -17,6 +17,7 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
+  Sparkles,
 } from "lucide-react"
 import { PAYE_API_URL } from "@/lib/config"
 
@@ -233,6 +234,7 @@ export default function DocsPage() {
   const sections = [
     { id: "intro", title: "Overview & Architecture" },
     { id: "ways-to-use", title: "Ways to use Paye" },
+    { id: "ai-prompt", title: "AI-Assisted Integrations" },
     { id: "authentication", title: "Authentication & Projects" },
     { id: "providers", title: "Configuring Providers" },
     { id: "sdk-one-time", title: "One-Time Checkout" },
@@ -304,6 +306,7 @@ export default function DocsPage() {
               {[
                 { id: "intro", label: "Overview & Architecture" },
                 { id: "ways-to-use", label: "Ways to use Paye" },
+                { id: "ai-prompt", label: "AI-Assisted Integrations" },
                 { id: "authentication", label: "Authentication & Projects" },
                 { id: "providers", label: "Configuring Providers" },
               ].map((item) => (
@@ -463,6 +466,44 @@ export default function DocsPage() {
                   providers once in the dashboard, and from that point on, you
                   interact only with the Paye API/SDK. If you switch from Paystack
                   to Flutterwave tomorrow, your code stays completely untouched.
+                </div>
+              </section>
+            )}
+
+            {/* Section: AI-Assisted Integrations */}
+            {activeSection === "ai-prompt" && (
+              <section className="space-y-5 animate-in fade-in duration-200">
+                <div className="flex items-center gap-2 border-b border-border pb-2">
+                  <Sparkles className="h-5 w-5 text-[#2563eb] dark:text-[#3b82f6]" />
+                  <h2 className="text-lg font-bold text-foreground">
+                    AI-Assisted Integrations (Paye AI)
+                  </h2>
+                </div>
+                <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
+                  Paye is designed to be **AI Copilot Friendly**. Instead of spending hours reading API specs or writing boilerplate code, you can use modern coding assistants (like Gemini, Claude, ChatGPT, or Cursor) to build your checkout button and server-side verification logic in seconds.
+                </p>
+
+                <div className="space-y-4 text-xs mt-4">
+                  <div className="space-y-2 rounded-lg border-[0.5px] border-border bg-secondary p-4">
+                    <strong className="block text-foreground text-sm font-bold">
+                      How it works:
+                    </strong>
+                    <ul className="list-disc pl-5 text-zinc-600 dark:text-zinc-450 space-y-2 leading-relaxed">
+                      <li>
+                        <strong>Dynamic Credentials:</strong> When you are logged into your dashboard, navigate to the <strong>Paye AI</strong> panel in the sidebar.
+                      </li>
+                      <li>
+                        <strong>Customized Prompts:</strong> Customize your transaction parameters (amount, email, currency) and select a prompt template (Full Stack, Frontend-only, or Backend-only).
+                      </li>
+                      <li>
+                        <strong>Instant Code:</strong> Copy the system prompt and paste it into your AI coding assistant. The AI will receive the exact instructions and your active credentials, outputting fully working code immediately.
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="rounded-lg border-l-4 border-[#2563eb] bg-[#eff6ff]/30 dark:bg-[#1e3a5f]/10 p-4 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
+                    <strong>Tip:</strong> Always use the test credentials provided in the Paye AI dashboard. Never expose your live secret API keys in public forums or unsecure client-side code.
+                  </div>
                 </div>
               </section>
             )}
