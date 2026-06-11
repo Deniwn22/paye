@@ -33,7 +33,12 @@ func (h *AuthHandler) SignupHandler(c *gin.Context) {
 
 	resp, err := h.authService.RegisterUser(&req)
 	if err != nil {
-		c.JSON(500, api.Error(err.Error()))
+		errStr := err.Error()
+		if errStr == "email already exists" || errStr == "password must be at least 8 characters" {
+			c.JSON(400, api.Error(errStr))
+		} else {
+			c.JSON(500, api.Error("An internal error occurred. Please try again later."))
+		}
 		return
 	}
 
@@ -60,7 +65,12 @@ func (h *AuthHandler) LoginHandler(c *gin.Context) {
 
 	resp, err := h.authService.LoginUser(&req)
 	if err != nil {
-		c.JSON(500, api.Error(err.Error()))
+		errStr := err.Error()
+		if errStr == "user not found" || errStr == "invalid password" || errStr == "password must be at least 8 characters" {
+			c.JSON(401, api.Error("Invalid email or password"))
+		} else {
+			c.JSON(500, api.Error("An internal error occurred. Please try again later."))
+		}
 		return
 	}
 

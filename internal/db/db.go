@@ -25,6 +25,18 @@ func Connect(dsn string) (*DB, error) {
 }
 
 func Migrate(db *DB) error {
+	// Clean up legacy columns on users table if they exist to prevent not-null constraint violations
+	migrator := db.DB.Migrator()
+	if migrator.HasColumn(&models.User{}, "api_key") {
+		_ = migrator.DropColumn(&models.User{}, "api_key")
+	}
+	if migrator.HasColumn(&models.User{}, "test_api_key") {
+		_ = migrator.DropColumn(&models.User{}, "test_api_key")
+	}
+	if migrator.HasColumn(&models.User{}, "test_public_id") {
+		_ = migrator.DropColumn(&models.User{}, "test_public_id")
+	}
+
 	return db.DB.AutoMigrate(
 		&models.User{},
 		&models.Project{},
