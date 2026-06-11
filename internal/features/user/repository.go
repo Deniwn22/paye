@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"github.com/ttomsin/paye/internal/models"
 	"gorm.io/gorm"
 )
@@ -10,6 +11,7 @@ type IUserRepo interface {
 	FindByEmail(email string) (*models.User, error)
 	FindByID(id string) (*models.User, error)
 	FindByPublicID(publicID string) (*models.User, error)
+	CountUsers(ctx context.Context) (int64, error)
 }
 
 type UserRepo struct {
@@ -41,4 +43,11 @@ func (r *UserRepo) FindByID(id string) (*models.User, error) {
 func (r *UserRepo) FindByPublicID(publicID string) (*models.User, error) {
 	var user models.User
 	return &user, r.db.Where("public_id = ?", publicID).First(&user).Error
+}
+
+// CountUsers counts all users in the database
+func (r *UserRepo) CountUsers(ctx context.Context) (int64, error) {
+	var count int64
+	err := r.db.WithContext(ctx).Model(&models.User{}).Count(&count).Error
+	return count, err
 }

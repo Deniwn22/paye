@@ -166,6 +166,21 @@ func main() {
 		})
 	})
 	
+	// user count (for public landing page stats)
+	v1.GET("/users/count", func(c *gin.Context) {
+		count, err := userRepo.CountUsers(c.Request.Context())
+		if err != nil {
+			c.JSON(500, gin.H{"status": false, "message": "Failed to retrieve user count"})
+			return
+		}
+		c.JSON(200, gin.H{
+			"status": true,
+			"data": gin.H{
+				"count": count,
+			},
+		})
+	})
+	
 	// Auth Routes (Public)
 	auth.RegisterRoutes(v1, authHandler)
 

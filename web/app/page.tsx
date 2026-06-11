@@ -1,9 +1,23 @@
 import Link from "next/link"
 import { getToken } from "@/lib/cookies"
 import LandingNav from "@/components/landing-nav"
+import { BACKEND_URL } from "@/lib/config"
 
 export default async function Page() {
   const token = await getToken()
+
+  let userCount = 0
+  try {
+    const res = await fetch(`${BACKEND_URL}/users/count`, {
+      next: { revalidate: 30 }, // cache for 30 seconds
+    })
+    const json = await res.json()
+    if (res.ok && json.status) {
+      userCount = json.data.count
+    }
+  } catch (err) {
+    // Fail silently
+  }
 
   return (
     <div className="min-h-screen bg-white font-sans text-[#0A0A0A] antialiased dark:bg-[#0A0A0A] dark:text-[#F9FAFB]">
@@ -59,14 +73,14 @@ export default async function Page() {
                     Single integration
                   </div>
                 </div>
-                {/*<div>
+                <div>
                   <div className="text-[26px] font-bold tracking-[-1px]">
-                    54<span className="text-[#2563EB]"> countries</span>
+                    {userCount}<span className="text-[#2563EB]"> merchants</span>
                   </div>
                   <div className="mt-0.5 text-[12px] text-[#9CA3AF]">
-                    African market reach
+                    Active on platform
                   </div>
-                </div>*/}
+                </div>
               </div>
             </div>
 
