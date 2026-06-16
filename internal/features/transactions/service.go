@@ -10,6 +10,7 @@ import (
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/providers/flutterwave"
+	"github.com/ttomsin/paye/internal/features/providers/nomba"
 	"github.com/ttomsin/paye/internal/features/providers/paystack"
 	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
@@ -77,6 +78,17 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 			fClient.BaseURL = s.paystackBaseURL
 		}
 		providerClient = fClient
+	case "nomba":
+		decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
+		if !isLive {
+			decryptedPublic, _ = crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
+		}
+		accountID := pc.Metadata["account_id"]
+		nClient := nomba.New(decryptedPublic, decryptedSecret, accountID)
+		if s.paystackBaseURL != "" {
+			nClient.SetBaseURL(s.paystackBaseURL)
+		}
+		providerClient = nClient
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", req.Provider)
 	}
@@ -159,6 +171,17 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 			fClient.BaseURL = s.paystackBaseURL
 		}
 		providerClient = fClient
+	case "nomba":
+		decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
+		if !tx.IsLive {
+			decryptedPublic, _ = crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
+		}
+		accountID := pc.Metadata["account_id"]
+		nClient := nomba.New(decryptedPublic, decryptedSecret, accountID)
+		if s.paystackBaseURL != "" {
+			nClient.SetBaseURL(s.paystackBaseURL)
+		}
+		providerClient = nClient
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", tx.Provider)
 	}

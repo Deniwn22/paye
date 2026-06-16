@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	payeDb "github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/features/paystack"
 	"github.com/ttomsin/paye/internal/features/providers"
@@ -21,16 +22,7 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *models.Project, *paystack.Pa
 		t.Fatalf("failed to open database: %v", err)
 	}
 
-	err = db.AutoMigrate(
-		&models.Project{},
-		&models.ProviderConfig{},
-		&models.Transaction{},
-		&models.Refund{},
-		&models.TransferRecipient{},
-		&models.Transfer{},
-		&models.Plan{},
-		&models.Subscription{},
-	)
+	err = payeDb.RunMigrations(db)
 	if err != nil {
 		t.Fatalf("failed to migrate database: %v", err)
 	}

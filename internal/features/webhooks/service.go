@@ -18,6 +18,7 @@ import (
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/providers/flutterwave"
+	"github.com/ttomsin/paye/internal/features/providers/nomba"
 	"github.com/ttomsin/paye/internal/features/providers/paystack"
 	"github.com/ttomsin/paye/internal/features/user"
 	"github.com/ttomsin/paye/internal/models"
@@ -132,6 +133,10 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 				providerClient = paystack.New(decryptedSecret)
 			case "flutterwave":
 				providerClient = flutterwave.New(decryptedSecret)
+			case "nomba":
+				decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
+				accountID := pc.Metadata["account_id"]
+				providerClient = nomba.New(decryptedPublic, decryptedSecret, accountID)
 			}
 			if providerClient != nil {
 				webhookEvent, verifyErr = providerClient.HandleWebhook(signature, payload)
@@ -139,6 +144,7 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 					isLive = true
 				}
 			}
+
 		}
 	}
 
@@ -157,6 +163,10 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 					providerClient = paystack.New(decryptedSecret)
 				case "flutterwave":
 					providerClient = flutterwave.New(decryptedSecret)
+				case "nomba":
+					decryptedPublic, _ := crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
+					accountID := pc.Metadata["account_id"]
+					providerClient = nomba.New(decryptedPublic, decryptedSecret, accountID)
 				}
 				if providerClient != nil {
 					webhookEvent, verifyErr = providerClient.HandleWebhook(signature, payload)
@@ -164,6 +174,7 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 						isLive = false
 					}
 				}
+
 			}
 		}
 	}

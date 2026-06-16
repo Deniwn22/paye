@@ -17,6 +17,8 @@ type ProviderConfig struct {
 	// Foreign keys
 	ProjectID uuid.UUID // (foreign key -> Project)
 	Project   *Project  `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
+
+	Metadata map[string]string `gorm:"serializer:json"`
 }
 
 // GetKeysForMode returns the encrypted secret and public keys based on environment mode

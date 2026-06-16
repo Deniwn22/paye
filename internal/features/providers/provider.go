@@ -2,19 +2,20 @@
 package providers
 
 type TransactionRequest struct {
-	Amount    float64
-	Email     string
-	Currency  string
-	Reference string
-	Metadata  map[string]any
+	Amount      float64
+	Email       string
+	Currency    string
+	Reference   string
+	CallbackURL string
+	Metadata    map[string]any
 }
 
 type TransactionResponse struct {
-	Status     bool
-	Message    string
-	Reference  string
-	AuthURL    string
-	AccessCode string
+	Status            bool
+	Message           string
+	Reference         string
+	AuthURL           string
+	AccessCode        string
 	Provider          string
 	Amount            float64
 	Currency          string

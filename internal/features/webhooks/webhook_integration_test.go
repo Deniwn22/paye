@@ -5,6 +5,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"crypto/sha512"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"io"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	payeDb "github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/features/auth"
@@ -33,7 +35,7 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 		t.Fatalf("failed to open database: %v", err)
 	}
 
-	err = db.AutoMigrate(&models.User{}, &models.Project{}, &models.ProviderConfig{}, &models.WebhookConfig{}, &models.WebhookLog{})
+	err = payeDb.RunMigrations(db)
 	if err != nil {
 		t.Fatalf("failed to migrate database: %v", err)
 	}
@@ -438,3 +440,121 @@ func TestDashboardStatsAndLogs(t *testing.T) {
 		t.Errorf("Expected forwarded status 200, got %v", firstLog["forwarded_status"])
 	}
 }
+
+func TestNombaWebhookProxyForwarding(t *testing.T) {
+	db, r, token, _, testProject := setupTestEnvironment(t)
+	encryptionKey := "12345678901234567890123456789012"
+
+	// Create active ProviderConfig for Nomba
+	rawSecretKey := "client_secret_val_123"
+	rawPublicKey := "client_id_val_123"
+	encSecretKey, _ := crypto.Encrypt(rawSecretKey, encryptionKey)
+	encPublicKey, _ := crypto.Encrypt(rawPublicKey, encryptionKey)
+
+	provConfig := &models.ProviderConfig{
+		Label:         "nomba-main",
+		ProviderName:  "nomba",
+		LiveSecretKey: encSecretKey,
+		LivePublicKey: encPublicKey,
+		IsActive:      true,
+		ProjectID:     testProject.Base.ID,
+		Metadata:      map[string]string{"account_id": "account_id_val_123"},
+	}
+	db.Create(provConfig)
+
+	// Setup mock target server to verify proxy forward call
+	receivedChan := make(chan struct{}, 1)
+	var lastReceivedBody []byte
+	var lastReceivedSignature string
+
+	mockTargetServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		body, _ := io.ReadAll(req.Body)
+		lastReceivedBody = body
+		lastReceivedSignature = req.Header.Get("X-Paye-Signature")
+		w.WriteHeader(http.StatusOK)
+		receivedChan <- struct{}{}
+	}))
+	defer mockTargetServer.Close()
+
+	// Create WebhookConfig mapping to the mock target server URL
+	wReq := dto.WebhookConfigRequest{
+		ProviderName:    "nomba",
+		TargetURL:       mockTargetServer.URL,
+		PayeWebhookSlug: "nomba-slug-123",
+	}
+	body, _ := json.Marshal(wReq)
+	req := httptest.NewRequest("POST", "/api/v1/webhooks/configs", bytes.NewBuffer(body))
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Failed to register webhook config: %s", w.Body.String())
+	}
+
+	// Send Nomba Webhook payload to the receiver endpoint
+	payload := []byte(`{
+		"event_type": "TRANSACTION_SUCCESS",
+		"requestId": "req_12345",
+		"data": {
+			"merchant": {
+				"walletId": "wallet_123",
+				"walletBalance": "50000.00",
+				"userId": "user_123"
+			},
+			"transaction": {
+				"transactionId": "tx_ref_abc",
+				"type": "deposit",
+				"transactionAmount": 1000.00,
+				"fee": 15.0,
+				"time": "2026-06-16T09:00:00Z",
+				"responseCode": "00"
+			}
+		}
+	}`)
+
+	// Hashing payload format: EventType:RequestID:UserID:WalletID:TransactionID:Type:Time:ResponseCode:Timestamp
+	hashingPayload := "TRANSACTION_SUCCESS:req_12345:user_123:wallet_123:tx_ref_abc:deposit:2026-06-16T09:00:00Z:00:1718524800"
+	hash := hmac.New(sha256.New, []byte(rawSecretKey))
+	hash.Write([]byte(hashingPayload))
+	nombaSignature := base64.StdEncoding.EncodeToString(hash.Sum(nil))
+
+	req = httptest.NewRequest("POST", "/api/v1/webhooks/receive/nomba-slug-123", bytes.NewBuffer(payload))
+	req.Header.Set("nomba-signature", nombaSignature)
+	req.Header.Set("nomba-timestamp", "1718524800")
+	req.Header.Set("Content-Type", "application/json")
+	w = httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected receiver endpoint status 200, got %d. Body: %s", w.Code, w.Body.String())
+	}
+
+	// Wait for background proxy forward to complete
+	select {
+	case <-receivedChan:
+		// Request received by target server
+	case <-time.After(2 * time.Second):
+		t.Fatalf("Timeout waiting for mock target server to receive the webhook")
+	}
+
+	// Verify payload and X-Paye-Signature header
+	var receivedMap, originalMap map[string]any
+	json.Unmarshal(lastReceivedBody, &receivedMap)
+	json.Unmarshal(payload, &originalMap)
+
+	// Compare event types
+	if receivedMap["event_type"] != originalMap["event_type"] {
+		t.Errorf("Proxy body mismatch: got %v, want %v", receivedMap["event_type"], originalMap["event_type"])
+	}
+
+	mac := hmac.New(sha256.New, []byte("paye_live_api_key_12345"))
+	mac.Write(lastReceivedBody)
+	expectedPayeSignature := hex.EncodeToString(mac.Sum(nil))
+
+	if lastReceivedSignature != expectedPayeSignature {
+		t.Errorf("Proxy signature header mismatch: got %s, want %s", lastReceivedSignature, expectedPayeSignature)
+	}
+}
+

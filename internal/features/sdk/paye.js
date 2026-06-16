@@ -2,7 +2,7 @@
   var _paymentInProgress = false;
   var config = {
     merchantId: "{{merchantId}}",
-    providers: JSON.parse('{{providers}}'),
+    providers: JSON.parse("{{providers}}"),
     publicKey: "{{publicKey}}",
     papiEndpoint: "{{papiEndpoint}}",
   };
@@ -301,7 +301,10 @@
 
               FlutterwaveCheckout({
                 public_key: config.publicKey,
-                tx_ref: txData.metadata && txData.metadata.tx_ref ? txData.metadata.tx_ref : txData.reference,
+                tx_ref:
+                  txData.metadata && txData.metadata.tx_ref
+                    ? txData.metadata.tx_ref
+                    : txData.reference,
                 amount: options.amount,
                 currency: options.currency || "NGN",
                 customer: { email: options.email },
@@ -366,6 +369,15 @@
                 },
               });
             });
+          } else if (provider === "nomba") {
+            // Nomba is redirect-based — no inline SDK
+            // Store reference before leaving the page
+            try {
+              sessionStorage.setItem("paye_nomba_ref", txData.reference);
+            } catch (e) {}
+
+            // Redirect customer to Nomba hosted checkout
+            window.location.href = txData.auth_url;
           } else {
             throw new Error(
               "Unsupported payment gateway provider: " + provider,
@@ -381,6 +393,35 @@
         });
     },
   };
+
+  // Auto-verify when Nomba redirects customer back to callbackUrl
+  (function checkNombaReturn() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var orderReference = urlParams.get("orderReference");
+    var storedRef = "";
+    try {
+      storedRef = sessionStorage.getItem("paye_nomba_ref") || "";
+    } catch (e) {}
+
+    if (orderReference && storedRef && orderReference === storedRef) {
+      try {
+        sessionStorage.removeItem("paye_nomba_ref");
+      } catch (e) {}
+
+      verifyTransaction(orderReference, {
+        onSuccess: function (ref, details) {
+          window.dispatchEvent(
+            new CustomEvent("paye:success", { detail: details }),
+          );
+        },
+        onFailure: function (err, details) {
+          window.dispatchEvent(
+            new CustomEvent("paye:failure", { detail: details }),
+          );
+        },
+      });
+    }
+  })();
 
   function injectButtons() {
     var targets = document.querySelectorAll("[data-paye-checkout]");
@@ -580,6 +621,7 @@
           }
         });
       });
+
       if (shouldScan) injectButtons();
     });
     observer.observe(document.body, { childList: true, subtree: true });

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	payeDb "github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/features/auth"
 	"github.com/ttomsin/paye/internal/features/projects"
 	"github.com/ttomsin/paye/internal/features/user"
@@ -22,7 +23,7 @@ func setupAuthTestEnv(t *testing.T) (*gorm.DB, *gin.Engine) {
 		t.Fatalf("failed to open database: %v", err)
 	}
 
-	err = db.AutoMigrate(&models.User{}, &models.Project{})
+	err = payeDb.RunMigrations(db)
 	if err != nil {
 		t.Fatalf("failed to migrate database: %v", err)
 	}

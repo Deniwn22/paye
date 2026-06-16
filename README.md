@@ -23,6 +23,21 @@ docker-compose up -d
 
 Ensure the Go backend is running (defaults to `http://localhost:8080`).
 
+#### Database Migrations
+
+The Go backend programmatically applies database migrations automatically on startup using embedded SQL files.
+
+If you want to manage migrations manually using the `goose` CLI tool (which you have installed), you can run:
+
+```bash
+# Run PostgreSQL migrations
+goose -dir internal/db/migrations/postgres postgres "postgres://postgres:postgres@localhost:5432/paye?sslmode=disable" up
+
+# Check migration status
+goose -dir internal/db/migrations/postgres postgres "postgres://postgres:postgres@localhost:5432/paye?sslmode=disable" status
+```
+
+
 ### 2. Configure Providers
 
 1. Navigate to the merchant dashboard (configured under the `web` workspace, running at `http://localhost:3000`).

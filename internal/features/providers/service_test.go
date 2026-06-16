@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	payeDb "github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/models"
 	"gorm.io/driver/sqlite"
@@ -77,12 +78,7 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *providers.ProviderRepo, *pro
 		t.Fatalf("failed to open database: %v", err)
 	}
 
-	err = db.AutoMigrate(
-		&models.Project{},
-		&models.ProviderConfig{},
-		&models.TransferRecipient{},
-		&models.Transfer{},
-	)
+	err = payeDb.RunMigrations(db)
 	if err != nil {
 		t.Fatalf("failed to migrate database: %v", err)
 	}

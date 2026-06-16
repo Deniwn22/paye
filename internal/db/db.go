@@ -1,10 +1,17 @@
 package db
 
 import (
-	"github.com/ttomsin/paye/internal/models"
+	"embed"
+	"fmt"
+	"log/slog"
+
+	"github.com/pressly/goose/v3"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+//go:embed migrations/**/*.sql
+var embedMigrations embed.FS
 
 type DB struct {
 	*gorm.DB
@@ -25,29 +32,36 @@ func Connect(dsn string) (*DB, error) {
 }
 
 func Migrate(db *DB) error {
-	// Clean up legacy columns on users table if they exist to prevent not-null constraint violations
-	migrator := db.DB.Migrator()
-	if migrator.HasColumn(&models.User{}, "api_key") {
-		_ = migrator.DropColumn(&models.User{}, "api_key")
-	}
-	if migrator.HasColumn(&models.User{}, "test_api_key") {
-		_ = migrator.DropColumn(&models.User{}, "test_api_key")
-	}
-	if migrator.HasColumn(&models.User{}, "test_public_id") {
-		_ = migrator.DropColumn(&models.User{}, "test_public_id")
+	return RunMigrations(db.DB)
+}
+
+func RunMigrations(gormDB *gorm.DB) error {
+	sqlDB, err := gormDB.DB()
+	if err != nil {
+		return fmt.Errorf("failed to get sql.DB from gorm: %w", err)
 	}
 
-	return db.DB.AutoMigrate(
-		&models.User{},
-		&models.Project{},
-		&models.ProviderConfig{},
-		&models.WebhookConfig{},
-		&models.WebhookLog{},
-		&models.Transaction{},
-		&models.Refund{},
-		&models.TransferRecipient{},
-		&models.Transfer{},
-		&models.Plan{},
-		&models.Subscription{},
-	)
+	goose.SetBaseFS(embedMigrations)
+
+	dialect := "postgres"
+	migrationDir := "migrations/postgres"
+
+	driverName := gormDB.Dialector.Name()
+	if driverName == "sqlite" || driverName == "sqlite3" {
+		dialect = "sqlite3"
+		migrationDir = "migrations/sqlite"
+	}
+
+	goose.SetLogger(goose.NopLogger())
+
+	if err := goose.SetDialect(dialect); err != nil {
+		return fmt.Errorf("failed to set goose dialect: %w", err)
+	}
+
+	slog.Info("Running database migrations using goose", "dialect", dialect, "dir", migrationDir)
+	if err := goose.Up(sqlDB, migrationDir); err != nil {
+		return fmt.Errorf("goose up failed: %w", err)
+	}
+
+	return nil
 }
