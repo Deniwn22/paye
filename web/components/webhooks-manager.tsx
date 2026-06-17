@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useTransition } from "react"
-import { addWebhookAction, deleteWebhookAction } from "@/app/actions"
+import { useState, useTransition, useEffect } from "react"
+import { addWebhookAction, deleteWebhookAction, getPaymentProvidersAction } from "@/app/actions"
 import { Plus, Link2, Copy, Check, Trash2, ArrowRight, ShieldCheck, AlertCircle } from "lucide-react"
 import { BACKEND_URL } from "@/lib/config"
 import {
@@ -40,6 +40,22 @@ export default function WebhooksManager({
   const [slug, setSlug] = useState("")
 
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null)
+
+  const [supportedProviders, setSupportedProviders] = useState<{ id: string; name: string; label: string; is_supported: boolean }[]>([
+    { id: "paystack", name: "paystack", label: "Paystack", is_supported: true },
+    { id: "flutterwave", name: "flutterwave", label: "Flutterwave", is_supported: true },
+    { id: "nomba", name: "nomba", label: "Nomba", is_supported: true },
+  ])
+
+  useEffect(() => {
+    async function loadProviders() {
+      const res = await getPaymentProvidersAction()
+      if (res.success && res.data) {
+        setSupportedProviders(res.data)
+      }
+    }
+    loadProviders()
+  }, [])
 
   const handleCopyUrl = (slugValue: string) => {
     const fullUrl = `${BACKEND_URL}/webhooks/receive/${slugValue}`
@@ -146,8 +162,11 @@ export default function WebhooksManager({
                         onChange={(e) => setProviderName(e.target.value)}
                         className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-semibold cursor-pointer transition-colors"
                       >
-                        <option value="paystack">Paystack</option>
-                        <option value="flutterwave">Flutterwave</option>
+                        {supportedProviders.map((p) => (
+                          <option key={p.id} value={p.name} disabled={!p.is_supported}>
+                            {p.label}{!p.is_supported ? " (Coming Soon)" : ""}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     <div className="space-y-1.5">

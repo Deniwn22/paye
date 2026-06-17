@@ -1,0 +1,92 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+  .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--color-text-primary); font-family: var(--font-sans); }
+  .logo span { color: #2563EB; }
+  nav { border-bottom: 0.5px solid var(--color-border-tertiary); padding: 1rem 0; background: var(--color-background-primary); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { font-size: 14px; color: var(--color-text-secondary); text-decoration: none; font-family: var(--font-sans); }
+  .nav-ctas { display: flex; align-items: center; gap: 1rem; }
+  .btn-ghost { font-size: 14px; color: var(--color-text-secondary); background: none; border: none; cursor: pointer; font-family: var(--font-sans); }
+  .btn-primary { font-size: 14px; font-weight: 500; color: #fff; background: #2563EB; border: none; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-family: var(--font-sans); }
+
+  .hero { position: relative; padding: 6rem 0 5rem; overflow: hidden; background: var(--color-background-primary); }
+  .hero-content { position: relative; z-index: 2; max-width: 600px; }
+  .hero h1 { font-size: 58px; font-weight: 700; line-height: 1.08; letter-spacing: -2px; margin-bottom: 1.5rem; color: var(--color-text-primary); font-family: var(--font-sans); }
+  .hero h1 em { font-style: normal; color: #2563EB; }
+  .hero p { font-size: 18px; color: var(--color-text-secondary); max-width: 440px; line-height: 1.6; margin-bottom: 2.5rem; font-family: var(--font-sans); }
+  .hero-actions { display: flex; align-items: center; gap: 1rem; }
+  .btn-lg { font-size: 15px; font-weight: 500; color: #fff; background: #2563EB; border: none; padding: 13px 28px; border-radius: 10px; cursor: pointer; font-family: var(--font-sans); }
+  .btn-lg-ghost { font-size: 15px; color: var(--color-text-secondary); background: none; border: 0.5px solid var(--color-border-tertiary); padding: 13px 28px; border-radius: 10px; cursor: pointer; font-family: var(--font-sans); }
+
+  .africa-wrap { position: absolute; right: -40px; top: 50%; transform: translateY(-50%); width: 480px; height: 480px; z-index: 1; opacity: 0.07; }
+
+  .stat-row { display: flex; gap: 3rem; margin-top: 4rem; padding-top: 3rem; border-top: 0.5px solid var(--color-border-tertiary); }
+  .stat { }
+  .stat-num { font-size: 28px; font-weight: 700; letter-spacing: -1px; color: var(--color-text-primary); font-family: var(--font-sans); }
+  .stat-num span { color: #2563EB; }
+  .stat-label { font-size: 13px; color: var(--color-text-tertiary); margin-top: 2px; font-family: var(--font-sans); }
+</style>
+
+<h2 class="sr-only">Paye.africa hero section reference</h2>
+
+<nav>
+  <div class="wrap nav-inner">
+    <div class="logo">Paye<span>.</span></div>
+    <ul class="nav-links">
+      <li><a href="#">Product</a></li>
+      <li><a href="#">Developers</a></li>
+      <li><a href="#">Pricing</a></li>
+      <li><a href="#">Docs</a></li>
+    </ul>
+    <div class="nav-ctas">
+      <button class="btn-ghost">Sign in</button>
+      <button class="btn-primary">Get started</button>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="wrap" style="position:relative;">
+
+    <svg class="africa-wrap" viewBox="0 0 400 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="
+        M160,20 L200,18 L230,25 L255,20 L270,30 L275,50 L265,65 L270,80
+        L280,95 L285,115 L278,130 L290,145 L295,165 L288,185 L295,205
+        L300,230 L295,255 L285,275 L278,295 L265,315 L250,335 L235,355
+        L220,370 L205,385 L195,400 L185,415 L175,430 L168,445 L162,455
+        L158,445 L152,430 L145,415 L135,400 L122,385 L108,368 L95,348
+        L82,325 L70,302 L62,278 L58,252 L55,225 L52,198 L55,172 L60,148
+        L58,125 L65,108 L72,92 L80,78 L85,62 L92,48 L105,38 L120,28 L140,22 L160,20Z
+      " fill="#2563EB"/>
+      <path d="M195,400 L185,415 L175,430 L168,445 L162,455 L158,445 L152,430 L145,415 L135,400" stroke="#2563EB" stroke-width="1" fill="none"/>
+    </svg>
+
+    <div class="hero-content">
+      <h1>One API.<br>Every African<br>payment <em>provider.</em></h1>
+      <p>Stop rewriting payment logic for every gateway. Integrate Paystack, Flutterwave, and more from a single endpoint — and route dynamically.</p>
+      <div class="hero-actions">
+        <button class="btn-lg">Start building free</button>
+        <button class="btn-lg-ghost">Read the docs →</button>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-num">2<span>+</span></div>
+          <div class="stat-label">Payment providers</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">1<span> API</span></div>
+          <div class="stat-label">Single integration</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">54<span> countries</span></div>
+          <div class="stat-label">African market reach</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

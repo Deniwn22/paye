@@ -195,6 +195,32 @@ const docTemplate = `{
                 }
             }
         },
+        "/payment-providers": {
+            "get": {
+                "description": "Retrieve a list of all payment providers from the system database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "List supported payment providers",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerPaymentProviderListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/providers": {
             "get": {
                 "security": [
@@ -446,6 +472,47 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions": {
+            "get": {
+                "description": "Retrieve a list of payment transactions for the authenticated merchant.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transactions"
+                ],
+                "summary": "List payment transactions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerTransactionListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/api.SwaggerSimpleResponse"
                         }
@@ -784,6 +851,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/webhooks/logs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve webhooks logs for the authenticated project scoped by active mode",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "List webhook logs",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Pagination limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/webhooks/receive/{slug}": {
             "post": {
                 "description": "Public proxy endpoint that receives webhooks from providers (e.g. Paystack) and forwards them to target URL",
@@ -855,6 +973,23 @@ const docTemplate = `{
                 }
             }
         },
+        "api.SwaggerPaymentProviderListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PaymentProviderResponse"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
         "api.SwaggerProviderConfigListResponse": {
             "type": "object",
             "properties": {
@@ -902,6 +1037,23 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/dto.InitializeTransactionResponse"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "api.SwaggerTransactionListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.VerifyTransactionResponse"
+                    }
                 },
                 "message": {
                     "type": "string"
@@ -1107,6 +1259,10 @@ const docTemplate = `{
                 "message": {
                     "type": "string"
                 },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "provider": {
                     "type": "string"
                 },
@@ -1119,13 +1275,31 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.PaymentProviderResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_supported": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.ProviderConfigRequest": {
             "type": "object",
             "required": [
                 "label",
-                "provider_name",
-                "public_key",
-                "secret_key"
+                "provider_name"
             ],
             "properties": {
                 "is_active": {
@@ -1134,20 +1308,33 @@ const docTemplate = `{
                 "label": {
                     "type": "string"
                 },
+                "live_public_key": {
+                    "type": "string"
+                },
+                "live_secret_key": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "provider_name": {
-                    "enum": [
-                        "paystack"
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/dto.ProviderType"
-                        }
-                    ]
+                    "$ref": "#/definitions/dto.ProviderType"
                 },
                 "public_key": {
+                    "description": "legacy",
                     "type": "string"
                 },
                 "secret_key": {
+                    "description": "legacy",
+                    "type": "string"
+                },
+                "test_public_key": {
+                    "type": "string"
+                },
+                "test_secret_key": {
                     "type": "string"
                 }
             }
@@ -1164,13 +1351,33 @@ const docTemplate = `{
                 "label": {
                     "type": "string"
                 },
+                "live_public_key": {
+                    "type": "string"
+                },
+                "live_secret_key": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "provider_name": {
                     "type": "string"
                 },
                 "public_key": {
+                    "description": "legacy",
                     "type": "string"
                 },
                 "secret_key": {
+                    "description": "legacy",
+                    "type": "string"
+                },
+                "test_public_key": {
+                    "type": "string"
+                },
+                "test_secret_key": {
                     "type": "string"
                 }
             }
@@ -1211,8 +1418,7 @@ const docTemplate = `{
         "dto.WebhookConfigRequest": {
             "type": "object",
             "required": [
-                "provider_name",
-                "target_url"
+                "provider_name"
             ],
             "properties": {
                 "paye_webhook_slug": {
@@ -1280,6 +1486,12 @@ const docTemplate = `{
         }
     },
     "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "The merchant's API Key (e.g., paye_live_... or paye_test_...).",
+            "type": "apiKey",
+            "name": "X-Paye-API-Key",
+            "in": "header"
+        },
         "BearerAuth": {
             "description": "Type \"Bearer \u003cyour-jwt-token\u003e\" to authenticate.",
             "type": "apiKey",
@@ -1296,7 +1508,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Paye API",
-	Description:      "Unified payment infrastructure API.",
+	Description:      "Unified payment routing engine and secure webhook proxies for African developers.\n\nProduction Server: https://paye.africa\nLocal Server: http://localhost:8080\n\nAuthentication Modes:\n1. Bearer JWT Token: Passed as \"Authorization: Bearer <token>\". Scoped to Dashboard CRUD resources (projects, provider credentials, webhook routes, logs).\n2. API Key Header: Passed as \"X-Paye-API-Key: paye_live_...\". Scoped to server-to-server transaction initializations, refunds, and payouts.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

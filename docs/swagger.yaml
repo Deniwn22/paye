@@ -9,6 +9,17 @@ definitions:
       status:
         type: boolean
     type: object
+  api.SwaggerPaymentProviderListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.PaymentProviderResponse'
+        type: array
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
   api.SwaggerProviderConfigListResponse:
     properties:
       data:
@@ -40,6 +51,17 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/dto.InitializeTransactionResponse'
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  api.SwaggerTransactionListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.VerifyTransactionResponse'
+        type: array
       message:
         type: string
       status:
@@ -175,6 +197,9 @@ definitions:
         type: string
       message:
         type: string
+      metadata:
+        additionalProperties: true
+        type: object
       provider:
         type: string
       reference:
@@ -183,26 +208,48 @@ definitions:
         description: pending, success, failed
         type: string
     type: object
+  dto.PaymentProviderResponse:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      is_supported:
+        type: boolean
+      label:
+        type: string
+      name:
+        type: string
+    type: object
   dto.ProviderConfigRequest:
     properties:
       is_active:
         type: boolean
       label:
         type: string
+      live_public_key:
+        type: string
+      live_secret_key:
+        type: string
+      metadata:
+        additionalProperties:
+          type: string
+        type: object
       provider_name:
-        allOf:
-        - $ref: '#/definitions/dto.ProviderType'
-        enum:
-        - paystack
+        $ref: '#/definitions/dto.ProviderType'
       public_key:
+        description: legacy
         type: string
       secret_key:
+        description: legacy
+        type: string
+      test_public_key:
+        type: string
+      test_secret_key:
         type: string
     required:
     - label
     - provider_name
-    - public_key
-    - secret_key
     type: object
   dto.ProviderConfigResponse:
     properties:
@@ -212,11 +259,25 @@ definitions:
         type: boolean
       label:
         type: string
+      live_public_key:
+        type: string
+      live_secret_key:
+        type: string
+      metadata:
+        additionalProperties:
+          type: string
+        type: object
       provider_name:
         type: string
       public_key:
+        description: legacy
         type: string
       secret_key:
+        description: legacy
+        type: string
+      test_public_key:
+        type: string
+      test_secret_key:
         type: string
     type: object
   dto.ProviderType:
@@ -251,7 +312,6 @@ definitions:
         type: string
     required:
     - provider_name
-    - target_url
     type: object
   dto.WebhookConfigResponse:
     properties:
@@ -290,7 +350,15 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: Unified payment infrastructure API.
+  description: |-
+    Unified payment routing engine and secure webhook proxies for African developers.
+
+    Production Server: https://paye.africa
+    Local Server: http://localhost:8080
+
+    Authentication Modes:
+    1. Bearer JWT Token: Passed as "Authorization: Bearer <token>". Scoped to Dashboard CRUD resources (projects, provider credentials, webhook routes, logs).
+    2. API Key Header: Passed as "X-Paye-API-Key: paye_live_...". Scoped to server-to-server transaction initializations, refunds, and payouts.
   title: Paye API
   version: "1.0"
 paths:
@@ -410,6 +478,23 @@ paths:
       summary: Get dashboard statistics
       tags:
       - Dashboard
+  /payment-providers:
+    get:
+      description: Retrieve a list of all payment providers from the system database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerPaymentProviderListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      summary: List supported payment providers
+      tags:
+      - Providers
   /providers:
     get:
       description: Retrieve list of all provider configs for the authenticated user
@@ -578,6 +663,33 @@ paths:
       summary: Toggle provider active status
       tags:
       - Providers
+  /transactions:
+    get:
+      description: Retrieve a list of payment transactions for the authenticated merchant.
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerTransactionListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      summary: List payment transactions
+      tags:
+      - transactions
   /transactions/initialize:
     post:
       consumes:
@@ -789,6 +901,39 @@ paths:
       summary: Update webhook configuration
       tags:
       - Webhooks
+  /webhooks/logs:
+    get:
+      description: Retrieve webhooks logs for the authenticated project scoped by
+        active mode
+      parameters:
+      - description: Pagination limit
+        in: query
+        name: limit
+        type: integer
+      - description: Pagination offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: List webhook logs
+      tags:
+      - Webhooks
   /webhooks/receive/{slug}:
     post:
       consumes:
@@ -828,6 +973,11 @@ paths:
       tags:
       - Webhooks Public
 securityDefinitions:
+  ApiKeyAuth:
+    description: The merchant's API Key (e.g., paye_live_... or paye_test_...).
+    in: header
+    name: X-Paye-API-Key
+    type: apiKey
   BearerAuth:
     description: Type "Bearer <your-jwt-token>" to authenticate.
     in: header

@@ -1,0 +1,238 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .db { display: flex; height: 580px; font-family: var(--font-sans); background: var(--color-background-tertiary); border-radius: 16px; overflow: hidden; border: 0.5px solid var(--color-border-tertiary); }
+
+  /* SIDEBAR */
+  .sidebar { width: 200px; min-width: 200px; background: var(--color-background-primary); border-right: 0.5px solid var(--color-border-tertiary); display: flex; flex-direction: column; padding: 1rem 0; }
+  .sb-logo { padding: 0 1.25rem 1.25rem; border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 0.75rem; }
+  .sb-logo .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: var(--color-text-primary); }
+  .sb-logo .logo span { color: #2563EB; }
+  .sb-project { display: flex; align-items: center; gap: 6px; padding: 5px 8px; margin: 0 0.75rem 0.75rem; border-radius: 8px; background: var(--color-background-secondary); cursor: pointer; }
+  .sb-project-icon { width: 18px; height: 18px; border-radius: 5px; background: #2563EB; display: flex; align-items: center; justify-content: center; }
+  .sb-project-icon i { font-size: 11px; color: #fff; }
+  .sb-project-name { font-size: 12px; font-weight: 500; color: var(--color-text-primary); flex: 1; }
+  .sb-project i.ti-chevron-down { font-size: 12px; color: var(--color-text-tertiary); }
+  .sb-nav { flex: 1; padding: 0 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .sb-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; cursor: pointer; text-decoration: none; }
+  .sb-item i { font-size: 16px; color: var(--color-text-tertiary); }
+  .sb-item span { font-size: 13px; color: var(--color-text-secondary); }
+  .sb-item:hover { background: var(--color-background-secondary); }
+  .sb-item.active { background: #EFF6FF; }
+  .sb-item.active i { color: #2563EB; }
+  .sb-item.active span { color: #2563EB; font-weight: 500; }
+  .sb-divider { height: 0.5px; background: var(--color-border-tertiary); margin: 0.5rem 0.75rem; }
+  .sb-bottom { padding: 0.75rem; border-top: 0.5px solid var(--color-border-tertiary); margin-top: auto; }
+  .sb-user { display: flex; align-items: center; gap: 8px; }
+  .sb-avatar { width: 28px; height: 28px; border-radius: 50%; background: #EFF6FF; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #2563EB; }
+  .sb-user-info { flex: 1; min-width: 0; }
+  .sb-user-email { font-size: 11px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* MAIN */
+  .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+  /* TOPBAR */
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 0.875rem 1.5rem; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); position: sticky; top: 0; z-index: 5; }
+  .topbar-left { display: flex; align-items: center; gap: 8px; }
+  .topbar-title { font-size: 15px; font-weight: 600; color: var(--color-text-primary); }
+  .mode-toggle { display: flex; align-items: center; background: var(--color-background-secondary); border-radius: 8px; padding: 3px; gap: 2px; }
+  .mode-btn { font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 6px; border: none; cursor: pointer; background: none; color: var(--color-text-secondary); font-family: var(--font-sans); }
+  .mode-btn.active { background: var(--color-background-primary); color: var(--color-text-primary); box-shadow: 0 0 0 0.5px var(--color-border-tertiary); }
+  .mode-btn.test.active { color: #B45309; background: #FFFBEB; box-shadow: 0 0 0 0.5px #FDE68A; }
+
+  /* CONTENT */
+  .content { padding: 1.5rem; flex: 1; }
+  .content-header { margin-bottom: 1.5rem; }
+  .content-header h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--color-text-primary); }
+  .content-header p { font-size: 13px; color: var(--color-text-tertiary); margin-top: 2px; }
+
+  /* STATS */
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .stat-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: 12px; padding: 1rem 1.25rem; }
+  .stat-label { font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-tertiary); margin-bottom: 0.5rem; }
+  .stat-value { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--color-text-primary); }
+  .stat-sub { font-size: 11px; color: var(--color-text-tertiary); margin-top: 3px; }
+  .stat-sub.success { color: #16A34A; }
+  .stat-sub.warn { color: #B45309; }
+
+  /* TABLE */
+  .table-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: 12px; overflow: hidden; }
+  .table-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .table-title { font-size: 13px; font-weight: 600; color: var(--color-text-primary); }
+  .table-link { font-size: 12px; color: #2563EB; cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-tertiary); padding: 10px 1.25rem; text-align: left; background: var(--color-background-secondary); }
+  tbody tr { border-top: 0.5px solid var(--color-border-tertiary); }
+  tbody tr:hover { background: var(--color-background-secondary); }
+  tbody td { font-size: 13px; color: var(--color-text-primary); padding: 12px 1.25rem; }
+  .td-ref { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; font-family: var(--font-mono); }
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 999px; }
+  .badge.success { background: #F0FDF4; color: #16A34A; }
+  .badge.pending { background: #FFFBEB; color: #B45309; }
+  .badge.failed { background: #FEF2F2; color: #DC2626; }
+  .badge i { font-size: 10px; }
+  .provider-tag { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); background: var(--color-background-secondary); padding: 2px 8px; border-radius: 6px; }
+</style>
+
+<h2 class="sr-only">Paye dashboard reference design</h2>
+
+<div class="db">
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="logo">Paye<span>.</span></div>
+    </div>
+
+    <div class="sb-project">
+      <div class="sb-project-icon"><i class="ti ti-box" aria-hidden="true"></i></div>
+      <span class="sb-project-name">Default Project</span>
+      <i class="ti ti-chevron-down" aria-hidden="true"></i>
+    </div>
+
+    <nav class="sb-nav">
+      <a class="sb-item active">
+        <i class="ti ti-layout-dashboard" aria-hidden="true"></i>
+        <span>Overview</span>
+      </a>
+      <a class="sb-item">
+        <i class="ti ti-arrows-exchange" aria-hidden="true"></i>
+        <span>Providers</span>
+      </a>
+      <a class="sb-item">
+        <i class="ti ti-webhook" aria-hidden="true"></i>
+        <span>Webhooks</span>
+      </a>
+      <a class="sb-item">
+        <i class="ti ti-key" aria-hidden="true"></i>
+        <span>API Keys</span>
+      </a>
+      <div class="sb-divider"></div>
+      <a class="sb-item">
+        <i class="ti ti-credit-card" aria-hidden="true"></i>
+        <span>Transactions</span>
+      </a>
+      <a class="sb-item">
+        <i class="ti ti-refresh" aria-hidden="true"></i>
+        <span>Refunds</span>
+      </a>
+      <a class="sb-item">
+        <i class="ti ti-send" aria-hidden="true"></i>
+        <span>Transfers</span>
+      </a>
+      <div class="sb-divider"></div>
+      <a class="sb-item">
+        <i class="ti ti-file-invoice" aria-hidden="true"></i>
+        <span>Plans</span>
+      </a>
+      <a class="sb-item">
+        <i class="ti ti-users" aria-hidden="true"></i>
+        <span>Subscriptions</span>
+      </a>
+    </nav>
+
+    <div class="sb-bottom">
+      <div class="sb-user">
+        <div class="sb-avatar">P</div>
+        <div class="sb-user-info">
+          <div class="sb-user-email">paye@gmail.com</div>
+        </div>
+        <i class="ti ti-settings" style="font-size:14px; color: var(--color-text-tertiary);" aria-hidden="true"></i>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="topbar-title">Overview</span>
+      </div>
+      <div class="mode-toggle">
+        <button class="mode-btn test active">Test mode</button>
+        <button class="mode-btn">Live mode</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="content-header">
+        <h2>Good morning, Thompson.</h2>
+        <p>Here's what's happening across your connected providers.</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-label">Total volume</div>
+          <div class="stat-value">₦45,000</div>
+          <div class="stat-sub">Across all providers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Transactions</div>
+          <div class="stat-value">1</div>
+          <div class="stat-sub success">0 failed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Delivery rate</div>
+          <div class="stat-value">100%</div>
+          <div class="stat-sub success">1 OK · 0 failed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active routing</div>
+          <div class="stat-value">1</div>
+          <div class="stat-sub">Connected provider</div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <span class="table-title">Recent activity</span>
+          <span class="table-link">View all →</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Amount</th>
+              <th>Provider</th>
+              <th>Signature</th>
+              <th>Status</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div>charge.success</div>
+                <div class="td-ref">paye_ref_81d68f48-b362</div>
+              </td>
+              <td>₦45,000.00</td>
+              <td><span class="provider-tag">Paystack</span></td>
+              <td><span class="badge success"><i class="ti ti-check" aria-hidden="true"></i> Verified</span></td>
+              <td><span class="badge success">HTTP 200</span></td>
+              <td style="color: var(--color-text-tertiary); font-size: 12px;">9:31 AM</td>
+            </tr>
+            <tr>
+              <td>
+                <div>charge.success</div>
+                <div class="td-ref">paye_ref_44a12c91-f019</div>
+              </td>
+              <td>₦12,500.00</td>
+              <td><span class="provider-tag">Flutterwave</span></td>
+              <td><span class="badge success"><i class="ti ti-check" aria-hidden="true"></i> Verified</span></td>
+              <td><span class="badge pending">HTTP 202</span></td>
+              <td style="color: var(--color-text-tertiary); font-size: 12px;">8:14 AM</td>
+            </tr>
+            <tr>
+              <td>
+                <div>charge.failed</div>
+                <div class="td-ref">paye_ref_09bc7e23-a881</div>
+              </td>
+              <td>₦8,000.00</td>
+              <td><span class="provider-tag">Paystack</span></td>
+              <td><span class="badge failed"><i class="ti ti-x" aria-hidden="true"></i> Failed</span></td>
+              <td><span class="badge failed">HTTP 400</span></td>
+              <td style="color: var(--color-text-tertiary); font-size: 12px;">Yesterday</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

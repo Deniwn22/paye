@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useTransition } from "react"
-import { addProviderAction, deleteProviderAction, toggleProviderAction } from "@/app/actions"
+import { useState, useTransition, useEffect } from "react"
+import { addProviderAction, deleteProviderAction, toggleProviderAction, getPaymentProvidersAction } from "@/app/actions"
 import { Plus, Trash2, Key, HelpCircle, ShieldCheck, Check, AlertCircle, Eye, EyeOff, Radio } from "lucide-react"
 import {
   Dialog,
@@ -26,6 +26,14 @@ export interface ProviderConfig {
   is_active: boolean
 }
 
+interface PaymentProvider {
+  id: string
+  name: string
+  label: string
+  description: string
+  is_supported: boolean
+}
+
 export default function ProvidersManager({ initialProviders = [] }: { initialProviders?: ProviderConfig[] }) {
   const [providers, setProviders] = useState<ProviderConfig[]>(initialProviders || [])
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -38,10 +46,27 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
   const [testPublicKey, setTestPublicKey] = useState("")
   const [liveSecretKey, setLiveSecretKey] = useState("")
   const [livePublicKey, setLivePublicKey] = useState("")
+  const [accountId, setAccountId] = useState("")
 
   const [formTab, setFormTab] = useState<"test" | "live">("test")
   const [revealKeyId, setRevealKeyId] = useState<string | null>(null)
   const [revealType, setRevealType] = useState<"test" | "live">("test")
+
+  const [supportedProviders, setSupportedProviders] = useState<PaymentProvider[]>([
+    { id: "paystack", name: "paystack", label: "Paystack", description: "Popular African payment gateway.", is_supported: true },
+    { id: "flutterwave", name: "flutterwave", label: "Flutterwave", description: "Seamless payments across Africa.", is_supported: true },
+    { id: "nomba", name: "nomba", label: "Nomba", description: "Simplified business payments.", is_supported: true },
+  ])
+
+  useEffect(() => {
+    async function loadProviders() {
+      const res = await getPaymentProvidersAction()
+      if (res.success && res.data) {
+        setSupportedProviders(res.data)
+      }
+    }
+    loadProviders()
+  }, [])
 
   const validateKeys = (): boolean => {
     if (providerName === "paystack") {
@@ -95,6 +120,11 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
       return
     }
 
+    if (providerName === "nomba" && !accountId) {
+      toast.error("Nomba Account ID is required")
+      return
+    }
+
     if (!validateKeys()) return
 
     const formData = new FormData()
@@ -104,6 +134,9 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
     formData.append("testPublicKey", testPublicKey)
     formData.append("liveSecretKey", liveSecretKey)
     formData.append("livePublicKey", livePublicKey)
+    if (providerName === "nomba") {
+      formData.append("metadata", JSON.stringify({ account_id: accountId }))
+    }
 
     startTransition(async () => {
       const res = await addProviderAction(null, formData)
@@ -116,6 +149,7 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
         setTestPublicKey("")
         setLiveSecretKey("")
         setLivePublicKey("")
+        setAccountId("")
         setDialogOpen(false)
         window.location.reload()
       }
@@ -207,11 +241,28 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                     onChange={(e) => setProviderName(e.target.value)}
                     className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-semibold cursor-pointer transition-colors"
                   >
-                    <option value="paystack">Paystack</option>
-                    <option value="flutterwave">Flutterwave</option>
+                    {supportedProviders.map((p) => (
+                      <option key={p.id} value={p.name} disabled={!p.is_supported}>
+                        {p.label}{!p.is_supported ? " (Coming Soon)" : ""}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
+
+              {providerName === "nomba" && (
+                <div className="space-y-1.5 animate-in fade-in duration-150">
+                  <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">Nomba Account ID</label>
+                  <input
+                    type="text"
+                    required
+                    value={accountId}
+                    onChange={(e) => setAccountId(e.target.value)}
+                    placeholder="e.g. acc-xxxxx-xxxx"
+                    className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-sans transition-colors"
+                  />
+                </div>
+              )}
 
               {/* Form Environment Tabs */}
               <div className="flex border-b border-zinc-200 dark:border-zinc-800 mt-2">
@@ -242,22 +293,38 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
               {formTab === "test" ? (
                 <div className="space-y-4 pt-2 animate-in fade-in duration-150">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">Test Secret Key</label>
+                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      {providerName === "nomba" ? "Test Client Secret" : "Test Secret Key"}
+                    </label>
                     <input
                       type="password"
                       value={testSecretKey}
                       onChange={(e) => setTestSecretKey(e.target.value)}
-                      placeholder={providerName === "paystack" ? "sk_test_..." : "FLWSECK_TEST-..."}
+                      placeholder={
+                        providerName === "paystack"
+                          ? "sk_test_..."
+                          : providerName === "flutterwave"
+                          ? "FLWSECK_TEST-..."
+                          : "e.g. client_secret_..."
+                      }
                       className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">Test Public Key (Optional)</label>
+                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      {providerName === "nomba" ? "Test Client ID" : "Test Public Key (Optional)"}
+                    </label>
                     <input
                       type="text"
                       value={testPublicKey}
                       onChange={(e) => setTestPublicKey(e.target.value)}
-                      placeholder={providerName === "paystack" ? "pk_test_..." : "FLWPUBK_TEST-..."}
+                      placeholder={
+                        providerName === "paystack"
+                          ? "pk_test_..."
+                          : providerName === "flutterwave"
+                          ? "FLWPUBK_TEST-..."
+                          : "e.g. client_id_..."
+                      }
                       className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
                     />
                   </div>
@@ -265,22 +332,38 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
               ) : (
                 <div className="space-y-4 pt-2 animate-in fade-in duration-150">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">Live Secret Key</label>
+                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      {providerName === "nomba" ? "Live Client Secret" : "Live Secret Key"}
+                    </label>
                     <input
                       type="password"
                       value={liveSecretKey}
                       onChange={(e) => setLiveSecretKey(e.target.value)}
-                      placeholder={providerName === "paystack" ? "sk_live_..." : "FLWSECK-..."}
+                      placeholder={
+                        providerName === "paystack"
+                          ? "sk_live_..."
+                          : providerName === "flutterwave"
+                          ? "FLWSECK-..."
+                          : "e.g. client_secret_..."
+                      }
                       className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">Live Public Key (Optional)</label>
+                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      {providerName === "nomba" ? "Live Client ID" : "Live Public Key (Optional)"}
+                    </label>
                     <input
                       type="text"
                       value={livePublicKey}
                       onChange={(e) => setLivePublicKey(e.target.value)}
-                      placeholder={providerName === "paystack" ? "pk_live_..." : "FLWPUBK-..."}
+                      placeholder={
+                        providerName === "paystack"
+                          ? "pk_live_..."
+                          : providerName === "flutterwave"
+                          ? "FLWPUBK-..."
+                          : "e.g. client_id_..."
+                      }
                       className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
                     />
                   </div>

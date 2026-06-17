@@ -9,28 +9,30 @@ const (
 )
 
 type ProviderConfigRequest struct {
-	Label         string       `json:"label" binding:"required"`
-	ProviderName  ProviderType `json:"provider_name" binding:"required" enums:"paystack"`
-	SecretKey     string       `json:"secret_key"` // legacy
-	PublicKey     string       `json:"public_key"` // legacy
-	TestSecretKey string       `json:"test_secret_key"`
-	TestPublicKey string       `json:"test_public_key"`
-	LiveSecretKey string       `json:"live_secret_key"`
-	LivePublicKey string       `json:"live_public_key"`
-	IsActive      bool         `json:"is_active"`
+	Label         string            `json:"label" binding:"required"`
+	ProviderName  ProviderType      `json:"provider_name" binding:"required"`
+	SecretKey     string            `json:"secret_key"` // legacy
+	PublicKey     string            `json:"public_key"` // legacy
+	TestSecretKey string            `json:"test_secret_key"`
+	TestPublicKey string            `json:"test_public_key"`
+	LiveSecretKey string            `json:"live_secret_key"`
+	LivePublicKey string            `json:"live_public_key"`
+	IsActive      bool              `json:"is_active"`
+	Metadata      map[string]string `json:"metadata"`
 }
 
 type ProviderConfigResponse struct {
-	ID            string `json:"id"`
-	Label         string `json:"label"`
-	ProviderName  string `json:"provider_name"`
-	SecretKey     string `json:"secret_key"` // legacy
-	PublicKey     string `json:"public_key"` // legacy
-	TestSecretKey string `json:"test_secret_key"`
-	TestPublicKey string `json:"test_public_key"`
-	LiveSecretKey string `json:"live_secret_key"`
-	LivePublicKey string `json:"live_public_key"`
-	IsActive      bool   `json:"is_active"`
+	ID            string            `json:"id"`
+	Label         string            `json:"label"`
+	ProviderName  string            `json:"provider_name"`
+	SecretKey     string            `json:"secret_key"` // legacy
+	PublicKey     string            `json:"public_key"` // legacy
+	TestSecretKey string            `json:"test_secret_key"`
+	TestPublicKey string            `json:"test_public_key"`
+	LiveSecretKey string            `json:"live_secret_key"`
+	LivePublicKey string            `json:"live_public_key"`
+	IsActive      bool              `json:"is_active"`
+	Metadata      map[string]string `json:"metadata"`
 }
 
 
@@ -46,6 +48,7 @@ func ToProviderConfigResponse(config *models.ProviderConfig) *ProviderConfigResp
 		LiveSecretKey: config.LiveSecretKey,
 		LivePublicKey: config.LivePublicKey,
 		IsActive:      config.IsActive,
+		Metadata:      config.Metadata,
 	}
 }
 
@@ -60,5 +63,6 @@ func ToProviderConfig(config *ProviderConfigRequest) *models.ProviderConfig {
 		LiveSecretKey: config.LiveSecretKey,
 		LivePublicKey: config.LivePublicKey,
 		IsActive:      config.IsActive,
+		Metadata:      config.Metadata,
 	}
 }

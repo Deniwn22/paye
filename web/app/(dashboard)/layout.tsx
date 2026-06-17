@@ -30,7 +30,11 @@ export default async function DashboardLayout({
   }
 
   const claims = decodeJWT(token)
-  const email = claims?.user_email || "merchant@paye.co"
+  if (!claims || (claims.exp && claims.exp * 1000 < Date.now())) {
+    redirect("/api/auth/logout")
+  }
+
+  const email = claims.user_email || "merchant@paye.co"
   const activeMode = await getActiveMode()
 
   // Fetch projects from backend

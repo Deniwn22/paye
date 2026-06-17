@@ -454,3 +454,21 @@ func (h *ProviderHandler) ListTransfersHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, api.Success("Transfers retrieved successfully", resp))
 }
+
+// ListPaymentProvidersHandler godoc
+// @Summary List supported payment providers
+// @Description Retrieve a list of all payment providers from the system database
+// @Tags Providers
+// @Produce json
+// @Success 200 {object} api.SwaggerPaymentProviderListResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /payment-providers [get]
+func (h *ProviderHandler) ListPaymentProvidersHandler(c *gin.Context) {
+	resp, err := h.service.ListPaymentProviders(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success("Payment providers retrieved successfully", dto.ToPaymentProviderResponseList(resp)))
+}

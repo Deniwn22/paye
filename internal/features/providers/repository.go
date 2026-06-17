@@ -73,3 +73,13 @@ func (p *ProviderRepo) FindActiveProvider(ctx context.Context, projectID string,
 	err := p.db.WithContext(ctx).First(&provider, "project_id = ? AND provider_name = ? AND is_active = ?", projectID, providerName, true).Error
 	return &provider, err
 }
+
+// ListPaymentProviders returns a list of all payment providers
+func (p *ProviderRepo) ListPaymentProviders(ctx context.Context) ([]*models.PaymentProvider, error) {
+	var providers []*models.PaymentProvider
+	if err := p.db.WithContext(ctx).Find(&providers).Error; err != nil {
+		return nil, err
+	}
+	return providers, nil
+}
+

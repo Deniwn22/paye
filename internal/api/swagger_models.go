@@ -72,3 +72,11 @@ type SwaggerTransactionListResponse struct {
 	Message string                           `json:"message"`
 	Data    []dto.VerifyTransactionResponse `json:"data"`
 }
+
+// SwaggerPaymentProviderListResponse represents the list of supported payment providers success response
+type SwaggerPaymentProviderListResponse struct {
+	Status  bool                          `json:"status"`
+	Message string                        `json:"message"`
+	Data    []dto.PaymentProviderResponse `json:"data"`
+}
+

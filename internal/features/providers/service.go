@@ -577,3 +577,9 @@ func (s *ProviderService) ListSubscriptions(ctx context.Context, projectID strin
 	}
 }
 
+// ListPaymentProviders retrieves all payment providers from the database
+func (s *ProviderService) ListPaymentProviders(ctx context.Context) ([]*models.PaymentProvider, error) {
+	return s.repo.ListPaymentProviders(ctx)
+}
+
+

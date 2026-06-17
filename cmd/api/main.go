@@ -31,7 +31,14 @@ import (
 
 // @title Paye API
 // @version 1.0
-// @description Unified payment infrastructure API.
+// @description Unified payment routing engine and secure webhook proxies for African developers.
+// @description
+// @description Production Server: https://paye.africa
+// @description Local Server: http://localhost:8080
+// @description
+// @description Authentication Modes:
+// @description 1. Bearer JWT Token: Passed as "Authorization: Bearer <token>". Scoped to Dashboard CRUD resources (projects, provider credentials, webhook routes, logs).
+// @description 2. API Key Header: Passed as "X-Paye-API-Key: paye_live_...". Scoped to server-to-server transaction initializations, refunds, and payouts.
 // @host localhost:8080
 // @BasePath /api/v1
 
@@ -39,6 +46,11 @@ import (
 // @in header
 // @name Authorization
 // @description Type "Bearer <your-jwt-token>" to authenticate.
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name X-Paye-API-Key
+// @description The merchant's API Key (e.g., paye_live_... or paye_test_...).
 
 func main() {
 	// Configure structured logger
@@ -183,6 +195,9 @@ func main() {
 	
 	// Auth Routes (Public)
 	auth.RegisterRoutes(v1, authHandler)
+
+	// Payment Providers Route (Public)
+	v1.GET("/payment-providers", providerHandler.ListPaymentProvidersHandler)
 
 	// Public SDK Initialize Endpoint (Public)
 	v1.POST("/sdk/transactions/initialize", sdkHandler.InitializeSDKTransaction)

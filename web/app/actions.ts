@@ -204,6 +204,14 @@ export async function addProviderAction(prevState: any, formData: FormData) {
   const testPublicKey = formData.get("testPublicKey") as string
   const liveSecretKey = formData.get("liveSecretKey") as string
   const livePublicKey = formData.get("livePublicKey") as string
+  const metadataStr = formData.get("metadata") as string
+
+  let metadata = {}
+  if (metadataStr) {
+    try {
+      metadata = JSON.parse(metadataStr)
+    } catch (e) {}
+  }
 
   if (!label || !providerName) {
     return { success: false, error: "Name and provider type are required" }
@@ -224,6 +232,7 @@ export async function addProviderAction(prevState: any, formData: FormData) {
         live_secret_key: liveSecretKey,
         live_public_key: livePublicKey,
         is_active: true,
+        metadata: metadata,
       }),
     })
 
@@ -453,6 +462,24 @@ export async function createTransferAction(amount: number, recipientCode: string
       return { success: false, error: result.message || "Failed to initiate transfer" }
     }
     return { success: true, transfer: result.data }
+  } catch (err) {
+    return { success: false, error: "Network error occurred" }
+  }
+}
+
+export async function getPaymentProvidersAction() {
+  try {
+    const res = await fetch(`${BACKEND_URL}/payment-providers`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      next: { revalidate: 30 }
+    })
+
+    const result = await res.json()
+    if (!res.ok || !result.status) {
+      return { success: false, error: result.message || "Failed to fetch payment providers" }
+    }
+    return { success: true, data: result.data }
   } catch (err) {
     return { success: false, error: "Network error occurred" }
   }
