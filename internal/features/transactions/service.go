@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/ttomsin/paye/internal/crypto"
@@ -279,4 +280,27 @@ func (s *TransactionService) ListTransactions(ctx context.Context, projectID str
 	}
 	return res, nil
 }
+
+// PollPendingTransactions queries the provider for all pending transactions created between 5 minutes and 24 hours ago, updating their statuses.
+func (s *TransactionService) PollPendingTransactions(ctx context.Context) error {
+	now := time.Now()
+	startTime := now.Add(-24 * time.Hour)
+	endTime := now.Add(-5 * time.Minute)
+
+	txs, err := s.repo.FindOlderPendingTransactions(ctx, startTime, endTime)
+	if err != nil {
+		return fmt.Errorf("failed to fetch older pending transactions: %w", err)
+	}
+
+	for _, tx := range txs {
+		slog.Info("Polling status for pending transaction", "reference", tx.Reference, "provider", tx.Provider)
+		_, err := s.VerifyTransaction(ctx, tx.ProjectID.String(), tx.Reference)
+		if err != nil {
+			slog.Error("Failed to auto-verify transaction during polling", "reference", tx.Reference, "error", err)
+		}
+	}
+
+	return nil
+}
+
 

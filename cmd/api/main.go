@@ -143,6 +143,20 @@ func main() {
 		slog.Error("failed to add cron job", "error", err)
 		os.Exit(1)
 	}
+
+	// Background job to verify older pending transactions that didn't get webhook updates
+	_, err = c.AddFunc("*/5 * * * *", func() {
+		slog.Info("Running cron job: PollPendingTransactions")
+		err := transactionService.PollPendingTransactions(context.Background())
+		if err != nil {
+			slog.Error("Cron error (PollPendingTransactions)", "error", err)
+		}
+	})
+	if err != nil {
+		slog.Error("failed to add transactions polling cron job", "error", err)
+		os.Exit(1)
+	}
+
 	c.Start()
 
 	//init handlers

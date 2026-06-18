@@ -2,6 +2,7 @@ package transactions
 
 import (
 	"context"
+	"time"
 
 	"github.com/ttomsin/paye/internal/models"
 	"gorm.io/gorm"
@@ -44,3 +45,13 @@ func (r *TransactionRepo) ListTransactions(ctx context.Context, projectID string
 	err := r.db.WithContext(ctx).Where("project_id = ? AND is_live = ?", projectID, isLive).Order("created_at DESC").Limit(limit).Offset(offset).Find(&txs).Error
 	return txs, err
 }
+
+// FindOlderPendingTransactions retrieves transactions created between startTime and endTime that are still pending.
+func (r *TransactionRepo) FindOlderPendingTransactions(ctx context.Context, startTime, endTime time.Time) ([]*models.Transaction, error) {
+	var txs []*models.Transaction
+	err := r.db.WithContext(ctx).
+		Where("status = ? AND created_at BETWEEN ? AND ?", "pending", startTime, endTime).
+		Find(&txs).Error
+	return txs, err
+}
+

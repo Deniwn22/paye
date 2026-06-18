@@ -2,12 +2,14 @@ package transactions_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	payeDb "github.com/ttomsin/paye/internal/db"
@@ -337,3 +339,86 @@ func TestOPayTransactionWebhookInjection(t *testing.T) {
 		t.Errorf("Expected callback URL '%s', got '%s'", expectedCallbackURL, capturedCallbackURL)
 	}
 }
+
+func TestPendingTransactionPolling(t *testing.T) {
+	db, _, _, _, testProject, txService := setupTestEnvironment(t)
+	encryptionKey := "12345678901234567890123456789012"
+
+	// 1. Create active ProviderConfig for Paystack
+	rawSecretKey := "sk_test_paystack_secret_key_val_123"
+	encSecretKey, _ := crypto.Encrypt(rawSecretKey, encryptionKey)
+	encPublicKey, _ := crypto.Encrypt("pk_test_val", encryptionKey)
+
+	provConfig := &models.ProviderConfig{
+		Label:        "paystack-main",
+		ProviderName: "paystack",
+		SecretKey:    encSecretKey,
+		PublicKey:    encPublicKey,
+		IsActive:     true,
+		ProjectID:    testProject.Base.ID,
+	}
+	db.Create(provConfig)
+
+	// 2. Setup mock target payment server (Paystack)
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if req.Method == "GET" && req.URL.Path == "/transaction/verify/test_polling_ref" {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{
+				"status": true,
+				"message": "Verification successful",
+				"data": {
+					"status": "success",
+					"reference": "test_polling_ref",
+					"amount": 50000,
+					"currency": "NGN",
+					"customer": {
+						"email": "customer@example.com"
+					}
+				}
+			}`))
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+	}))
+	defer mockServer.Close()
+
+	// Inject the mock server BaseURL
+	txService.SetPaystackBaseURL(mockServer.URL)
+
+	// 3. Create a pending transaction in DB
+	txRecord := &models.Transaction{
+		ProjectID: testProject.Base.ID,
+		Provider:  "paystack",
+		Reference: "test_polling_ref",
+		Amount:    500.0,
+		Currency:  "NGN",
+		Email:     "customer@example.com",
+		Status:    "pending",
+	}
+	if err := db.Create(txRecord).Error; err != nil {
+		t.Fatalf("Failed to create mock pending transaction: %v", err)
+	}
+
+	// 4. Move its created_at timestamp back 10 minutes (so it falls in the 5m - 24h window)
+	tenMinutesAgo := time.Now().Add(-10 * time.Minute)
+	if err := db.Model(txRecord).Update("created_at", tenMinutesAgo).Error; err != nil {
+		t.Fatalf("Failed to backdate transaction: %v", err)
+	}
+
+	// 5. Run PollPendingTransactions
+	err := txService.PollPendingTransactions(context.Background())
+	if err != nil {
+		t.Fatalf("PollPendingTransactions failed: %v", err)
+	}
+
+	// 6. Verify that transaction status is updated in DB to success
+	var updatedTx models.Transaction
+	if err := db.First(&updatedTx, "reference = ?", "test_polling_ref").Error; err != nil {
+		t.Fatalf("Failed to find updated transaction: %v", err)
+	}
+
+	if updatedTx.Status != "success" {
+		t.Errorf("Expected status to be updated to 'success', got '%s'", updatedTx.Status)
+	}
+}
+
