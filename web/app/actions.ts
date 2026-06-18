@@ -14,6 +14,7 @@ import {
   deleteUserName,
 } from "@/lib/cookies"
 import { BACKEND_URL } from "@/lib/config"
+import { revalidatePath } from "next/cache"
 
 // --- Auth Actions ---
 
@@ -472,7 +473,7 @@ export async function getPaymentProvidersAction() {
     const res = await fetch(`${BACKEND_URL}/payment-providers`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
-      next: { revalidate: 30 }
+      cache: "no-store"
     })
 
     const result = await res.json()
@@ -480,6 +481,24 @@ export async function getPaymentProvidersAction() {
       return { success: false, error: result.message || "Failed to fetch payment providers" }
     }
     return { success: true, data: result.data }
+  } catch (err) {
+    return { success: false, error: "Network error occurred" }
+  }
+}
+
+export async function togglePaymentProviderAction(name: string) {
+  try {
+    const res = await fetchWithAuth(`/payment-providers/${name}/toggle-support`, {
+      method: "POST",
+    })
+
+    const result = await res.json()
+    if (!res.ok || !result.status) {
+      return { success: false, error: result.message || "Failed to toggle payment provider support" }
+    }
+
+    revalidatePath("/providers")
+    return { success: true }
   } catch (err) {
     return { success: false, error: "Network error occurred" }
   }

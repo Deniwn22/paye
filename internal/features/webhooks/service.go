@@ -19,6 +19,7 @@ import (
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/providers/flutterwave"
 	"github.com/ttomsin/paye/internal/features/providers/nomba"
+	"github.com/ttomsin/paye/internal/features/providers/opay"
 	"github.com/ttomsin/paye/internal/features/providers/paystack"
 	"github.com/ttomsin/paye/internal/features/user"
 	"github.com/ttomsin/paye/internal/models"
@@ -45,6 +46,14 @@ func NewWebhookService(repo *WebhookRepo, providerRepo *providers.ProviderRepo, 
 }
 
 func (s *WebhookService) CreateWebhook(ctx context.Context, req *dto.WebhookConfigRequest, projectID string) (*dto.WebhookConfigResponse, error) {
+	existing, err := s.repo.FindByProjectAndProvider(ctx, projectID, req.ProviderName)
+	if err != nil {
+		return nil, err
+	}
+	if existing != nil {
+		return nil, errors.New("a webhook configuration for this provider already exists")
+	}
+
 	slug := req.PayeWebhookSlug
 	if slug == "" {
 		slug = uuid.New().String()
@@ -137,6 +146,10 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 				decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
 				accountID := pc.Metadata["account_id"]
 				providerClient = nomba.New(decryptedPublic, decryptedSecret, accountID)
+			case "opay":
+				decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
+				merchantID := pc.Metadata["merchant_id"]
+				providerClient = opay.New(decryptedPublic, decryptedSecret, merchantID, false)
 			}
 			if providerClient != nil {
 				webhookEvent, verifyErr = providerClient.HandleWebhook(signature, payload)
@@ -167,6 +180,10 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 					decryptedPublic, _ := crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
 					accountID := pc.Metadata["account_id"]
 					providerClient = nomba.New(decryptedPublic, decryptedSecret, accountID)
+				case "opay":
+					decryptedPublic, _ := crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
+					merchantID := pc.Metadata["merchant_id"]
+					providerClient = opay.New(decryptedPublic, decryptedSecret, merchantID, true)
 				}
 				if providerClient != nil {
 					webhookEvent, verifyErr = providerClient.HandleWebhook(signature, payload)
@@ -257,9 +274,21 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 		slog.Warn("WebhookProxy: Failed to create WebhookLog", "error", err)
 	}
 
-	if webhookEvent.AuthorizationCode != "" {
-		_ = s.repo.UpdateTransactionAuthCode(ctx, webhookEvent.Reference, webhookEvent.AuthorizationCode, "success", string(payload))
+	dbStatus := "pending"
+	if webhookEvent.Status == string(providers.StatusSuccess) || webhookEvent.Status == "success" {
+		dbStatus = "success"
+	} else if webhookEvent.Status == string(providers.StatusFailed) || webhookEvent.Status == "failed" {
+		dbStatus = "failed"
 	}
+
+	_ = s.repo.UpdateTransactionStatusAndAuthCode(
+		ctx,
+		webhookEvent.Reference,
+		webhookEvent.AuthorizationCode,
+		dbStatus,
+		webhookEvent.Status,
+		string(payload),
+	)
 
 	// Forward webhook if TargetURL is not empty
 	if wc.TargetURL != "" {

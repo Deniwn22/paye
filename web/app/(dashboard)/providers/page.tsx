@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { getToken } from "@/lib/cookies"
 import ProvidersManager from "@/components/providers-manager"
 import { fetchBackend } from "@/lib/api"
+import { decodeJWT } from "@/lib/jwt"
 
 async function getProviders() {
   try {
@@ -22,6 +23,9 @@ export default async function ProvidersPage() {
     redirect("/signin")
   }
 
+  const decoded = decodeJWT(token)
+  const userRole = decoded?.role || "merchant"
+
   const initialProviders = await getProviders()
 
   return (
@@ -31,7 +35,7 @@ export default async function ProvidersPage() {
         <p className="text-sm text-slate-400 mt-1">Configure keys for your payment providers.</p>
       </div>
 
-      <ProvidersManager initialProviders={initialProviders} />
+      <ProvidersManager initialProviders={initialProviders} userRole={userRole} />
     </div>
   )
 }

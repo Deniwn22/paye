@@ -127,7 +127,7 @@ func main() {
 	providerService.SetPaystackService(paystackService)
 	webhookService := webhooks.NewWebhookService(webhookRepo, providerRepo, userRepo, derivedEncryptionKey)
 	dashboardService := dashboard.NewDashboardService(dashboardRepo)
-	transactionService := transactions.NewTransactionService(transactionRepo, providerRepo, derivedEncryptionKey)
+	transactionService := transactions.NewTransactionService(transactionRepo, providerRepo, webhookRepo, derivedEncryptionKey)
 	subscriptionService := subscriptions.NewSubscriptionService(database.DB, providerRepo, derivedEncryptionKey)
 
 	// Background worker for processing due subscriptions
@@ -168,6 +168,9 @@ func main() {
 
 	// Register Dynamic SDK serving route (Public)
 	r.GET("/sdk/:publicId", sdkHandler.ServeSDK)
+
+	// Serve static files in testweb directory for development/testing
+	r.Static("/testweb", "./testweb")
 	
 	// Public Group
 	v1 := r.Group("/api/v1")
@@ -216,9 +219,17 @@ func main() {
 	// Register Provider Config routes (Protected)
 	providers.RegisterRoutes(protected, providerHandler)
 
+	// Admin Protected Group (Requires JWT token and Admin role)
+	adminProtected := v1.Group("")
+	adminProtected.Use(jwtMiddleware.Handle, middleware.RequireAdmin())
+	providers.RegisterAdminRoutes(adminProtected, providerHandler)
+
 	// Register Webhook Config and Webhook receive routes
 	// Note: RegisterRoutes configures both protected CRUD routes and the public proxy route
 	webhooks.RegisterRoutes(protected, v1, webhookHandler)
+
+	// Proxy webhook receive route at the root level (supports legacy tests and config URLs without api/v1 prefix)
+	r.POST("/webhooks/receive/:slug", webhookHandler.ReceiveWebhookHandler)
 
 	// Register Dashboard stats and logs routes (Protected)
 	dashboard.RegisterRoutes(protected, dashboardHandler)

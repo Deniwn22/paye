@@ -3,9 +3,13 @@ package crypto
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/hmac"
 	"crypto/rand"
+	"crypto/sha512"
 	"encoding/hex"
 	"errors"
+
+	"golang.org/x/crypto/sha3"
 )
 
 // Encrypt encrypts the plain text using the given key and returns the cipher text and nonce as a hex string.
@@ -95,5 +99,19 @@ func GeneratePublicID(isLive bool) (string, error) {
 		prefix = "paye_live_pub_"
 	}
 	return prefix + hex.EncodeToString(pubBytes), nil
+}
+
+// HmacSHA512Hex returns the HMAC-SHA512 signature of data using the secret key, as a lowercase hex string.
+func HmacSHA512Hex(data, key string) string {
+	mac := hmac.New(sha512.New, []byte(key))
+	mac.Write([]byte(data))
+	return hex.EncodeToString(mac.Sum(nil))
+}
+
+// HmacSHA3_512Hex returns the HMAC-SHA3-512 signature of data using the secret key, as a lowercase hex string.
+func HmacSHA3_512Hex(data, key string) string {
+	mac := hmac.New(sha3.New512, []byte(key))
+	mac.Write([]byte(data))
+	return hex.EncodeToString(mac.Sum(nil))
 }
 

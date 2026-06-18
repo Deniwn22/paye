@@ -5,11 +5,12 @@ import (
 )
 
 type InitializeTransactionRequest struct {
-	Amount    float64 `json:"amount" binding:"required"`
-	Email     string  `json:"email" binding:"required,email"`
-	Currency  string  `json:"currency" binding:"required"`
-	Reference string  `json:"reference"`
-	Provider  string  `json:"provider" binding:"required"`
+	Amount      float64 `json:"amount" binding:"required"`
+	Email       string  `json:"email" binding:"required,email"`
+	Currency    string  `json:"currency" binding:"required"`
+	Reference   string  `json:"reference"`
+	Provider    string  `json:"provider" binding:"required"`
+	CallbackURL string  `json:"callbackUrl"`
 }
 
 type InitializeTransactionResponse struct {

@@ -10,17 +10,17 @@ services:
     volumes:
       - paye_db:/var/lib/postgresql/data
 
-  api:
-    build: .
-    restart: on-failure
-    ports:
-      - "8080:8080"
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/paye?sslmode=disable
-      - JWT_SECRET=asfdsadfsafsfsfasfdsfsfsdfsdfsdfsdfsfsdfsdfsdfsd
-      - ENCRYPTION_KEY=asfdsadfsafsfsfasfdsfsfsdfsdfsdfsdfsfsdfsdfsdfsd
-    depends_on:
-      - db
+  # api:
+  #   build: .
+  #   restart: on-failure
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     - DATABASE_URL=postgres://postgres:postgres@db:5432/paye?sslmode=disable
+  #     - JWT_SECRET=asfdsadfsafsfsfasfdsfsfsdfsdfsdfsdfsfsdfsdfsdfsd
+  #     - ENCRYPTION_KEY=asfdsadfsafsfsfasfdsfsfsdfsdfsdfsdfsfsdfsdfsdfsd
+  #   depends_on:
+  #     - db
 
 volumes:
   paye_db:

@@ -56,12 +56,13 @@ func NewSDKHandler(
 }
 
 type InitializeSDKTransactionRequest struct {
-	PublicID  string  `json:"publicId" binding:"required"`
-	Amount    float64 `json:"amount" binding:"required"`
-	Email     string  `json:"email" binding:"required,email"`
-	Currency  string  `json:"currency"`
-	Provider  string  `json:"provider"`
-	Reference string  `json:"reference"`
+	PublicID    string  `json:"publicId" binding:"required"`
+	Amount      float64 `json:"amount" binding:"required"`
+	Email       string  `json:"email" binding:"required,email"`
+	Currency    string  `json:"currency"`
+	Provider    string  `json:"provider"`
+	Reference   string  `json:"reference"`
+	CallbackURL string  `json:"callbackUrl"`
 }
 
 // ServeSDK serves the dynamic Javascript SDK script file for the merchant
@@ -158,11 +159,12 @@ func (h *SDKHandler) InitializeSDKTransaction(c *gin.Context) {
 
 	// 2. Delegate transaction initialization to TransactionService
 	initReq := &dto.InitializeTransactionRequest{
-		Amount:    req.Amount,
-		Email:     req.Email,
-		Currency:  req.Currency,
-		Provider:  provider,
-		Reference: req.Reference,
+		Amount:      req.Amount,
+		Email:       req.Email,
+		Currency:    req.Currency,
+		Provider:    provider,
+		Reference:   req.Reference,
+		CallbackURL: req.CallbackURL,
 	}
 	if initReq.Currency == "" {
 		initReq.Currency = "NGN"

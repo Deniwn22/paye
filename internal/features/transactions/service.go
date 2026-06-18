@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
+	"os"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/ttomsin/paye/internal/crypto"
@@ -11,7 +14,9 @@ import (
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/providers/flutterwave"
 	"github.com/ttomsin/paye/internal/features/providers/nomba"
+	"github.com/ttomsin/paye/internal/features/providers/opay"
 	"github.com/ttomsin/paye/internal/features/providers/paystack"
+	"github.com/ttomsin/paye/internal/features/webhooks"
 	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
 	"github.com/ttomsin/paye/pkg/paye"
@@ -20,14 +25,16 @@ import (
 type TransactionService struct {
 	repo            *TransactionRepo
 	providerRepo    *providers.ProviderRepo
+	webhookRepo     *webhooks.WebhookRepo
 	encryptionKey   string
 	paystackBaseURL string
 }
 
-func NewTransactionService(repo *TransactionRepo, providerRepo *providers.ProviderRepo, encryptionKey string) *TransactionService {
+func NewTransactionService(repo *TransactionRepo, providerRepo *providers.ProviderRepo, webhookRepo *webhooks.WebhookRepo, encryptionKey string) *TransactionService {
 	return &TransactionService{
 		repo:          repo,
 		providerRepo:  providerRepo,
+		webhookRepo:   webhookRepo,
 		encryptionKey: encryptionKey,
 	}
 }
@@ -89,6 +96,14 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 			nClient.SetBaseURL(s.paystackBaseURL)
 		}
 		providerClient = nClient
+	case "opay":
+		decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
+		if !isLive {
+			decryptedPublic, _ = crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
+		}
+		merchantID := pc.Metadata["merchant_id"]
+		oClient := opay.New(decryptedPublic, decryptedSecret, merchantID, !isLive)
+		providerClient = oClient
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", req.Provider)
 	}
@@ -101,10 +116,30 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 	}
 
 	pReq := providers.TransactionRequest{
-		Amount:    req.Amount,
-		Email:     req.Email,
-		Currency:  req.Currency,
-		Reference: reference,
+		Amount:      req.Amount,
+		Email:       req.Email,
+		Currency:    req.Currency,
+		Reference:   reference,
+		CallbackURL: req.CallbackURL,
+	}
+
+	if req.Provider == "opay" {
+		webhookConfig, err := s.webhookRepo.FindByProjectAndProvider(ctx, projectID, "opay")
+		if err != nil {
+			slog.Warn("Failed to query OPay webhook config slug", "project_id", projectID, "error", err)
+		} else if webhookConfig != nil {
+			if pReq.Metadata == nil {
+				pReq.Metadata = make(map[string]any)
+			}
+			baseURL := os.Getenv("WEBHOOK_BASE_URL")
+			if baseURL == "" {
+				baseURL = "https://api.paye.africa"
+			}
+			baseURL = strings.TrimSuffix(baseURL, "/")
+			pReq.Metadata["webhook_url"] = baseURL + "/api/v1/webhooks/receive/" + webhookConfig.PayeWebhookSlug
+		} else {
+			slog.Warn("No OPay webhook config found for project", "project_id", projectID)
+		}
 	}
 
 	resp, err := p.InitializeTransaction(pReq)
@@ -182,6 +217,14 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 			nClient.SetBaseURL(s.paystackBaseURL)
 		}
 		providerClient = nClient
+	case "opay":
+		decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
+		if !tx.IsLive {
+			decryptedPublic, _ = crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
+		}
+		merchantID := pc.Metadata["merchant_id"]
+		oClient := opay.New(decryptedPublic, decryptedSecret, merchantID, !tx.IsLive)
+		providerClient = oClient
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", tx.Provider)
 	}
@@ -203,9 +246,13 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 
 	if resp.Status {
 		tx.Status = "success"
+	} else if resp.StatusText == string(providers.StatusPending) || resp.StatusText == string(providers.StatusInitial) {
+		tx.Status = "pending"
 	} else {
 		tx.Status = "failed"
 	}
+
+	tx.TransactionStatus = resp.StatusText
 
 	if resp.AuthorizationCode != "" {
 		tx.AuthorizationCode = resp.AuthorizationCode

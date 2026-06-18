@@ -200,6 +200,8 @@ func (h *WebhookHandler) ReceiveWebhookHandler(c *gin.Context) {
 		sig := c.GetHeader("nomba-signature")
 		timestamp := c.GetHeader("nomba-timestamp")
 		signature = sig + "|" + timestamp
+	case "opay":
+		signature = "opay"
 	default:
 		signature = c.GetHeader("X-Webhook-Signature")
 	}

@@ -15,6 +15,8 @@ const UserApiKeyContextKey = "user_api_key"
 const ProjectIDContextKey = "project_id"
 const IsLiveContextKey = "is_live"
 
+const UserRoleContextKey = "user_role"
+
 type ContextKey string
 const IsLiveCtxKey ContextKey = "is_live"
 
@@ -58,6 +60,7 @@ func (m *ApiJwtMiddleware) Handle(c *gin.Context) {
 	c.Set(UserIDContextKey, claims.UserID)
 	c.Set(UserEmailContextKey, claims.Email)
 	c.Set(UserApiKeyContextKey, claims.APIKey)
+	c.Set(UserRoleContextKey, claims.Role)
 
 	// Determine active environment mode (live vs test)
 	liveHeader := c.GetHeader("X-Live-Mode")
@@ -69,4 +72,15 @@ func (m *ApiJwtMiddleware) Handle(c *gin.Context) {
 	c.Request = c.Request.WithContext(reqCtx)
 
 	c.Next()
+}
+
+func RequireAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role, exists := c.Get(UserRoleContextKey)
+		if !exists || role != "admin" {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Forbidden: Admin access required"})
+			return
+		}
+		c.Next()
+	}
 }

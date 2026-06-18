@@ -83,6 +83,7 @@ func (s *AuthService) RegisterUser(req *SignupRequest) (*AuthResponse, error) {
 		Email:    req.Email,
 		Password: hashedPassword,
 		PublicID: livePublicID,
+		Role:     "merchant",
 	}
 	if err := s.userRepo.CreateUser(user); err != nil {
 		return nil, err
@@ -98,7 +99,7 @@ func (s *AuthService) RegisterUser(req *SignupRequest) (*AuthResponse, error) {
 	if err := s.projectRepo.CreateProject(context.Background(), defaultProject); err != nil {
 		return nil, err
 	}
-	token, err := GenerateJWT(user.Base.ID.String(), user.Email, liveApiKey, livePublicID, s.jwtSecret)
+	token, err := GenerateJWT(user.Base.ID.String(), user.Email, liveApiKey, livePublicID, user.Role, s.jwtSecret)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +169,11 @@ func (s *AuthService) LoginUser(req *LoginRequest) (*AuthResponse, error) {
 		publicID = user.PublicID
 	}
 
-	token, err := GenerateJWT(user.Base.ID.String(), user.Email, apiKey, publicID, s.jwtSecret)
+	role := user.Role
+	if role == "" {
+		role = "merchant"
+	}
+	token, err := GenerateJWT(user.Base.ID.String(), user.Email, apiKey, publicID, role, s.jwtSecret)
 	if err != nil {
 		return nil, err
 	}

@@ -2,7 +2,7 @@
   var _paymentInProgress = false;
   var config = {
     merchantId: "{{merchantId}}",
-    providers: JSON.parse("{{providers}}"),
+    providers: {{providers}},
     publicKey: "{{publicKey}}",
     papiEndpoint: "{{papiEndpoint}}",
   };
@@ -72,7 +72,7 @@
 
   function verifyTransaction(reference, options, attempt) {
     attempt = attempt || 1;
-    var maxAttempts = 3;
+    var maxAttempts = 5;
 
     function runVerify() {
       var verifyUrl =
@@ -102,6 +102,15 @@
                 message: data.message,
               });
             }
+          } else if (
+            data &&
+            data.status === true &&
+            data.data &&
+            data.data.status === "pending" &&
+            attempt < maxAttempts
+          ) {
+            console.log("Paye SDK: Transaction still pending, retrying verification...");
+            verifyTransaction(reference, options, attempt + 1);
           } else {
             _paymentInProgress = false;
             var msg =
@@ -140,7 +149,7 @@
     if (attempt === 1) {
       runVerify();
     } else {
-      setTimeout(runVerify, (attempt - 1) * 1500);
+      setTimeout(runVerify, (attempt - 1) * 2000);
     }
   }
 
@@ -192,6 +201,7 @@
         currency: options.currency || "NGN",
         provider: provider,
         reference: options.reference,
+        callbackUrl: window.location.href,
       };
 
       // Call Paye public transactions initialize endpoint
@@ -377,7 +387,16 @@
             } catch (e) {}
 
             // Redirect customer to Nomba hosted checkout
-            window.location.href = txData.auth_url;
+            window.location.href = txData.authorization_url;
+          } else if (provider === "opay") {
+            // OPay is redirect-based — no inline SDK
+            // Store reference before leaving the page
+            try {
+              sessionStorage.setItem("paye_opay_ref", txData.reference);
+            } catch (e) {}
+
+            // Redirect customer to OPay hosted cashier
+            window.location.href = txData.authorization_url;
           } else {
             throw new Error(
               "Unsupported payment gateway provider: " + provider,
@@ -409,6 +428,33 @@
       } catch (e) {}
 
       verifyTransaction(orderReference, {
+        onSuccess: function (ref, details) {
+          window.dispatchEvent(
+            new CustomEvent("paye:success", { detail: details }),
+          );
+        },
+        onFailure: function (err, details) {
+          window.dispatchEvent(
+            new CustomEvent("paye:failure", { detail: details }),
+          );
+        },
+      });
+    }
+  })();
+
+  // Auto-verify when OPay redirects customer back to returnUrl
+  (function checkOpayReturn() {
+    var storedRef = "";
+    try {
+      storedRef = sessionStorage.getItem("paye_opay_ref") || "";
+    } catch (e) {}
+
+    if (storedRef) {
+      try {
+        sessionStorage.removeItem("paye_opay_ref");
+      } catch (e) {}
+
+      verifyTransaction(storedRef, {
         onSuccess: function (ref, details) {
           window.dispatchEvent(
             new CustomEvent("paye:success", { detail: details }),

@@ -64,7 +64,7 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 	}
 
 	jwtSecret := "test_jwt_secret_key_32_bytes_long_xxxx"
-	token, err := auth.GenerateJWT(testUser.Base.ID.String(), testUser.Email, "paye_live_api_key_12345", testUser.PublicID, jwtSecret)
+	token, err := auth.GenerateJWT(testUser.Base.ID.String(), testUser.Email, "paye_live_api_key_12345", testUser.PublicID, "merchant", jwtSecret)
 	if err != nil {
 		t.Fatalf("failed to generate JWT: %v", err)
 	}
@@ -237,6 +237,48 @@ func TestWebhookConfigCRUD(t *testing.T) {
 
 	if w.Code != http.StatusOK {
 		t.Fatalf("Expected delete status 200, got %d", w.Code)
+	}
+}
+
+func TestWebhookConfigDuplicate(t *testing.T) {
+	_, r, token, _, _ := setupTestEnvironment(t)
+
+	// Create First Webhook Config
+	wReq1 := dto.WebhookConfigRequest{
+		ProviderName: "paystack",
+		TargetURL:    "http://example.com/callback1",
+	}
+	body1, _ := json.Marshal(wReq1)
+	req1 := httptest.NewRequest("POST", "/api/v1/webhooks/configs", bytes.NewBuffer(body1))
+	req1.Header.Set("Authorization", "Bearer "+token)
+	req1.Header.Set("Content-Type", "application/json")
+	w1 := httptest.NewRecorder()
+	r.ServeHTTP(w1, req1)
+
+	if w1.Code != http.StatusOK {
+		t.Fatalf("Expected first create webhook config status 200, got %d. Body: %s", w1.Code, w1.Body.String())
+	}
+
+	// Create Second Webhook Config for the SAME provider
+	wReq2 := dto.WebhookConfigRequest{
+		ProviderName: "paystack",
+		TargetURL:    "http://example.com/callback2",
+	}
+	body2, _ := json.Marshal(wReq2)
+	req2 := httptest.NewRequest("POST", "/api/v1/webhooks/configs", bytes.NewBuffer(body2))
+	req2.Header.Set("Authorization", "Bearer "+token)
+	req2.Header.Set("Content-Type", "application/json")
+	w2 := httptest.NewRecorder()
+	r.ServeHTTP(w2, req2)
+
+	if w2.Code != http.StatusInternalServerError {
+		t.Fatalf("Expected duplicate create webhook config status 500, got %d. Body: %s", w2.Code, w2.Body.String())
+	}
+
+	var respBody map[string]any
+	json.Unmarshal(w2.Body.Bytes(), &respBody)
+	if respBody["message"] != "a webhook configuration for this provider already exists" {
+		t.Errorf("Expected error 'a webhook configuration for this provider already exists', got '%v'", respBody["message"])
 	}
 }
 

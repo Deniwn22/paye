@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useTransition, useEffect } from "react"
-import { addProviderAction, deleteProviderAction, toggleProviderAction, getPaymentProvidersAction } from "@/app/actions"
-import { Plus, Trash2, Key, HelpCircle, ShieldCheck, Check, AlertCircle, Eye, EyeOff, Radio } from "lucide-react"
+import { addProviderAction, deleteProviderAction, toggleProviderAction, getPaymentProvidersAction, togglePaymentProviderAction } from "@/app/actions"
+import { Plus, Trash2, Key, HelpCircle, ShieldCheck, Check, AlertCircle, Eye, EyeOff, Radio, Sliders } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -34,7 +34,7 @@ interface PaymentProvider {
   is_supported: boolean
 }
 
-export default function ProvidersManager({ initialProviders = [] }: { initialProviders?: ProviderConfig[] }) {
+export default function ProvidersManager({ initialProviders = [], userRole = "merchant" }: { initialProviders?: ProviderConfig[], userRole?: string }) {
   const [providers, setProviders] = useState<ProviderConfig[]>(initialProviders || [])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -55,7 +55,8 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
   const [supportedProviders, setSupportedProviders] = useState<PaymentProvider[]>([
     { id: "paystack", name: "paystack", label: "Paystack", description: "Popular African payment gateway.", is_supported: true },
     { id: "flutterwave", name: "flutterwave", label: "Flutterwave", description: "Seamless payments across Africa.", is_supported: true },
-    { id: "nomba", name: "nomba", label: "Nomba", description: "Simplified business payments.", is_supported: true },
+    { id: "nomba", name: "nomba", label: "Nomba", description: "Simplified business payments.", is_supported: false },
+    { id: "opay", name: "opay", label: "OPay", description: "Vibrant checkout and mobile money payments.", is_supported: true },
   ])
 
   useEffect(() => {
@@ -67,6 +68,24 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
     }
     loadProviders()
   }, [])
+
+  const handleAdminToggle = async (name: string) => {
+    const res = await togglePaymentProviderAction(name)
+    if (!res.success) {
+      toast.error(res.error || "Failed to toggle global provider support")
+    } else {
+      setSupportedProviders(
+        supportedProviders.map((p) => {
+          if (p.name === name) {
+            const nextSupported = !p.is_supported
+            toast.success(`Global support for ${p.label} has been ${nextSupported ? "enabled" : "disabled"}`)
+            return { ...p, is_supported: nextSupported }
+          }
+          return p
+        })
+      )
+    }
+  }
 
   const validateKeys = (): boolean => {
     if (providerName === "paystack") {
@@ -125,6 +144,11 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
       return
     }
 
+    if (providerName === "opay" && !accountId) {
+      toast.error("OPay Merchant ID is required")
+      return
+    }
+
     if (!validateKeys()) return
 
     const formData = new FormData()
@@ -136,6 +160,8 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
     formData.append("livePublicKey", livePublicKey)
     if (providerName === "nomba") {
       formData.append("metadata", JSON.stringify({ account_id: accountId }))
+    } else if (providerName === "opay") {
+      formData.append("metadata", JSON.stringify({ merchant_id: accountId }))
     }
 
     startTransition(async () => {
@@ -197,6 +223,66 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
 
   return (
     <div className="space-y-6 text-sm font-sans select-text">
+      {userRole === "admin" && (
+        <div className="p-6 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 border border-indigo-500/20 rounded-2xl space-y-6 shadow-sm">
+          <div className="flex items-center justify-between border-b border-indigo-500/25 pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <Sliders className="w-5 h-5 text-indigo-500" />
+                <h2 className="text-sm font-bold text-zinc-950 dark:text-zinc-150 uppercase tracking-wider">System Admin Controls</h2>
+                <span className="text-[10px] font-bold text-white bg-indigo-600 dark:bg-indigo-700 px-2.5 py-0.5 rounded-full uppercase tracking-wide">
+                  Admin Panel
+                </span>
+              </div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
+                Toggle payment providers availability system-wide. Disabling a provider here will prevent users from selecting it or activating it.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {supportedProviders.map((prov) => (
+              <div
+                key={prov.id}
+                className={`p-4 border rounded-xl flex flex-col justify-between space-y-4 transition-all duration-300 ${
+                  prov.is_supported
+                    ? "bg-zinc-900/5 dark:bg-zinc-900/40 border-emerald-500/35 shadow-[0_2px_10px_rgba(16,185,129,0.04)]"
+                    : "bg-zinc-150/40 dark:bg-zinc-950/40 border-zinc-200 dark:border-zinc-900 opacity-80"
+                }`}
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-zinc-805 dark:text-zinc-195">{prov.label}</span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${prov.is_supported ? "bg-emerald-500" : "bg-zinc-400"}`} />
+                  </div>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-normal">{prov.description}</p>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-zinc-200/50 dark:border-zinc-850/50">
+                  <span className={`text-[10px] font-bold uppercase ${prov.is_supported ? "text-emerald-500" : "text-zinc-400"}`}>
+                    {prov.is_supported ? "Active" : "Disabled"}
+                  </span>
+                  
+                  {/* Custom Toggle Switch */}
+                  <button
+                    onClick={() => handleAdminToggle(prov.name)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none cursor-pointer ${
+                      prov.is_supported ? "bg-emerald-500" : "bg-zinc-300 dark:bg-zinc-800"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+                        prov.is_supported ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Header and Add Button wrapped in Dialog */}
       <div className="flex items-center justify-between border-b border-zinc-200/60 dark:border-zinc-900 pb-4">
         <div>
@@ -250,15 +336,17 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                 </div>
               </div>
 
-              {providerName === "nomba" && (
+              {(providerName === "nomba" || providerName === "opay") && (
                 <div className="space-y-1.5 animate-in fade-in duration-150">
-                  <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">Nomba Account ID</label>
+                  <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                    {providerName === "nomba" ? "Nomba Account ID" : "OPay Merchant ID"}
+                  </label>
                   <input
                     type="text"
                     required
                     value={accountId}
                     onChange={(e) => setAccountId(e.target.value)}
-                    placeholder="e.g. acc-xxxxx-xxxx"
+                    placeholder={providerName === "nomba" ? "e.g. acc-xxxxx-xxxx" : "e.g. 256612345678901"}
                     className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-sans transition-colors"
                   />
                 </div>
@@ -305,6 +393,8 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                           ? "sk_test_..."
                           : providerName === "flutterwave"
                           ? "FLWSECK_TEST-..."
+                          : providerName === "opay"
+                          ? "OPAYSEC..."
                           : "e.g. client_secret_..."
                       }
                       className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
@@ -312,7 +402,7 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
-                      {providerName === "nomba" ? "Test Client ID" : "Test Public Key (Optional)"}
+                      {providerName === "nomba" ? "Test Client ID" : providerName === "opay" ? "Test Public Key" : "Test Public Key (Optional)"}
                     </label>
                     <input
                       type="text"
@@ -323,6 +413,8 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                           ? "pk_test_..."
                           : providerName === "flutterwave"
                           ? "FLWPUBK_TEST-..."
+                          : providerName === "opay"
+                          ? "OPAYPUB..."
                           : "e.g. client_id_..."
                       }
                       className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
@@ -344,6 +436,8 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                           ? "sk_live_..."
                           : providerName === "flutterwave"
                           ? "FLWSECK-..."
+                          : providerName === "opay"
+                          ? "OPAYSEC..."
                           : "e.g. client_secret_..."
                       }
                       className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
@@ -351,7 +445,7 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
-                      {providerName === "nomba" ? "Live Client ID" : "Live Public Key (Optional)"}
+                      {providerName === "nomba" ? "Live Client ID" : providerName === "opay" ? "Live Public Key" : "Live Public Key (Optional)"}
                     </label>
                     <input
                       type="text"
@@ -362,9 +456,11 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                           ? "pk_live_..."
                           : providerName === "flutterwave"
                           ? "FLWPUBK-..."
+                          : providerName === "opay"
+                          ? "OPAYPUB..."
                           : "e.g. client_id_..."
                       }
-                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
+                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
                     />
                   </div>
                 </div>
@@ -424,7 +520,7 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${
                         p.is_active
                           ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
@@ -433,15 +529,18 @@ export default function ProvidersManager({ initialProviders = [] }: { initialPro
                         <span className={`w-1.5 h-1.5 rounded-full ${p.is_active ? "bg-emerald-500" : "bg-zinc-400"}`} />
                         {p.is_active ? "Connected" : "Inactive"}
                       </span>
+                      {/* Custom Toggle Switch */}
                       <button
                         onClick={() => handleToggle(p.id)}
-                        className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
-                          p.is_active
-                            ? "border-red-500/20 bg-red-500/5 text-red-650 dark:text-red-400 hover:bg-red-500/10"
-                            : "border-[#2563eb] bg-[#2563eb] hover:bg-[#1d4ed8] text-white"
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none cursor-pointer ${
+                          p.is_active ? "bg-emerald-500" : "bg-zinc-300 dark:bg-zinc-805"
                         }`}
                       >
-                        {p.is_active ? "Disable" : "Enable"}
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+                            p.is_active ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
                       </button>
                     </div>
                   </div>

@@ -12,6 +12,7 @@ type Claims struct {
 	Email    string `json:"email"`
 	APIKey   string `json:"api_key"`
 	PublicID string `json:"public_id"`
+	Role     string `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -33,13 +34,14 @@ func GenerateAPIKey(isLive bool) (string, error) {
 	return crypto.GenerateAPIKey(isLive)
 }
 
-// GenerateJWT generates a JWT token for the given user ID, API key, and Public ID.
-func GenerateJWT(userID, email, apiKey, publicID string, secretKey string) (string, error) {
+// GenerateJWT generates a JWT token for the given user ID, API key, Public ID, and Role.
+func GenerateJWT(userID, email, apiKey, publicID string, role string, secretKey string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &Claims{
 		UserID:   userID,
 		Email:    email,
 		APIKey:   apiKey,
 		PublicID: publicID,
+		Role:     role,
 	})
 	return token.SignedString([]byte(secretKey))
 }

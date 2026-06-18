@@ -582,4 +582,17 @@ func (s *ProviderService) ListPaymentProviders(ctx context.Context) ([]*models.P
 	return s.repo.ListPaymentProviders(ctx)
 }
 
+// TogglePaymentProviderSupport toggles a payment provider's support status system-wide
+func (s *ProviderService) TogglePaymentProviderSupport(ctx context.Context, name string) (*models.PaymentProvider, error) {
+	provider, err := s.repo.FindPaymentProviderByName(ctx, name)
+	if err != nil {
+		return nil, fmt.Errorf("payment provider not found: %w", err)
+	}
+	provider.IsSupported = !provider.IsSupported
+	if err := s.repo.UpdatePaymentProvider(ctx, provider); err != nil {
+		return nil, fmt.Errorf("failed to update payment provider support status: %w", err)
+	}
+	return provider, nil
+}
+
 

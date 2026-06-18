@@ -1,658 +1,1823 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AutoNaija — Buy Premium Cars in Nigeria</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --black: #0A0A0A; --white: #FFFFFF;
-    --gray-50: #F9FAFB; --gray-100: #F3F4F6;
-    --gray-200: #E5E7EB; --gray-400: #9CA3AF;
-    --gray-500: #6B7280; --gray-700: #374151;
-    --gold: #C9952A; --gold-light: #F5E6C8;
-    --red: #DC2626; --green: #16A34A;
-    --blue: #2563EB; --blue-hover: #1D4ED8;
-    --border: rgba(0,0,0,0.08);
-    --radius: 12px; --radius-lg: 16px;
-  }
-  html { scroll-behavior: smooth; }
-  body { font-family: 'Inter', sans-serif; background: var(--gray-50); color: var(--black); -webkit-font-smoothing: antialiased; }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>AutoNaija — Buy Premium Cars in Nigeria</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            :root {
+                --black: #0a0a0a;
+                --white: #ffffff;
+                --gray-50: #f9fafb;
+                --gray-100: #f3f4f6;
+                --gray-200: #e5e7eb;
+                --gray-400: #9ca3af;
+                --gray-500: #6b7280;
+                --gray-700: #374151;
+                --gold: #c9952a;
+                --gold-light: #f5e6c8;
+                --red: #dc2626;
+                --green: #16a34a;
+                --blue: #2563eb;
+                --blue-hover: #1d4ed8;
+                --border: rgba(0, 0, 0, 0.08);
+                --radius: 12px;
+                --radius-lg: 16px;
+            }
+            html {
+                scroll-behavior: smooth;
+            }
+            body {
+                font-family: "Inter", sans-serif;
+                background: var(--gray-50);
+                color: var(--black);
+                -webkit-font-smoothing: antialiased;
+            }
 
-  /* ── NAV ── */
-  nav { position: sticky; top: 0; z-index: 100; background: var(--white); border-bottom: 0.5px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 64px; }
-  .nav-logo { font-size: 20px; font-weight: 800; letter-spacing: -0.8px; color: var(--black); text-decoration: none; }
-  .nav-logo span { color: var(--gold); }
-  .nav-links { display: flex; gap: 2rem; list-style: none; }
-  .nav-links a { font-size: 14px; color: var(--gray-500); text-decoration: none; transition: color 0.15s; }
-  .nav-links a:hover { color: var(--black); }
-  .nav-right { display: flex; align-items: center; gap: 1rem; }
-  .nav-cta { font-size: 13px; font-weight: 600; color: var(--white); background: var(--black); padding: 8px 18px; border-radius: 8px; text-decoration: none; border: none; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
-  .nav-cta:hover { opacity: 0.85; }
-  .nav-signin { font-size: 13px; font-weight: 500; color: var(--gray-500); background: none; border: none; cursor: pointer; font-family: inherit; transition: color 0.15s; }
-  .nav-signin:hover { color: var(--black); }
-  .nav-user { display: none; align-items: center; gap: 0.75rem; }
-  .nav-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--black); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
-  .nav-user-name { font-size: 13px; font-weight: 600; }
-  .nav-logout { font-size: 12px; color: var(--gray-400); background: none; border: none; cursor: pointer; font-family: inherit; }
-  .nav-logout:hover { color: var(--red); }
+            /* ── NAV ── */
+            nav {
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                background: var(--white);
+                border-bottom: 0.5px solid var(--border);
+                padding: 0 2rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                height: 64px;
+            }
+            .nav-logo {
+                font-size: 20px;
+                font-weight: 800;
+                letter-spacing: -0.8px;
+                color: var(--black);
+                text-decoration: none;
+            }
+            .nav-logo span {
+                color: var(--gold);
+            }
+            .nav-links {
+                display: flex;
+                gap: 2rem;
+                list-style: none;
+            }
+            .nav-links a {
+                font-size: 14px;
+                color: var(--gray-500);
+                text-decoration: none;
+                transition: color 0.15s;
+            }
+            .nav-links a:hover {
+                color: var(--black);
+            }
+            .nav-right {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+            .nav-cta {
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--white);
+                background: var(--black);
+                padding: 8px 18px;
+                border-radius: 8px;
+                text-decoration: none;
+                border: none;
+                cursor: pointer;
+                font-family: inherit;
+                transition: opacity 0.15s;
+            }
+            .nav-cta:hover {
+                opacity: 0.85;
+            }
+            .nav-signin {
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--gray-500);
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-family: inherit;
+                transition: color 0.15s;
+            }
+            .nav-signin:hover {
+                color: var(--black);
+            }
+            .nav-user {
+                display: none;
+                align-items: center;
+                gap: 0.75rem;
+            }
+            .nav-avatar {
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                background: var(--black);
+                color: var(--white);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 13px;
+                font-weight: 700;
+            }
+            .nav-user-name {
+                font-size: 13px;
+                font-weight: 600;
+            }
+            .nav-logout {
+                font-size: 12px;
+                color: var(--gray-400);
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-family: inherit;
+            }
+            .nav-logout:hover {
+                color: var(--red);
+            }
 
-  /* ── HERO ── */
-  .hero { background: var(--black); color: var(--white); padding: 5rem 2rem 4rem; text-align: center; position: relative; overflow: hidden; }
-  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(201,149,42,0.15) 0%, transparent 70%); pointer-events: none; }
-  .hero-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.5rem; }
-  .hero-eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
-  .hero h1 { font-size: 52px; font-weight: 800; letter-spacing: -2px; line-height: 1.06; margin-bottom: 1.25rem; max-width: 700px; margin-left: auto; margin-right: auto; }
-  .hero h1 em { font-style: normal; color: var(--gold); }
-  .hero p { font-size: 17px; color: rgba(255,255,255,0.6); max-width: 480px; margin: 0 auto 2.5rem; line-height: 1.65; }
-  .hero-search { display: flex; gap: 0.75rem; max-width: 520px; margin: 0 auto 3rem; flex-wrap: wrap; justify-content: center; }
-  .hero-search input { flex: 1; min-width: 240px; padding: 12px 16px; background: rgba(255,255,255,0.08); border: 0.5px solid rgba(255,255,255,0.15); border-radius: 10px; font-size: 14px; color: var(--white); font-family: inherit; outline: none; }
-  .hero-search input::placeholder { color: rgba(255,255,255,0.35); }
-  .hero-search button { padding: 12px 24px; background: var(--gold); border: none; border-radius: 10px; font-size: 14px; font-weight: 600; color: var(--white); cursor: pointer; font-family: inherit; }
-  .hero-stats { display: flex; gap: 3rem; justify-content: center; flex-wrap: wrap; padding-top: 2.5rem; border-top: 0.5px solid rgba(255,255,255,0.08); }
-  .hero-stat-num { font-size: 28px; font-weight: 800; letter-spacing: -1px; color: var(--white); }
-  .hero-stat-num span { color: var(--gold); }
-  .hero-stat-label { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 3px; }
+            /* ── HERO ── */
+            .hero {
+                background: var(--black);
+                color: var(--white);
+                padding: 5rem 2rem 4rem;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+            .hero::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(
+                    ellipse at 50% 0%,
+                    rgba(201, 149, 42, 0.15) 0%,
+                    transparent 70%
+                );
+                pointer-events: none;
+            }
+            .hero-eyebrow {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: var(--gold);
+                margin-bottom: 1.5rem;
+            }
+            .hero-eyebrow span {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: var(--gold);
+            }
+            .hero h1 {
+                font-size: 52px;
+                font-weight: 800;
+                letter-spacing: -2px;
+                line-height: 1.06;
+                margin-bottom: 1.25rem;
+                max-width: 700px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .hero h1 em {
+                font-style: normal;
+                color: var(--gold);
+            }
+            .hero p {
+                font-size: 17px;
+                color: rgba(255, 255, 255, 0.6);
+                max-width: 480px;
+                margin: 0 auto 2.5rem;
+                line-height: 1.65;
+            }
+            .hero-search {
+                display: flex;
+                gap: 0.75rem;
+                max-width: 520px;
+                margin: 0 auto 3rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .hero-search input {
+                flex: 1;
+                min-width: 240px;
+                padding: 12px 16px;
+                background: rgba(255, 255, 255, 0.08);
+                border: 0.5px solid rgba(255, 255, 255, 0.15);
+                border-radius: 10px;
+                font-size: 14px;
+                color: var(--white);
+                font-family: inherit;
+                outline: none;
+            }
+            .hero-search input::placeholder {
+                color: rgba(255, 255, 255, 0.35);
+            }
+            .hero-search button {
+                padding: 12px 24px;
+                background: var(--gold);
+                border: none;
+                border-radius: 10px;
+                font-size: 14px;
+                font-weight: 600;
+                color: var(--white);
+                cursor: pointer;
+                font-family: inherit;
+            }
+            .hero-stats {
+                display: flex;
+                gap: 3rem;
+                justify-content: center;
+                flex-wrap: wrap;
+                padding-top: 2.5rem;
+                border-top: 0.5px solid rgba(255, 255, 255, 0.08);
+            }
+            .hero-stat-num {
+                font-size: 28px;
+                font-weight: 800;
+                letter-spacing: -1px;
+                color: var(--white);
+            }
+            .hero-stat-num span {
+                color: var(--gold);
+            }
+            .hero-stat-label {
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.4);
+                margin-top: 3px;
+            }
 
-  /* ── FILTER BAR ── */
-  .filter-bar { background: var(--white); border-bottom: 0.5px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 1rem; height: 56px; overflow-x: auto; }
-  .filter-label { font-size: 12px; font-weight: 600; color: var(--gray-400); white-space: nowrap; }
-  .filter-btn { font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 999px; border: 0.5px solid var(--gray-200); background: none; cursor: pointer; white-space: nowrap; font-family: inherit; color: var(--gray-700); transition: all 0.15s; }
-  .filter-btn:hover { border-color: var(--black); color: var(--black); }
-  .filter-btn.active { background: var(--black); color: var(--white); border-color: var(--black); }
+            /* ── FILTER BAR ── */
+            .filter-bar {
+                background: var(--white);
+                border-bottom: 0.5px solid var(--border);
+                padding: 0 2rem;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                height: 56px;
+                overflow-x: auto;
+            }
+            .filter-label {
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--gray-400);
+                white-space: nowrap;
+            }
+            .filter-btn {
+                font-size: 13px;
+                font-weight: 500;
+                padding: 6px 14px;
+                border-radius: 999px;
+                border: 0.5px solid var(--gray-200);
+                background: none;
+                cursor: pointer;
+                white-space: nowrap;
+                font-family: inherit;
+                color: var(--gray-700);
+                transition: all 0.15s;
+            }
+            .filter-btn:hover {
+                border-color: var(--black);
+                color: var(--black);
+            }
+            .filter-btn.active {
+                background: var(--black);
+                color: var(--white);
+                border-color: var(--black);
+            }
 
-  /* ── MAIN ── */
-  .main { max-width: 1280px; margin: 0 auto; padding: 2.5rem 2rem; }
-  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-  .section-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-  .section-count { font-size: 13px; color: var(--gray-400); }
+            /* ── MAIN ── */
+            .main {
+                max-width: 1280px;
+                margin: 0 auto;
+                padding: 2.5rem 2rem;
+            }
+            .section-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 1.5rem;
+            }
+            .section-title {
+                font-size: 20px;
+                font-weight: 700;
+                letter-spacing: -0.5px;
+            }
+            .section-count {
+                font-size: 13px;
+                color: var(--gray-400);
+            }
 
-  /* ── CAR GRID ── */
-  .car-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
-  .car-card { background: var(--white); border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: box-shadow 0.2s, transform 0.2s; cursor: pointer; }
-  .car-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-2px); }
-  .car-img-placeholder { width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; font-size: 64px; position: relative; }
-  .car-badge { position: absolute; top: 12px; left: 12px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; }
-  .badge-new { background: var(--black); color: var(--white); }
-  .badge-hot { background: var(--red); color: var(--white); }
-  .badge-used { background: var(--gray-100); color: var(--gray-700); }
-  .car-fav { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.9); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: transform 0.15s; }
-  .car-fav:hover { transform: scale(1.1); }
-  .car-body { padding: 1.25rem; }
-  .car-make { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.25rem; }
-  .car-name { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 0.75rem; }
-  .car-specs { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
-  .car-spec { font-size: 12px; color: var(--gray-500); }
-  .car-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 1rem; border-top: 0.5px solid var(--border); }
-  .car-price { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
-  .car-price-sub { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
-  .buy-btn { font-size: 13px; font-weight: 600; color: var(--white); background: var(--black); border: none; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-family: inherit; transition: background 0.15s; }
-  .buy-btn:hover { background: #222; }
+            /* ── CAR GRID ── */
+            .car-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 1.5rem;
+                margin-bottom: 3rem;
+            }
+            .car-card {
+                background: var(--white);
+                border: 0.5px solid var(--border);
+                border-radius: var(--radius-lg);
+                overflow: hidden;
+                transition:
+                    box-shadow 0.2s,
+                    transform 0.2s;
+                cursor: pointer;
+            }
+            .car-card:hover {
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+                transform: translateY(-2px);
+            }
+            .car-img-placeholder {
+                width: 100%;
+                height: 200px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 64px;
+                position: relative;
+            }
+            .car-badge {
+                position: absolute;
+                top: 12px;
+                left: 12px;
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                padding: 4px 10px;
+                border-radius: 999px;
+            }
+            .badge-new {
+                background: var(--black);
+                color: var(--white);
+            }
+            .badge-hot {
+                background: var(--red);
+                color: var(--white);
+            }
+            .badge-used {
+                background: var(--gray-100);
+                color: var(--gray-700);
+            }
+            .car-fav {
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.9);
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
+                transition: transform 0.15s;
+            }
+            .car-fav:hover {
+                transform: scale(1.1);
+            }
+            .car-body {
+                padding: 1.25rem;
+            }
+            .car-make {
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                color: var(--gold);
+                margin-bottom: 0.25rem;
+            }
+            .car-name {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: -0.3px;
+                margin-bottom: 0.75rem;
+            }
+            .car-specs {
+                display: flex;
+                gap: 1rem;
+                margin-bottom: 1rem;
+                flex-wrap: wrap;
+            }
+            .car-spec {
+                font-size: 12px;
+                color: var(--gray-500);
+            }
+            .car-footer {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding-top: 1rem;
+                border-top: 0.5px solid var(--border);
+            }
+            .car-price {
+                font-size: 20px;
+                font-weight: 800;
+                letter-spacing: -0.5px;
+            }
+            .car-price-sub {
+                font-size: 11px;
+                color: var(--gray-400);
+                margin-top: 1px;
+            }
+            .buy-btn {
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--white);
+                background: var(--black);
+                border: none;
+                padding: 9px 18px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-family: inherit;
+                transition: background 0.15s;
+            }
+            .buy-btn:hover {
+                background: #222;
+            }
 
-  /* ── CAR MODAL ── */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
-  .modal-overlay.open { display: flex; }
-  .modal { background: var(--white); border-radius: var(--radius-lg); max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; }
-  .modal-img { width: 100%; height: 220px; display: flex; align-items: center; justify-content: center; font-size: 80px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; position: relative; }
-  .modal-close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.9); border: none; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
-  .modal-body { padding: 1.5rem; }
-  .modal-make { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.25rem; }
-  .modal-name { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 0.5rem; }
-  .modal-specs { display: flex; gap: 1.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
-  .modal-spec { font-size: 13px; color: var(--gray-500); }
-  .modal-divider { height: 0.5px; background: var(--border); margin: 1.25rem 0; }
-  .modal-price { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 0.25rem; }
-  .modal-price-note { font-size: 12px; color: var(--gray-400); margin-bottom: 1.25rem; }
-  .modal-features-title { font-size: 13px; font-weight: 600; margin-bottom: 0.75rem; }
-  .modal-features-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem; }
-  .modal-feature { font-size: 12px; color: var(--gray-700); background: var(--gray-100); padding: 4px 10px; border-radius: 999px; }
+            /* ── CAR MODAL ── */
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.6);
+                z-index: 200;
+                align-items: center;
+                justify-content: center;
+                padding: 1rem;
+            }
+            .modal-overlay.open {
+                display: flex;
+            }
+            .modal {
+                background: var(--white);
+                border-radius: var(--radius-lg);
+                max-width: 520px;
+                width: 100%;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            .modal-img {
+                width: 100%;
+                height: 220px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 80px;
+                border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+                position: relative;
+            }
+            .modal-close {
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.9);
+                border: none;
+                cursor: pointer;
+                font-size: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .modal-body {
+                padding: 1.5rem;
+            }
+            .modal-make {
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                color: var(--gold);
+                margin-bottom: 0.25rem;
+            }
+            .modal-name {
+                font-size: 22px;
+                font-weight: 800;
+                letter-spacing: -0.5px;
+                margin-bottom: 0.5rem;
+            }
+            .modal-specs {
+                display: flex;
+                gap: 1.5rem;
+                margin-bottom: 1.25rem;
+                flex-wrap: wrap;
+            }
+            .modal-spec {
+                font-size: 13px;
+                color: var(--gray-500);
+            }
+            .modal-divider {
+                height: 0.5px;
+                background: var(--border);
+                margin: 1.25rem 0;
+            }
+            .modal-price {
+                font-size: 28px;
+                font-weight: 800;
+                letter-spacing: -1px;
+                margin-bottom: 0.25rem;
+            }
+            .modal-price-note {
+                font-size: 12px;
+                color: var(--gray-400);
+                margin-bottom: 1.25rem;
+            }
+            .modal-features-title {
+                font-size: 13px;
+                font-weight: 600;
+                margin-bottom: 0.75rem;
+            }
+            .modal-features-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                margin-bottom: 1.25rem;
+            }
+            .modal-feature {
+                font-size: 12px;
+                color: var(--gray-700);
+                background: var(--gray-100);
+                padding: 4px 10px;
+                border-radius: 999px;
+            }
 
-  /* ── PAYE CHECKOUT IN MODAL ── */
-  .paye-section { background: var(--gray-50); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
-  .paye-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-  .paye-section-title { font-size: 13px; font-weight: 600; }
-  .paye-powered-row { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
-  .paye-powered { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--gray-400); }
-  .paye-powered strong { color: var(--blue); }
-  .paye-customized { font-size: 10px; color: var(--gray-400); font-style: italic; }
+            /* ── PAYE CHECKOUT IN MODAL ── */
+            .paye-section {
+                background: var(--gray-50);
+                border: 0.5px solid var(--border);
+                border-radius: var(--radius);
+                padding: 1.25rem;
+            }
+            .paye-section-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 1rem;
+            }
+            .paye-section-title {
+                font-size: 13px;
+                font-weight: 600;
+            }
+            .paye-powered-row {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 2px;
+            }
+            .paye-powered {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 11px;
+                color: var(--gray-400);
+            }
+            .paye-powered strong {
+                color: var(--blue);
+            }
+            .paye-customized {
+                font-size: 10px;
+                color: var(--gray-400);
+                font-style: italic;
+            }
 
-  /* User pre-fill notice */
-  .prefill-notice { display: flex; align-items: center; gap: 8px; background: #EFF6FF; border: 0.5px solid #BFDBFE; border-radius: 8px; padding: 10px 14px; margin-bottom: 1rem; font-size: 12px; color: var(--blue); }
-  .prefill-notice strong { font-weight: 600; }
+            /* User pre-fill notice */
+            .prefill-notice {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: #eff6ff;
+                border: 0.5px solid #bfdbfe;
+                border-radius: 8px;
+                padding: 10px 14px;
+                margin-bottom: 1rem;
+                font-size: 12px;
+                color: var(--blue);
+            }
+            .prefill-notice strong {
+                font-weight: 600;
+            }
 
-  /* Guest form */
-  .paye-form { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
-  .paye-input { width: 100%; padding: 10px 14px; border: 0.5px solid var(--gray-200); border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.15s; background: var(--white); }
-  .paye-input:focus { border-color: var(--blue); }
-  .paye-input::placeholder { color: var(--gray-400); }
-  .paye-trust { display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
-  .paye-trust-item { font-size: 11px; color: var(--gray-400); display: flex; align-items: center; gap: 4px; }
+            /* Guest form */
+            .paye-form {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+                margin-bottom: 1rem;
+            }
+            .paye-input {
+                width: 100%;
+                padding: 10px 14px;
+                border: 0.5px solid var(--gray-200);
+                border-radius: 8px;
+                font-size: 14px;
+                font-family: inherit;
+                outline: none;
+                transition: border-color 0.15s;
+                background: var(--white);
+            }
+            .paye-input:focus {
+                border-color: var(--blue);
+            }
+            .paye-input::placeholder {
+                color: var(--gray-400);
+            }
+            .paye-trust {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 1.5rem;
+                margin-top: 0.75rem;
+                flex-wrap: wrap;
+            }
+            .paye-trust-item {
+                font-size: 11px;
+                color: var(--gray-400);
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
 
-  /* Login prompt in modal */
-  .login-prompt { text-align: center; padding: 1rem; background: var(--gray-50); border-radius: 8px; margin-bottom: 1rem; border: 0.5px solid var(--border); }
-  .login-prompt p { font-size: 13px; color: var(--gray-500); margin-bottom: 0.75rem; }
-  .login-prompt-btns { display: flex; gap: 0.75rem; justify-content: center; }
-  .btn-login-prompt { font-size: 13px; font-weight: 600; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-family: inherit; border: none; transition: all 0.15s; }
-  .btn-login-primary { background: var(--black); color: var(--white); }
-  .btn-login-ghost { background: none; border: 0.5px solid var(--gray-200) !important; color: var(--gray-700); }
+            /* Login prompt in modal */
+            .login-prompt {
+                text-align: center;
+                padding: 1rem;
+                background: var(--gray-50);
+                border-radius: 8px;
+                margin-bottom: 1rem;
+                border: 0.5px solid var(--border);
+            }
+            .login-prompt p {
+                font-size: 13px;
+                color: var(--gray-500);
+                margin-bottom: 0.75rem;
+            }
+            .login-prompt-btns {
+                display: flex;
+                gap: 0.75rem;
+                justify-content: center;
+            }
+            .btn-login-prompt {
+                font-size: 13px;
+                font-weight: 600;
+                padding: 8px 20px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-family: inherit;
+                border: none;
+                transition: all 0.15s;
+            }
+            .btn-login-primary {
+                background: var(--black);
+                color: var(--white);
+            }
+            .btn-login-ghost {
+                background: none;
+                border: 0.5px solid var(--gray-200) !important;
+                color: var(--gray-700);
+            }
 
-  /* ── AUTH MODAL ── */
-  .auth-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; align-items: center; justify-content: center; padding: 1rem; }
-  .auth-overlay.open { display: flex; }
-  .auth-modal { background: var(--white); border-radius: var(--radius-lg); max-width: 420px; width: 100%; padding: 2rem; }
-  .auth-modal-header { text-align: center; margin-bottom: 1.75rem; }
-  .auth-logo { font-size: 22px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 0.5rem; }
-  .auth-logo span { color: var(--gold); }
-  .auth-title { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 0.25rem; }
-  .auth-sub { font-size: 13px; color: var(--gray-500); }
-  .auth-form { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem; }
-  .auth-input { width: 100%; padding: 11px 14px; border: 0.5px solid var(--gray-200); border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.15s; }
-  .auth-input:focus { border-color: var(--black); }
-  .auth-input::placeholder { color: var(--gray-400); }
-  .auth-submit { width: 100%; padding: 13px; background: var(--black); color: var(--white); border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
-  .auth-submit:hover { opacity: 0.85; }
-  .auth-switch { text-align: center; font-size: 13px; color: var(--gray-500); }
-  .auth-switch a { color: var(--black); font-weight: 600; text-decoration: none; cursor: pointer; }
-  .auth-error { font-size: 12px; color: var(--red); text-align: center; display: none; margin-bottom: 0.5rem; }
-  .auth-close { position: absolute; display: none; }
+            /* ── AUTH MODAL ── */
+            .auth-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 300;
+                align-items: center;
+                justify-content: center;
+                padding: 1rem;
+            }
+            .auth-overlay.open {
+                display: flex;
+            }
+            .auth-modal {
+                background: var(--white);
+                border-radius: var(--radius-lg);
+                max-width: 420px;
+                width: 100%;
+                padding: 2rem;
+            }
+            .auth-modal-header {
+                text-align: center;
+                margin-bottom: 1.75rem;
+            }
+            .auth-logo {
+                font-size: 22px;
+                font-weight: 800;
+                letter-spacing: -0.8px;
+                margin-bottom: 0.5rem;
+            }
+            .auth-logo span {
+                color: var(--gold);
+            }
+            .auth-title {
+                font-size: 18px;
+                font-weight: 700;
+                letter-spacing: -0.5px;
+                margin-bottom: 0.25rem;
+            }
+            .auth-sub {
+                font-size: 13px;
+                color: var(--gray-500);
+            }
+            .auth-form {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+                margin-bottom: 1.25rem;
+            }
+            .auth-input {
+                width: 100%;
+                padding: 11px 14px;
+                border: 0.5px solid var(--gray-200);
+                border-radius: 8px;
+                font-size: 14px;
+                font-family: inherit;
+                outline: none;
+                transition: border-color 0.15s;
+            }
+            .auth-input:focus {
+                border-color: var(--black);
+            }
+            .auth-input::placeholder {
+                color: var(--gray-400);
+            }
+            .auth-submit {
+                width: 100%;
+                padding: 13px;
+                background: var(--black);
+                color: var(--white);
+                border: none;
+                border-radius: 10px;
+                font-size: 15px;
+                font-weight: 600;
+                cursor: pointer;
+                font-family: inherit;
+                transition: opacity 0.15s;
+            }
+            .auth-submit:hover {
+                opacity: 0.85;
+            }
+            .auth-switch {
+                text-align: center;
+                font-size: 13px;
+                color: var(--gray-500);
+            }
+            .auth-switch a {
+                color: var(--black);
+                font-weight: 600;
+                text-decoration: none;
+                cursor: pointer;
+            }
+            .auth-error {
+                font-size: 12px;
+                color: var(--red);
+                text-align: center;
+                display: none;
+                margin-bottom: 0.5rem;
+            }
+            .auth-close {
+                position: absolute;
+                display: none;
+            }
 
-  /* Paye Button styling override */
-  .paye-checkout-button {
-    width: 100% !important;
-    background: var(--black) !important;
-    color: var(--white) !important;
-    border-radius: 8px !important;
-    padding: 12px !important;
-    font-family: inherit !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    margin-top: 0.75rem !important;
-    transition: opacity 0.15s !important;
-  }
-  .paye-checkout-button:hover {
-    background: var(--black) !important;
-    opacity: 0.9 !important;
-  }
+            /* Paye Button styling override */
+            .paye-checkout-button {
+                width: 100% !important;
+                background: var(--black) !important;
+                color: var(--white) !important;
+                border-radius: 8px !important;
+                padding: 12px !important;
+                font-family: inherit !important;
+                font-size: 14px !important;
+                font-weight: 600 !important;
+                margin-top: 0.75rem !important;
+                transition: opacity 0.15s !important;
+            }
+            .paye-checkout-button:hover {
+                background: var(--black) !important;
+                opacity: 0.9 !important;
+            }
 
-  /* ── FOOTER ── */
-  footer { background: var(--black); color: rgba(255,255,255,0.5); padding: 2rem; text-align: center; font-size: 13px; margin-top: 4rem; }
-  footer strong { color: var(--white); }
-  .footer-paye { margin-top: 0.75rem; font-size: 12px; color: rgba(255,255,255,0.3); }
-  .footer-paye a { color: var(--blue); text-decoration: none; }
-</style>
-</head>
-<body>
-
-<!-- NAV -->
-<nav>
-  <a href="#" class="nav-logo">Auto<span>Naija</span></a>
-  <ul class="nav-links">
-    <li><a href="#">Buy</a></li>
-    <li><a href="#">Sell</a></li>
-    <li><a href="#">Finance</a></li>
-    <li><a href="#">About</a></li>
-  </ul>
-  <div class="nav-right">
-    <!-- Guest state -->
-    <div id="nav-guest">
-      <button class="nav-signin" onclick="openAuth('login')">Sign in</button>
-      <button class="nav-cta" onclick="openAuth('signup')">Sign up</button>
-    </div>
-    <!-- Logged in state -->
-    <div class="nav-user" id="nav-user">
-      <div class="nav-avatar" id="nav-avatar"></div>
-      <span class="nav-user-name" id="nav-user-name"></span>
-      <button class="nav-logout" onclick="logout()">Sign out</button>
-    </div>
-  </div>
-</nav>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-eyebrow"><span></span>Nigeria's #1 Premium Car Marketplace</div>
-  <h1>Find Your Perfect<br /><em>Nigerian Drive.</em></h1>
-  <p>Thousands of verified cars. Trusted sellers. Secure checkout powered by Paye — pay with Paystack or Flutterwave, your choice.</p>
-  <div class="hero-search">
-    <input type="text" placeholder="Search by make, model, or location..." />
-    <button>Search Cars</button>
-  </div>
-  <div class="hero-stats">
-    <div>
-      <div class="hero-stat-num">4<span>,200+</span></div>
-      <div class="hero-stat-label">Verified listings</div>
-    </div>
-    <div>
-      <div class="hero-stat-num">12<span>k+</span></div>
-      <div class="hero-stat-label">Happy buyers</div>
-    </div>
-    <div>
-      <div class="hero-stat-num">36<span> states</span></div>
-      <div class="hero-stat-label">Nationwide delivery</div>
-    </div>
-  </div>
-</section>
-
-<!-- FILTER BAR -->
-<div class="filter-bar">
-  <span class="filter-label">Filter:</span>
-  <button class="filter-btn active" onclick="filterCars('all', this)">All Cars</button>
-  <button class="filter-btn" onclick="filterCars('sedan', this)">Sedan</button>
-  <button class="filter-btn" onclick="filterCars('suv', this)">SUV</button>
-  <button class="filter-btn" onclick="filterCars('truck', this)">Truck</button>
-  <button class="filter-btn" onclick="filterCars('new', this)">Brand New</button>
-  <button class="filter-btn" onclick="filterCars('used', this)">Foreign Used</button>
-  <button class="filter-btn" onclick="filterCars('under10m', this)">Under ₦10M</button>
-</div>
-
-<!-- MAIN -->
-<main class="main">
-  <div class="section-header">
-    <h2 class="section-title">Featured Listings</h2>
-    <span class="section-count" id="car-count">Showing 6 cars</span>
-  </div>
-  <div class="car-grid" id="car-grid">
-
-    <div class="car-card" data-type="suv" data-condition="new" data-price="47000000" onclick="openModal(0)">
-      <div class="car-img-placeholder" style="background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)">
-        🚙<span class="car-badge badge-new">Brand New</span>
-        <button class="car-fav" onclick="event.stopPropagation()">♡</button>
-      </div>
-      <div class="car-body">
-        <div class="car-make">Toyota</div>
-        <div class="car-name">Land Cruiser Prado 2024</div>
-        <div class="car-specs"><span class="car-spec">4.0L V6</span><span class="car-spec">· Automatic</span><span class="car-spec">· Lagos</span><span class="car-spec">· 0 km</span></div>
-        <div class="car-footer">
-          <div><div class="car-price">₦47,000,000</div><div class="car-price-sub">Negotiable</div></div>
-          <button class="buy-btn" onclick="event.stopPropagation();openModal(0)">Buy Now</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="car-card" data-type="sedan" data-condition="used" data-price="18500000" onclick="openModal(1)">
-      <div class="car-img-placeholder" style="background:linear-gradient(135deg,#1a1a1a,#2d2d2d,#1a1a1a)">
-        🚗<span class="car-badge badge-hot">🔥 Hot Deal</span>
-        <button class="car-fav" onclick="event.stopPropagation()">♡</button>
-      </div>
-      <div class="car-body">
-        <div class="car-make">Mercedes-Benz</div>
-        <div class="car-name">C300 AMG Line 2022</div>
-        <div class="car-specs"><span class="car-spec">2.0L Turbo</span><span class="car-spec">· Automatic</span><span class="car-spec">· Abuja</span><span class="car-spec">· 28k km</span></div>
-        <div class="car-footer">
-          <div><div class="car-price">₦18,500,000</div><div class="car-price-sub">Foreign used</div></div>
-          <button class="buy-btn" onclick="event.stopPropagation();openModal(1)">Buy Now</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="car-card" data-type="suv" data-condition="used" data-price="28000000" onclick="openModal(2)">
-      <div class="car-img-placeholder" style="background:linear-gradient(135deg,#0d1b2a,#1b4332,#0d1b2a)">
-        🚐<span class="car-badge badge-used">Foreign Used</span>
-        <button class="car-fav" onclick="event.stopPropagation()">♡</button>
-      </div>
-      <div class="car-body">
-        <div class="car-make">Lexus</div>
-        <div class="car-name">LX 570 Sport 2021</div>
-        <div class="car-specs"><span class="car-spec">5.7L V8</span><span class="car-spec">· Automatic</span><span class="car-spec">· Port Harcourt</span><span class="car-spec">· 42k km</span></div>
-        <div class="car-footer">
-          <div><div class="car-price">₦28,000,000</div><div class="car-price-sub">Financing available</div></div>
-          <button class="buy-btn" onclick="event.stopPropagation();openModal(2)">Buy Now</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="car-card" data-type="sedan" data-condition="new" data-price="8900000" onclick="openModal(3)">
-      <div class="car-img-placeholder" style="background:linear-gradient(135deg,#1a0a2e,#2d1b69,#1a0a2e)">
-        🚘<span class="car-badge badge-new">Brand New</span>
-        <button class="car-fav" onclick="event.stopPropagation()">♡</button>
-      </div>
-      <div class="car-body">
-        <div class="car-make">Honda</div>
-        <div class="car-name">Accord Sport 2024</div>
-        <div class="car-specs"><span class="car-spec">1.5L Turbo</span><span class="car-spec">· CVT</span><span class="car-spec">· Lagos</span><span class="car-spec">· 0 km</span></div>
-        <div class="car-footer">
-          <div><div class="car-price">₦8,900,000</div><div class="car-price-sub">Ex-showroom</div></div>
-          <button class="buy-btn" onclick="event.stopPropagation();openModal(3)">Buy Now</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="car-card" data-type="truck" data-condition="new" data-price="52000000" onclick="openModal(4)">
-      <div class="car-img-placeholder" style="background:linear-gradient(135deg,#2a1a0a,#8B4513,#2a1a0a)">
-        🚛<span class="car-badge badge-hot">🔥 Limited</span>
-        <button class="car-fav" onclick="event.stopPropagation()">♡</button>
-      </div>
-      <div class="car-body">
-        <div class="car-make">Ford</div>
-        <div class="car-name">F-150 Raptor 2024</div>
-        <div class="car-specs"><span class="car-spec">3.5L EcoBoost</span><span class="car-spec">· 10-Speed Auto</span><span class="car-spec">· Lagos</span><span class="car-spec">· 0 km</span></div>
-        <div class="car-footer">
-          <div><div class="car-price">₦52,000,000</div><div class="car-price-sub">Brand new</div></div>
-          <button class="buy-btn" onclick="event.stopPropagation();openModal(4)">Buy Now</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="car-card" data-type="suv" data-condition="used" data-price="6500000" onclick="openModal(5)">
-      <div class="car-img-placeholder" style="background:linear-gradient(135deg,#0a1628,#1e3a5f,#0a1628)">
-        🚙<span class="car-badge badge-used">Foreign Used</span>
-        <button class="car-fav" onclick="event.stopPropagation()">♡</button>
-      </div>
-      <div class="car-body">
-        <div class="car-make">Toyota</div>
-        <div class="car-name">RAV4 XLE 2020</div>
-        <div class="car-specs"><span class="car-spec">2.5L Hybrid</span><span class="car-spec">· Automatic</span><span class="car-spec">· Ibadan</span><span class="car-spec">· 51k km</span></div>
-        <div class="car-footer">
-          <div><div class="car-price">₦6,500,000</div><div class="car-price-sub">Clean title</div></div>
-          <button class="buy-btn" onclick="event.stopPropagation();openModal(5)">Buy Now</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</main>
-
-<!-- CAR MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-  <div class="modal" id="modal">
-    <div class="modal-img" id="modal-img">
-      <button class="modal-close" onclick="closeModalDirect()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-make" id="modal-make"></div>
-      <div class="modal-name" id="modal-name"></div>
-      <div class="modal-specs" id="modal-specs"></div>
-      <div class="modal-divider"></div>
-      <div class="modal-features-title">Key Features</div>
-      <div class="modal-features-list" id="modal-features"></div>
-      <div class="modal-divider"></div>
-      <div class="modal-price" id="modal-price"></div>
-      <div class="modal-price-note">₦500,000 deposit secures this vehicle</div>
-
-      <!-- PAYE CHECKOUT -->
-      <div class="paye-section">
-        <div class="paye-section-header">
-          <span class="paye-section-title">Secure Checkout</span>
-          <div class="paye-powered-row">
-            <span class="paye-powered">Powered by <strong>Paye.</strong></span>
-            <span class="paye-customized">Customized for AutoNaija</span>
-          </div>
-        </div>
-
-        <!-- Shown when logged in -->
-        <div id="checkout-loggedin" style="display:none;">
-          <div class="prefill-notice">
-            👤 <span>Checking out as <strong id="checkout-user-name"></strong> — details pre-filled from your account.</span>
-          </div>
-          <input type="hidden" id="loggedin-email" />
-          <div
-            id="paye-checkout-loggedin"
-            data-paye-checkout
-            data-email-source="#loggedin-email"
-            data-amount="500000"
-            data-button-text="Pay ₦500,000 Deposit"
-            data-currency="NGN">
-          </div>
-        </div>
-
-        <!-- Shown when guest -->
-        <div id="checkout-guest" style="display:none;">
-          <div class="login-prompt">
-            <p>Sign in to AutoNaija for a faster checkout experience.</p>
-            <div class="login-prompt-btns">
-              <button class="btn-login-prompt btn-login-primary" onclick="closeModalDirect();openAuth('login')">Sign in</button>
-              <button class="btn-login-prompt btn-login-ghost" onclick="closeModalDirect();openAuth('signup')">Create account</button>
+            /* ── FOOTER ── */
+            footer {
+                background: var(--black);
+                color: rgba(255, 255, 255, 0.5);
+                padding: 2rem;
+                text-align: center;
+                font-size: 13px;
+                margin-top: 4rem;
+            }
+            footer strong {
+                color: var(--white);
+            }
+            .footer-paye {
+                margin-top: 0.75rem;
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.3);
+            }
+            .footer-paye a {
+                color: var(--blue);
+                text-decoration: none;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- NAV -->
+        <nav>
+            <a href="#" class="nav-logo">Auto<span>Naija</span></a>
+            <ul class="nav-links">
+                <li><a href="#">Buy</a></li>
+                <li><a href="#">Sell</a></li>
+                <li><a href="#">Finance</a></li>
+                <li><a href="#">About</a></li>
+            </ul>
+            <div class="nav-right">
+                <!-- Guest state -->
+                <div id="nav-guest">
+                    <button class="nav-signin" onclick="openAuth('login')">
+                        Sign in
+                    </button>
+                    <button class="nav-cta" onclick="openAuth('signup')">
+                        Sign up
+                    </button>
+                </div>
+                <!-- Logged in state -->
+                <div class="nav-user" id="nav-user">
+                    <div class="nav-avatar" id="nav-avatar"></div>
+                    <span class="nav-user-name" id="nav-user-name"></span>
+                    <button class="nav-logout" onclick="logout()">
+                        Sign out
+                    </button>
+                </div>
             </div>
-          </div>
-          <div class="paye-form">
-            <input class="paye-input" type="text" placeholder="Full name" id="guest-name" />
-            <input class="paye-input" type="email" placeholder="Email address" id="guest-email" />
-            <input class="paye-input" type="tel" placeholder="Phone number" id="guest-phone" />
-          </div>
-          <div
-            id="paye-checkout-guest"
-            data-paye-checkout
-            data-email-source="#guest-email"
-            data-amount="500000"
-            data-button-text="Pay ₦500,000 Deposit"
-            data-currency="NGN">
-          </div>
+        </nav>
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-eyebrow">
+                <span></span>Nigeria's #1 Premium Car Marketplace
+            </div>
+            <h1>Find Your Perfect<br /><em>Nigerian Drive.</em></h1>
+            <p>
+                Thousands of verified cars. Trusted sellers. Secure checkout
+                powered by Paye — pay with Paystack or Flutterwave, your choice.
+            </p>
+            <div class="hero-search">
+                <input
+                    type="text"
+                    placeholder="Search by make, model, or location..."
+                />
+                <button>Search Cars</button>
+            </div>
+            <div class="hero-stats">
+                <div>
+                    <div class="hero-stat-num">4<span>,200+</span></div>
+                    <div class="hero-stat-label">Verified listings</div>
+                </div>
+                <div>
+                    <div class="hero-stat-num">12<span>k+</span></div>
+                    <div class="hero-stat-label">Happy buyers</div>
+                </div>
+                <div>
+                    <div class="hero-stat-num">36<span> states</span></div>
+                    <div class="hero-stat-label">Nationwide delivery</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FILTER BAR -->
+        <div class="filter-bar">
+            <span class="filter-label">Filter:</span>
+            <button class="filter-btn active" onclick="filterCars('all', this)">
+                All Cars
+            </button>
+            <button class="filter-btn" onclick="filterCars('sedan', this)">
+                Sedan
+            </button>
+            <button class="filter-btn" onclick="filterCars('suv', this)">
+                SUV
+            </button>
+            <button class="filter-btn" onclick="filterCars('truck', this)">
+                Truck
+            </button>
+            <button class="filter-btn" onclick="filterCars('new', this)">
+                Brand New
+            </button>
+            <button class="filter-btn" onclick="filterCars('used', this)">
+                Foreign Used
+            </button>
+            <button class="filter-btn" onclick="filterCars('under10m', this)">
+                Under ₦10M
+            </button>
         </div>
 
-        <div class="paye-trust">
-          <span class="paye-trust-item">🔒 256-bit encrypted</span>
-          <span class="paye-trust-item">✓ Paystack & Flutterwave</span>
-          <span class="paye-trust-item">↩ Refundable deposit</span>
+        <!-- MAIN -->
+        <main class="main">
+            <div class="section-header">
+                <h2 class="section-title">Featured Listings</h2>
+                <span class="section-count" id="car-count">Showing 6 cars</span>
+            </div>
+            <div class="car-grid" id="car-grid">
+                <div
+                    class="car-card"
+                    data-type="suv"
+                    data-condition="new"
+                    data-price="47000000"
+                    onclick="openModal(0)"
+                >
+                    <div
+                        class="car-img-placeholder"
+                        style="
+                            background: linear-gradient(
+                                135deg,
+                                #1a1a2e,
+                                #16213e,
+                                #0f3460
+                            );
+                        "
+                    >
+                        🚙<span class="car-badge badge-new">Brand New</span>
+                        <button
+                            class="car-fav"
+                            onclick="event.stopPropagation()"
+                        >
+                            ♡
+                        </button>
+                    </div>
+                    <div class="car-body">
+                        <div class="car-make">Toyota</div>
+                        <div class="car-name">Land Cruiser Prado 2024</div>
+                        <div class="car-specs">
+                            <span class="car-spec">4.0L V6</span
+                            ><span class="car-spec">· Automatic</span
+                            ><span class="car-spec">· Lagos</span
+                            ><span class="car-spec">· 0 km</span>
+                        </div>
+                        <div class="car-footer">
+                            <div>
+                                <div class="car-price">₦47,000,000</div>
+                                <div class="car-price-sub">Negotiable</div>
+                            </div>
+                            <button
+                                class="buy-btn"
+                                onclick="
+                                    event.stopPropagation();
+                                    openModal(0);
+                                "
+                            >
+                                Buy Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="car-card"
+                    data-type="sedan"
+                    data-condition="used"
+                    data-price="18500"
+                    onclick="openModal(1)"
+                >
+                    <div
+                        class="car-img-placeholder"
+                        style="
+                            background: linear-gradient(
+                                135deg,
+                                #1a1a1a,
+                                #2d2d2d,
+                                #1a1a1a
+                            );
+                        "
+                    >
+                        🚗<span class="car-badge badge-hot">🔥 Hot Deal</span>
+                        <button
+                            class="car-fav"
+                            onclick="event.stopPropagation()"
+                        >
+                            ♡
+                        </button>
+                    </div>
+                    <div class="car-body">
+                        <div class="car-make">Mercedes-Benz</div>
+                        <div class="car-name">C300 AMG Line 2022</div>
+                        <div class="car-specs">
+                            <span class="car-spec">2.0L Turbo</span
+                            ><span class="car-spec">· Automatic</span
+                            ><span class="car-spec">· Abuja</span
+                            ><span class="car-spec">· 28k km</span>
+                        </div>
+                        <div class="car-footer">
+                            <div>
+                                <div class="car-price">₦18,500,000</div>
+                                <div class="car-price-sub">Foreign used</div>
+                            </div>
+                            <button
+                                class="buy-btn"
+                                onclick="
+                                    event.stopPropagation();
+                                    openModal(1);
+                                "
+                            >
+                                Buy Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="car-card"
+                    data-type="suv"
+                    data-condition="used"
+                    data-price="28000000"
+                    onclick="openModal(2)"
+                >
+                    <div
+                        class="car-img-placeholder"
+                        style="
+                            background: linear-gradient(
+                                135deg,
+                                #0d1b2a,
+                                #1b4332,
+                                #0d1b2a
+                            );
+                        "
+                    >
+                        🚐<span class="car-badge badge-used">Foreign Used</span>
+                        <button
+                            class="car-fav"
+                            onclick="event.stopPropagation()"
+                        >
+                            ♡
+                        </button>
+                    </div>
+                    <div class="car-body">
+                        <div class="car-make">Lexus</div>
+                        <div class="car-name">LX 570 Sport 2021</div>
+                        <div class="car-specs">
+                            <span class="car-spec">5.7L V8</span
+                            ><span class="car-spec">· Automatic</span
+                            ><span class="car-spec">· Port Harcourt</span
+                            ><span class="car-spec">· 42k km</span>
+                        </div>
+                        <div class="car-footer">
+                            <div>
+                                <div class="car-price">₦28,000,000</div>
+                                <div class="car-price-sub">
+                                    Financing available
+                                </div>
+                            </div>
+                            <button
+                                class="buy-btn"
+                                onclick="
+                                    event.stopPropagation();
+                                    openModal(2);
+                                "
+                            >
+                                Buy Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="car-card"
+                    data-type="sedan"
+                    data-condition="new"
+                    data-price="8900000"
+                    onclick="openModal(3)"
+                >
+                    <div
+                        class="car-img-placeholder"
+                        style="
+                            background: linear-gradient(
+                                135deg,
+                                #1a0a2e,
+                                #2d1b69,
+                                #1a0a2e
+                            );
+                        "
+                    >
+                        🚘<span class="car-badge badge-new">Brand New</span>
+                        <button
+                            class="car-fav"
+                            onclick="event.stopPropagation()"
+                        >
+                            ♡
+                        </button>
+                    </div>
+                    <div class="car-body">
+                        <div class="car-make">Honda</div>
+                        <div class="car-name">Accord Sport 2024</div>
+                        <div class="car-specs">
+                            <span class="car-spec">1.5L Turbo</span
+                            ><span class="car-spec">· CVT</span
+                            ><span class="car-spec">· Lagos</span
+                            ><span class="car-spec">· 0 km</span>
+                        </div>
+                        <div class="car-footer">
+                            <div>
+                                <div class="car-price">₦8,900,000</div>
+                                <div class="car-price-sub">Ex-showroom</div>
+                            </div>
+                            <button
+                                class="buy-btn"
+                                onclick="
+                                    event.stopPropagation();
+                                    openModal(3);
+                                "
+                            >
+                                Buy Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="car-card"
+                    data-type="truck"
+                    data-condition="new"
+                    data-price="52000000"
+                    onclick="openModal(4)"
+                >
+                    <div
+                        class="car-img-placeholder"
+                        style="
+                            background: linear-gradient(
+                                135deg,
+                                #2a1a0a,
+                                #8b4513,
+                                #2a1a0a
+                            );
+                        "
+                    >
+                        🚛<span class="car-badge badge-hot">🔥 Limited</span>
+                        <button
+                            class="car-fav"
+                            onclick="event.stopPropagation()"
+                        >
+                            ♡
+                        </button>
+                    </div>
+                    <div class="car-body">
+                        <div class="car-make">Ford</div>
+                        <div class="car-name">F-150 Raptor 2024</div>
+                        <div class="car-specs">
+                            <span class="car-spec">3.5L EcoBoost</span
+                            ><span class="car-spec">· 10-Speed Auto</span
+                            ><span class="car-spec">· Lagos</span
+                            ><span class="car-spec">· 0 km</span>
+                        </div>
+                        <div class="car-footer">
+                            <div>
+                                <div class="car-price">₦52,000,000</div>
+                                <div class="car-price-sub">Brand new</div>
+                            </div>
+                            <button
+                                class="buy-btn"
+                                onclick="
+                                    event.stopPropagation();
+                                    openModal(4);
+                                "
+                            >
+                                Buy Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="car-card"
+                    data-type="suv"
+                    data-condition="used"
+                    data-price="6500"
+                    onclick="openModal(5)"
+                >
+                    <div
+                        class="car-img-placeholder"
+                        style="
+                            background: linear-gradient(
+                                135deg,
+                                #0a1628,
+                                #1e3a5f,
+                                #0a1628
+                            );
+                        "
+                    >
+                        🚙<span class="car-badge badge-used">Foreign Used</span>
+                        <button
+                            class="car-fav"
+                            onclick="event.stopPropagation()"
+                        >
+                            ♡
+                        </button>
+                    </div>
+                    <div class="car-body">
+                        <div class="car-make">Toyota</div>
+                        <div class="car-name">RAV4 XLE 2020</div>
+                        <div class="car-specs">
+                            <span class="car-spec">2.5L Hybrid</span
+                            ><span class="car-spec">· Automatic</span
+                            ><span class="car-spec">· Ibadan</span
+                            ><span class="car-spec">· 51k km</span>
+                        </div>
+                        <div class="car-footer">
+                            <div>
+                                <div class="car-price">₦6,500,000</div>
+                                <div class="car-price-sub">Clean title</div>
+                            </div>
+                            <button
+                                class="buy-btn"
+                                onclick="
+                                    event.stopPropagation();
+                                    openModal(5);
+                                "
+                            >
+                                Buy Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- CAR MODAL -->
+        <div
+            class="modal-overlay"
+            id="modal-overlay"
+            onclick="closeModal(event)"
+        >
+            <div class="modal" id="modal">
+                <div class="modal-img" id="modal-img">
+                    <button class="modal-close" onclick="closeModalDirect()">
+                        ✕
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-make" id="modal-make"></div>
+                    <div class="modal-name" id="modal-name"></div>
+                    <div class="modal-specs" id="modal-specs"></div>
+                    <div class="modal-divider"></div>
+                    <div class="modal-features-title">Key Features</div>
+                    <div class="modal-features-list" id="modal-features"></div>
+                    <div class="modal-divider"></div>
+                    <div class="modal-price" id="modal-price"></div>
+                    <div class="modal-price-note">
+                        ₦500,000 deposit secures this vehicle
+                    </div>
+
+                    <!-- PAYE CHECKOUT -->
+                    <div class="paye-section">
+                        <div class="paye-section-header">
+                            <span class="paye-section-title"
+                                >Secure Checkout</span
+                            >
+                            <div class="paye-powered-row">
+                                <span class="paye-powered"
+                                    >Powered by <strong>Paye.</strong></span
+                                >
+                                <span class="paye-customized"
+                                    >Customized for AutoNaija</span
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Shown when logged in -->
+                        <div id="checkout-loggedin" style="display: none">
+                            <div class="prefill-notice">
+                                👤
+                                <span
+                                    >Checking out as
+                                    <strong id="checkout-user-name"></strong> —
+                                    details pre-filled from your account.</span
+                                >
+                            </div>
+                            <input type="hidden" id="loggedin-email" />
+                            <div
+                                id="paye-checkout-loggedin"
+                                data-paye-checkout
+                                data-email-source="#loggedin-email"
+                                data-amount="500"
+                                data-button-text="Pay ₦500,000 Deposit"
+                                data-currency="NGN"
+                            ></div>
+                        </div>
+
+                        <!-- Shown when guest -->
+                        <div id="checkout-guest" style="display: none">
+                            <div class="login-prompt">
+                                <p>
+                                    Sign in to AutoNaija for a faster checkout
+                                    experience.
+                                </p>
+                                <div class="login-prompt-btns">
+                                    <button
+                                        class="btn-login-prompt btn-login-primary"
+                                        onclick="
+                                            closeModalDirect();
+                                            openAuth('login');
+                                        "
+                                    >
+                                        Sign in
+                                    </button>
+                                    <button
+                                        class="btn-login-prompt btn-login-ghost"
+                                        onclick="
+                                            closeModalDirect();
+                                            openAuth('signup');
+                                        "
+                                    >
+                                        Create account
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="paye-form">
+                                <input
+                                    class="paye-input"
+                                    type="text"
+                                    placeholder="Full name"
+                                    id="guest-name"
+                                />
+                                <input
+                                    class="paye-input"
+                                    type="email"
+                                    placeholder="Email address"
+                                    id="guest-email"
+                                />
+                                <input
+                                    class="paye-input"
+                                    type="tel"
+                                    placeholder="Phone number"
+                                    id="guest-phone"
+                                />
+                            </div>
+                            <div
+                                id="paye-checkout-guest"
+                                data-paye-checkout
+                                data-email-source="#guest-email"
+                                data-amount="500"
+                                data-button-text="Pay ₦100,000 Deposit"
+                                data-currency="NGN"
+                            ></div>
+                        </div>
+
+                        <div class="paye-trust">
+                            <span class="paye-trust-item"
+                                >🔒 256-bit encrypted</span
+                            >
+                            <span class="paye-trust-item"
+                                >✓ Paystack & Flutterwave</span
+                            >
+                            <span class="paye-trust-item"
+                                >↩ Refundable deposit</span
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
 
-    </div>
-  </div>
-</div>
+        <!-- AUTH MODAL -->
+        <div
+            class="auth-overlay"
+            id="auth-overlay"
+            onclick="closeAuthOnOverlay(event)"
+        >
+            <div class="auth-modal">
+                <div class="auth-modal-header">
+                    <div class="auth-logo">Auto<span>Naija</span></div>
+                    <div class="auth-title" id="auth-title">Welcome back</div>
+                    <div class="auth-sub" id="auth-sub">
+                        Sign in to your account
+                    </div>
+                </div>
+                <div class="auth-error" id="auth-error"></div>
+                <div class="auth-form" id="auth-form">
+                    <input
+                        class="auth-input"
+                        type="text"
+                        id="auth-name"
+                        placeholder="Full name"
+                        style="display: none"
+                    />
+                    <input
+                        class="auth-input"
+                        type="tel"
+                        id="auth-phone"
+                        placeholder="Phone number"
+                        style="display: none"
+                    />
+                    <input
+                        class="auth-input"
+                        type="email"
+                        id="auth-email"
+                        placeholder="Email address"
+                    />
+                    <input
+                        class="auth-input"
+                        type="password"
+                        id="auth-password"
+                        placeholder="Password"
+                    />
+                </div>
+                <button
+                    class="auth-submit"
+                    id="auth-submit"
+                    onclick="handleAuth()"
+                >
+                    Sign in
+                </button>
+                <br /><br />
+                <div class="auth-switch" id="auth-switch">
+                    Don't have an account? <a onclick="toggleAuth()">Sign up</a>
+                </div>
+            </div>
+        </div>
 
-<!-- AUTH MODAL -->
-<div class="auth-overlay" id="auth-overlay" onclick="closeAuthOnOverlay(event)">
-  <div class="auth-modal">
-    <div class="auth-modal-header">
-      <div class="auth-logo">Auto<span>Naija</span></div>
-      <div class="auth-title" id="auth-title">Welcome back</div>
-      <div class="auth-sub" id="auth-sub">Sign in to your account</div>
-    </div>
-    <div class="auth-error" id="auth-error"></div>
-    <div class="auth-form" id="auth-form">
-      <input class="auth-input" type="text" id="auth-name" placeholder="Full name" style="display:none;" />
-      <input class="auth-input" type="tel" id="auth-phone" placeholder="Phone number" style="display:none;" />
-      <input class="auth-input" type="email" id="auth-email" placeholder="Email address" />
-      <input class="auth-input" type="password" id="auth-password" placeholder="Password" />
-    </div>
-    <button class="auth-submit" id="auth-submit" onclick="handleAuth()">Sign in</button>
-    <br/><br/>
-    <div class="auth-switch" id="auth-switch">
-      Don't have an account? <a onclick="toggleAuth()">Sign up</a>
-    </div>
-  </div>
-</div>
+        <!-- FOOTER -->
+        <footer>
+            <div>
+                <strong>AutoNaija</strong> — Nigeria's Premium Car Marketplace
+            </div>
+            <div style="margin-top: 0.5rem">
+                Lagos · Abuja · Port Harcourt · Nationwide Delivery
+            </div>
+            <div class="footer-paye">
+                Payments secured by
+                <a href="https://paye.africa" target="_blank">Paye.</a> — One
+                API. Every African payment provider.
+            </div>
+        </footer>
 
-<!-- FOOTER -->
-<footer>
-  <div><strong>AutoNaija</strong> — Nigeria's Premium Car Marketplace</div>
-  <div style="margin-top:0.5rem;">Lagos · Abuja · Port Harcourt · Nationwide Delivery</div>
-  <div class="footer-paye">Payments secured by <a href="https://paye.africa" target="_blank">Paye.</a> — One API. Every African payment provider.</div>
-</footer>
+        <!-- PAYE SDK -->
+        <script src="http://localhost:8080/sdk/paye_test_pub_1b721d59709a18139d002df4227b1fe6.js"></script>
 
-<!-- PAYE SDK -->
-<script src="https://api.paye.africa/sdk/paye_test_pub_b9b734506a9cd0f6237e8721aa676d01.js"></script>
+        <script>
+            const cars = [
+                {
+                    emoji: "🚙",
+                    bg: "linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)",
+                    make: "Toyota",
+                    name: "Land Cruiser Prado 2024",
+                    specs: ["4.0L V6", "Automatic", "Lagos", "0 km"],
+                    features: [
+                        "4WD System",
+                        "Leather Seats",
+                        "Sunroof",
+                        "Rear Camera",
+                        "Apple CarPlay",
+                        "Android Auto",
+                        "Blind Spot Monitor",
+                        "Heated Seats",
+                    ],
+                    price: "₦47,000,000",
+                    amount: 100,
+                },
+                {
+                    emoji: "🚗",
+                    bg: "linear-gradient(135deg,#1a1a1a,#2d2d2d,#1a1a1a)",
+                    make: "Mercedes-Benz",
+                    name: "C300 AMG Line 2022",
+                    specs: ["2.0L Turbo", "Automatic", "Abuja", "28k km"],
+                    features: [
+                        "AMG Body Kit",
+                        "Panoramic Roof",
+                        "Burmester Audio",
+                        "LED Headlights",
+                        "Keyless Entry",
+                        "Digital Cluster",
+                        "Wireless Charging",
+                    ],
+                    price: "₦18,500,000",
+                    amount: 500,
+                },
+                {
+                    emoji: "🚐",
+                    bg: "linear-gradient(135deg,#0d1b2a,#1b4332,#0d1b2a)",
+                    make: "Lexus",
+                    name: "LX 570 Sport 2021",
+                    specs: ["5.7L V8", "Automatic", "Port Harcourt", "42k km"],
+                    features: [
+                        "Mark Levinson Audio",
+                        "3-Row Seating",
+                        "Air Suspension",
+                        "Rear Entertainment",
+                        "Multi-Terrain Select",
+                        "Adaptive Headlights",
+                    ],
+                    price: "₦28,000,000",
+                    amount: 500,
+                },
+                {
+                    emoji: "🚘",
+                    bg: "linear-gradient(135deg,#1a0a2e,#2d1b69,#1a0a2e)",
+                    make: "Honda",
+                    name: "Accord Sport 2024",
+                    specs: ["1.5L Turbo", "CVT", "Lagos", "0 km"],
+                    features: [
+                        "Sport Trim",
+                        "Heated Front Seats",
+                        "Remote Start",
+                        "Lane Assist",
+                        "Adaptive Cruise",
+                        "Wireless CarPlay",
+                        "Power Sunroof",
+                    ],
+                    price: "₦8,900,000",
+                    amount: 500,
+                },
+                {
+                    emoji: "🚛",
+                    bg: "linear-gradient(135deg,#2a1a0a,#8B4513,#2a1a0a)",
+                    make: "Ford",
+                    name: "F-150 Raptor 2024",
+                    specs: ["3.5L EcoBoost", "10-Speed Auto", "Lagos", "0 km"],
+                    features: [
+                        "Fox Racing Shocks",
+                        "Trail Control",
+                        "360° Camera",
+                        "Bang & Olufsen Audio",
+                        "Pro Trailer Backup",
+                        "Matrix LED",
+                    ],
+                    price: "₦52,000,000",
+                    amount: 500,
+                },
+                {
+                    emoji: "🚙",
+                    bg: "linear-gradient(135deg,#0a1628,#1e3a5f,#0a1628)",
+                    make: "Toyota",
+                    name: "RAV4 XLE 2020",
+                    specs: ["2.5L Hybrid", "Automatic", "Ibadan", "51k km"],
+                    features: [
+                        "Hybrid Powertrain",
+                        "Safety Sense 2.0",
+                        "Wireless Charging",
+                        "Dual Zone A/C",
+                        "Power Liftgate",
+                        "JBL Audio",
+                    ],
+                    price: "₦6,500,000",
+                    amount: 500,
+                },
+            ];
 
-<script>
-  const cars = [
-    { emoji:'🚙', bg:'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)', make:'Toyota', name:'Land Cruiser Prado 2024', specs:['4.0L V6','Automatic','Lagos','0 km'], features:['4WD System','Leather Seats','Sunroof','Rear Camera','Apple CarPlay','Android Auto','Blind Spot Monitor','Heated Seats'], price:'₦47,000,000', amount:500000 },
-    { emoji:'🚗', bg:'linear-gradient(135deg,#1a1a1a,#2d2d2d,#1a1a1a)', make:'Mercedes-Benz', name:'C300 AMG Line 2022', specs:['2.0L Turbo','Automatic','Abuja','28k km'], features:['AMG Body Kit','Panoramic Roof','Burmester Audio','LED Headlights','Keyless Entry','Digital Cluster','Wireless Charging'], price:'₦18,500,000', amount:500000 },
-    { emoji:'🚐', bg:'linear-gradient(135deg,#0d1b2a,#1b4332,#0d1b2a)', make:'Lexus', name:'LX 570 Sport 2021', specs:['5.7L V8','Automatic','Port Harcourt','42k km'], features:['Mark Levinson Audio','3-Row Seating','Air Suspension','Rear Entertainment','Multi-Terrain Select','Adaptive Headlights'], price:'₦28,000,000', amount:500000 },
-    { emoji:'🚘', bg:'linear-gradient(135deg,#1a0a2e,#2d1b69,#1a0a2e)', make:'Honda', name:'Accord Sport 2024', specs:['1.5L Turbo','CVT','Lagos','0 km'], features:['Sport Trim','Heated Front Seats','Remote Start','Lane Assist','Adaptive Cruise','Wireless CarPlay','Power Sunroof'], price:'₦8,900,000', amount:500000 },
-    { emoji:'🚛', bg:'linear-gradient(135deg,#2a1a0a,#8B4513,#2a1a0a)', make:'Ford', name:'F-150 Raptor 2024', specs:['3.5L EcoBoost','10-Speed Auto','Lagos','0 km'], features:['Fox Racing Shocks','Trail Control','360° Camera','Bang & Olufsen Audio','Pro Trailer Backup','Matrix LED'], price:'₦52,000,000', amount:500000 },
-    { emoji:'🚙', bg:'linear-gradient(135deg,#0a1628,#1e3a5f,#0a1628)', make:'Toyota', name:'RAV4 XLE 2020', specs:['2.5L Hybrid','Automatic','Ibadan','51k km'], features:['Hybrid Powertrain','Safety Sense 2.0','Wireless Charging','Dual Zone A/C','Power Liftgate','JBL Audio'], price:'₦6,500,000', amount:500000 },
-  ];
+            let currentCar = null;
+            let authMode = "login";
+            let currentUser = JSON.parse(
+                localStorage.getItem("autonaija_user") || "null",
+            );
 
-  let currentCar = null;
-  let authMode = 'login';
-  let currentUser = JSON.parse(localStorage.getItem('autonaija_user') || 'null');
+            // ── AUTH STATE ──
+            function updateNavState() {
+                if (currentUser) {
+                    document.getElementById("nav-guest").style.display = "none";
+                    const navUser = document.getElementById("nav-user");
+                    navUser.style.display = "flex";
+                    document.getElementById("nav-user-name").textContent =
+                        currentUser.name.split(" ")[0];
+                    document.getElementById("nav-avatar").textContent =
+                        currentUser.name.charAt(0).toUpperCase();
+                } else {
+                    document.getElementById("nav-guest").style.display = "flex";
+                    document.getElementById("nav-user").style.display = "none";
+                }
+            }
 
-  // ── AUTH STATE ──
-  function updateNavState() {
-    if (currentUser) {
-      document.getElementById('nav-guest').style.display = 'none';
-      const navUser = document.getElementById('nav-user');
-      navUser.style.display = 'flex';
-      document.getElementById('nav-user-name').textContent = currentUser.name.split(' ')[0];
-      document.getElementById('nav-avatar').textContent = currentUser.name.charAt(0).toUpperCase();
-    } else {
-      document.getElementById('nav-guest').style.display = 'flex';
-      document.getElementById('nav-user').style.display = 'none';
-    }
-  }
+            function logout() {
+                currentUser = null;
+                localStorage.removeItem("autonaija_user");
+                updateNavState();
+            }
 
-  function logout() {
-    currentUser = null;
-    localStorage.removeItem('autonaija_user');
-    updateNavState();
-  }
+            // ── AUTH MODAL ──
+            function openAuth(mode) {
+                authMode = mode;
+                document.getElementById("auth-overlay").classList.add("open");
+                document.body.style.overflow = "hidden";
+                setAuthMode(mode);
+            }
 
-  // ── AUTH MODAL ──
-  function openAuth(mode) {
-    authMode = mode;
-    document.getElementById('auth-overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-    setAuthMode(mode);
-  }
+            function setAuthMode(mode) {
+                authMode = mode;
+                const nameEl = document.getElementById("auth-name");
+                const phoneEl = document.getElementById("auth-phone");
+                if (mode === "signup") {
+                    document.getElementById("auth-title").textContent =
+                        "Create your account";
+                    document.getElementById("auth-sub").textContent =
+                        "Join AutoNaija today";
+                    document.getElementById("auth-submit").textContent =
+                        "Create account";
+                    document.getElementById("auth-switch").innerHTML =
+                        'Already have an account? <a onclick="toggleAuth()">Sign in</a>';
+                    nameEl.style.display = "";
+                    phoneEl.style.display = "";
+                } else {
+                    document.getElementById("auth-title").textContent =
+                        "Welcome back";
+                    document.getElementById("auth-sub").textContent =
+                        "Sign in to your account";
+                    document.getElementById("auth-submit").textContent =
+                        "Sign in";
+                    document.getElementById("auth-switch").innerHTML =
+                        'Don\'t have an account? <a onclick="toggleAuth()">Sign up</a>';
+                    nameEl.style.display = "none";
+                    phoneEl.style.display = "none";
+                }
+                document.getElementById("auth-error").style.display = "none";
+            }
 
-  function setAuthMode(mode) {
-    authMode = mode;
-    const nameEl = document.getElementById('auth-name');
-    const phoneEl = document.getElementById('auth-phone');
-    if (mode === 'signup') {
-      document.getElementById('auth-title').textContent = 'Create your account';
-      document.getElementById('auth-sub').textContent = 'Join AutoNaija today';
-      document.getElementById('auth-submit').textContent = 'Create account';
-      document.getElementById('auth-switch').innerHTML = 'Already have an account? <a onclick="toggleAuth()">Sign in</a>';
-      nameEl.style.display = ''; phoneEl.style.display = '';
-    } else {
-      document.getElementById('auth-title').textContent = 'Welcome back';
-      document.getElementById('auth-sub').textContent = 'Sign in to your account';
-      document.getElementById('auth-submit').textContent = 'Sign in';
-      document.getElementById('auth-switch').innerHTML = "Don't have an account? <a onclick=\"toggleAuth()\">Sign up</a>";
-      nameEl.style.display = 'none'; phoneEl.style.display = 'none';
-    }
-    document.getElementById('auth-error').style.display = 'none';
-  }
+            function toggleAuth() {
+                setAuthMode(authMode === "login" ? "signup" : "login");
+            }
 
-  function toggleAuth() { setAuthMode(authMode === 'login' ? 'signup' : 'login'); }
+            function closeAuthOnOverlay(e) {
+                if (e.target === document.getElementById("auth-overlay"))
+                    closeAuth();
+            }
 
-  function closeAuthOnOverlay(e) {
-    if (e.target === document.getElementById('auth-overlay')) closeAuth();
-  }
+            function closeAuth() {
+                document
+                    .getElementById("auth-overlay")
+                    .classList.remove("open");
+                document.body.style.overflow = "";
+            }
 
-  function closeAuth() {
-    document.getElementById('auth-overlay').classList.remove('open');
-    document.body.style.overflow = '';
-  }
+            function handleAuth() {
+                const email = document
+                    .getElementById("auth-email")
+                    .value.trim();
+                const password = document.getElementById("auth-password").value;
+                const errEl = document.getElementById("auth-error");
 
-  function handleAuth() {
-    const email = document.getElementById('auth-email').value.trim();
-    const password = document.getElementById('auth-password').value;
-    const errEl = document.getElementById('auth-error');
+                if (!email || !password) {
+                    errEl.textContent = "Please fill in all fields.";
+                    errEl.style.display = "block";
+                    return;
+                }
 
-    if (!email || !password) {
-      errEl.textContent = 'Please fill in all fields.';
-      errEl.style.display = 'block'; return;
-    }
+                if (authMode === "signup") {
+                    const name = document
+                        .getElementById("auth-name")
+                        .value.trim();
+                    const phone = document
+                        .getElementById("auth-phone")
+                        .value.trim();
+                    if (!name || !phone) {
+                        errEl.textContent = "Please fill in all fields.";
+                        errEl.style.display = "block";
+                        return;
+                    }
+                    currentUser = { name, email, phone };
+                } else {
+                    // Demo login — accept any credentials, reconstruct from stored or use email
+                    const stored = JSON.parse(
+                        localStorage.getItem("autonaija_user") || "null",
+                    );
+                    currentUser = stored || {
+                        name: email.split("@")[0],
+                        email,
+                        phone: "",
+                    };
+                }
 
-    if (authMode === 'signup') {
-      const name = document.getElementById('auth-name').value.trim();
-      const phone = document.getElementById('auth-phone').value.trim();
-      if (!name || !phone) {
-        errEl.textContent = 'Please fill in all fields.';
-        errEl.style.display = 'block'; return;
-      }
-      currentUser = { name, email, phone };
-    } else {
-      // Demo login — accept any credentials, reconstruct from stored or use email
-      const stored = JSON.parse(localStorage.getItem('autonaija_user') || 'null');
-      currentUser = stored || { name: email.split('@')[0], email, phone: '' };
-    }
+                localStorage.setItem(
+                    "autonaija_user",
+                    JSON.stringify(currentUser),
+                );
+                updateNavState();
+                closeAuth();
+            }
 
-    localStorage.setItem('autonaija_user', JSON.stringify(currentUser));
-    updateNavState();
-    closeAuth();
-  }
+            // ── CAR MODAL ──
+            function openModal(index) {
+                currentCar = cars[index];
+                const c = currentCar;
 
-  // ── CAR MODAL ──
-  function openModal(index) {
-    currentCar = cars[index];
-    const c = currentCar;
+                const imgEl = document.getElementById("modal-img");
+                imgEl.style.background = c.bg;
+                // clear old emoji
+                const oldEmoji = imgEl.querySelector(".modal-emoji");
+                if (oldEmoji) oldEmoji.remove();
+                const emoji = document.createElement("span");
+                emoji.className = "modal-emoji";
+                emoji.style.fontSize = "80px";
+                emoji.textContent = c.emoji;
+                imgEl.insertBefore(emoji, imgEl.firstChild);
 
-    const imgEl = document.getElementById('modal-img');
-    imgEl.style.background = c.bg;
-    // clear old emoji
-    const oldEmoji = imgEl.querySelector('.modal-emoji');
-    if (oldEmoji) oldEmoji.remove();
-    const emoji = document.createElement('span');
-    emoji.className = 'modal-emoji';
-    emoji.style.fontSize = '80px';
-    emoji.textContent = c.emoji;
-    imgEl.insertBefore(emoji, imgEl.firstChild);
+                document.getElementById("modal-make").textContent = c.make;
+                document.getElementById("modal-name").textContent = c.name;
+                document.getElementById("modal-price").textContent = c.price;
+                document.getElementById("modal-specs").innerHTML = c.specs
+                    .map((s) => `<span class="modal-spec">${s}</span>`)
+                    .join("");
+                document.getElementById("modal-features").innerHTML = c.features
+                    .map((f) => `<span class="modal-feature">${f}</span>`)
+                    .join("");
 
-    document.getElementById('modal-make').textContent = c.make;
-    document.getElementById('modal-name').textContent = c.name;
-    document.getElementById('modal-price').textContent = c.price;
-    document.getElementById('modal-specs').innerHTML = c.specs.map(s => `<span class="modal-spec">${s}</span>`).join('');
-    document.getElementById('modal-features').innerHTML = c.features.map(f => `<span class="modal-feature">${f}</span>`).join('');
+                // Show correct checkout state
+                if (currentUser) {
+                    document.getElementById("checkout-loggedin").style.display =
+                        "block";
+                    document.getElementById("checkout-guest").style.display =
+                        "none";
+                    document.getElementById("checkout-user-name").textContent =
+                        currentUser.name;
 
-    // Show correct checkout state
-    if (currentUser) {
-      document.getElementById('checkout-loggedin').style.display = 'block';
-      document.getElementById('checkout-guest').style.display = 'none';
-      document.getElementById('checkout-user-name').textContent = currentUser.name;
-      
-      // Prefill hidden email input for SDK data-email-source
-      document.getElementById('loggedin-email').value = currentUser.email;
+                    // Prefill hidden email input for SDK data-email-source
+                    document.getElementById("loggedin-email").value =
+                        currentUser.email;
 
-      const payeEl = document.getElementById('paye-checkout-loggedin');
-      payeEl.setAttribute('data-email', currentUser.email);
-    } else {
-      document.getElementById('checkout-loggedin').style.display = 'none';
-      document.getElementById('checkout-guest').style.display = 'block';
-    }
+                    const payeEl = document.getElementById(
+                        "paye-checkout-loggedin",
+                    );
+                    payeEl.setAttribute("data-email", currentUser.email);
+                } else {
+                    document.getElementById("checkout-loggedin").style.display =
+                        "none";
+                    document.getElementById("checkout-guest").style.display =
+                        "block";
+                }
 
-    document.getElementById('modal-overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
+                document.getElementById("modal-overlay").classList.add("open");
+                document.body.style.overflow = "hidden";
+            }
 
-  function closeModal(e) {
-    if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
-  }
+            function closeModal(e) {
+                if (e.target === document.getElementById("modal-overlay"))
+                    closeModalDirect();
+            }
 
-  function closeModalDirect() {
-    document.getElementById('modal-overlay').classList.remove('open');
-    document.body.style.overflow = '';
-  }
+            function closeModalDirect() {
+                document
+                    .getElementById("modal-overlay")
+                    .classList.remove("open");
+                document.body.style.overflow = "";
+            }
 
-  // Update guest paye email from input
-  document.getElementById('guest-email').addEventListener('input', function() {
-    document.getElementById('paye-checkout-guest').setAttribute('data-email', this.value);
-  });
+            // Update guest paye email from input
+            document
+                .getElementById("guest-email")
+                .addEventListener("input", function () {
+                    document
+                        .getElementById("paye-checkout-guest")
+                        .setAttribute("data-email", this.value);
+                });
 
-  // ── FILTER ──
-  function filterCars(type, btn) {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const cards = document.querySelectorAll('.car-card');
-    let visible = 0;
-    cards.forEach(card => {
-      let show = false;
-      if (type === 'all') show = true;
-      else if (type === 'new') show = card.dataset.condition === 'new';
-      else if (type === 'used') show = card.dataset.condition === 'used';
-      else if (type === 'under10m') show = parseInt(card.dataset.price) < 10000000;
-      else show = card.dataset.type === type;
-      card.style.display = show ? '' : 'none';
-      if (show) visible++;
-    });
-    document.getElementById('car-count').textContent = `Showing ${visible} car${visible !== 1 ? 's' : ''}`;
-  }
+            // ── FILTER ──
+            function filterCars(type, btn) {
+                document
+                    .querySelectorAll(".filter-btn")
+                    .forEach((b) => b.classList.remove("active"));
+                btn.classList.add("active");
+                const cards = document.querySelectorAll(".car-card");
+                let visible = 0;
+                cards.forEach((card) => {
+                    let show = false;
+                    if (type === "all") show = true;
+                    else if (type === "new")
+                        show = card.dataset.condition === "new";
+                    else if (type === "used")
+                        show = card.dataset.condition === "used";
+                    else if (type === "under10m")
+                        show = parseInt(card.dataset.price) < 50000;
+                    else show = card.dataset.type === type;
+                    card.style.display = show ? "" : "none";
+                    if (show) visible++;
+                });
+                document.getElementById("car-count").textContent =
+                    `Showing ${visible} car${visible !== 1 ? "s" : ""}`;
+            }
 
-  // Init
-  updateNavState();
-</script>
-
-</body>
+            // Init
+            updateNavState();
+        </script>
+    </body>
 </html>
-
-
-
-
-
-
-
-

@@ -4,6 +4,7 @@ export interface JWTPayload {
   user_email: string
   user_api_key: string
   user_public_id: string
+  role: string
   exp: number
 }
 
@@ -25,6 +26,7 @@ export function decodeJWT(token: string): JWTPayload | null {
       user_email: payload.email,
       user_api_key: payload.api_key,
       user_public_id: payload.public_id || "",
+      role: payload.role || "merchant",
       exp: payload.exp,
     }
   } catch (err) {

@@ -2,6 +2,7 @@ package webhooks
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/ttomsin/paye/internal/models"
@@ -52,6 +53,18 @@ func (r *WebhookRepo) FindBySlug(ctx context.Context, slug string) (*models.Webh
 	return &config, nil
 }
 
+func (r *WebhookRepo) FindByProjectAndProvider(ctx context.Context, projectID string, providerName string) (*models.WebhookConfig, error) {
+	var config models.WebhookConfig
+	err := r.db.WithContext(ctx).Where("project_id = ? AND provider_name = ?", projectID, providerName).First(&config).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &config, nil
+}
+
 func (r *WebhookRepo) Update(ctx context.Context, wc *models.WebhookConfig) error {
 	return r.db.WithContext(ctx).Save(&wc).Error
 }
@@ -68,14 +81,20 @@ func (r *WebhookRepo) UpdateLog(ctx context.Context, wl *models.WebhookLog) erro
 	return r.db.WithContext(ctx).Save(wl).Error
 }
 
-func (r *WebhookRepo) UpdateTransactionAuthCode(ctx context.Context, reference string, authCode string, status string, rawPayload string) error {
+func (r *WebhookRepo) UpdateTransactionStatusAndAuthCode(ctx context.Context, reference string, authCode string, status string, transactionStatus string, rawPayload string) error {
+	updates := map[string]any{
+		"status":       status,
+		"raw_response": rawPayload,
+	}
+	if authCode != "" {
+		updates["authorization_code"] = authCode
+	}
+	if transactionStatus != "" {
+		updates["transaction_status"] = transactionStatus
+	}
 	return r.db.WithContext(ctx).Model(&models.Transaction{}).
 		Where("reference = ?", reference).
-		Updates(map[string]any{
-			"status":             status,
-			"authorization_code": authCode,
-			"raw_response":       rawPayload,
-		}).Error
+		Updates(updates).Error
 }
 
 func (r *WebhookRepo) ListLogs(ctx context.Context, projectID string, isLive bool, limit int, offset int) ([]*models.WebhookLog, error) {

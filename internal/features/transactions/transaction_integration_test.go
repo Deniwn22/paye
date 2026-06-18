@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,7 @@ import (
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/transactions"
 	"github.com/ttomsin/paye/internal/features/user"
+	"github.com/ttomsin/paye/internal/features/webhooks"
 	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
 	"gorm.io/driver/sqlite"
@@ -63,10 +65,11 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 	userRepo := user.NewUserRepo(db)
 	projectRepo := projects.NewProjectRepo(db)
 	providerRepo := providers.NewProviderRepo(db)
+	webhookRepo := webhooks.NewWebhookRepo(db)
 	txRepo := transactions.NewTransactionRepo(db)
 
 	authService := auth.NewAuthService(userRepo, projectRepo, "test_jwt_secret_key_32_bytes_long_xxxx")
-	txService := transactions.NewTransactionService(txRepo, providerRepo, encryptionKey)
+	txService := transactions.NewTransactionService(txRepo, providerRepo, webhookRepo, encryptionKey)
 	txHandler := transactions.NewTransactionHandler(txService)
 
 	gin.SetMode(gin.TestMode)
@@ -229,5 +232,108 @@ func TestTransactionInitializeAndVerify(t *testing.T) {
 
 	if w.Code != http.StatusUnauthorized {
 		t.Errorf("Expected status 401 for invalid API Key, got %d", w.Code)
+	}
+}
+
+type mockRoundTripper func(req *http.Request) *http.Response
+
+func (f mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req), nil
+}
+
+func TestOPayTransactionWebhookInjection(t *testing.T) {
+	db, r, apiKey, _, testProject, _ := setupTestEnvironment(t)
+	encryptionKey := "12345678901234567890123456789012"
+
+	// 1. Create active ProviderConfig for OPay
+	encSecretKey, _ := crypto.Encrypt("opay_secret_key_123", encryptionKey)
+	encPublicKey, _ := crypto.Encrypt("opay_public_key_123", encryptionKey)
+
+	provConfig := &models.ProviderConfig{
+		Label:        "opay-main",
+		ProviderName: "opay",
+		SecretKey:    encSecretKey,
+		PublicKey:    encPublicKey,
+		IsActive:     true,
+		ProjectID:    testProject.Base.ID,
+		Metadata:     map[string]string{"merchant_id": "12345"},
+	}
+	db.Create(provConfig)
+
+	// 2. Create WebhookConfig for OPay
+	webhookConfig := &models.WebhookConfig{
+		ProviderName:    "opay",
+		TargetURL:       "http://mymerchant.com/webhook",
+		PayeWebhookSlug: "opay-slug-xyz",
+		ProjectID:       testProject.Base.ID,
+	}
+	db.Create(webhookConfig)
+
+	// 3. Setup mock transport for http.DefaultClient
+	oldTransport := http.DefaultClient.Transport
+	defer func() {
+		http.DefaultClient.Transport = oldTransport
+	}()
+
+	var capturedCallbackURL string
+	http.DefaultClient.Transport = mockRoundTripper(func(req *http.Request) *http.Response {
+		if req.Method == "POST" && strings.HasSuffix(req.URL.Path, "/api/v1/international/cashier/create") {
+			bodyBytes, _ := io.ReadAll(req.Body)
+			var bodyMap map[string]any
+			json.Unmarshal(bodyBytes, &bodyMap)
+			if cb, ok := bodyMap["callbackUrl"].(string); ok {
+				capturedCallbackURL = cb
+			}
+
+			// return mock response
+			respJSON := `{
+				"code": "00000",
+				"message": "SUCCESS",
+				"data": {
+					"reference": "opay_ref_123",
+					"orderNo": "order_123",
+					"cashierUrl": "https://testapi.opaycheckout.com/cashier/123",
+					"status": "INITIAL",
+					"amount": {
+						"total": 10000,
+						"currency": "NGN"
+					}
+				}
+			}`
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Body:       io.NopCloser(strings.NewReader(respJSON)),
+				Header:     make(http.Header),
+			}
+		}
+		return &http.Response{
+			StatusCode: http.StatusBadRequest,
+			Body:       io.NopCloser(strings.NewReader("")),
+		}
+	})
+
+	// 4. Call Initialize Transaction
+	initReq := dto.InitializeTransactionRequest{
+		Amount:      100.0,
+		Email:       "customer@example.com",
+		Currency:    "NGN",
+		Reference:   "opay_ref_123",
+		Provider:    "opay",
+		CallbackURL: "http://mymerchant.com/return",
+	}
+	body, _ := json.Marshal(initReq)
+	req := httptest.NewRequest("POST", "/api/v1/transactions/initialize", bytes.NewBuffer(body))
+	req.Header.Set("X-Paye-API-Key", apiKey)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status 200, got %d. Body: %s", w.Code, w.Body.String())
+	}
+
+	expectedCallbackURL := "https://api.paye.africa/api/v1/webhooks/receive/opay-slug-xyz"
+	if capturedCallbackURL != expectedCallbackURL {
+		t.Errorf("Expected callback URL '%s', got '%s'", expectedCallbackURL, capturedCallbackURL)
 	}
 }

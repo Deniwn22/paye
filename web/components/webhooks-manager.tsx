@@ -44,7 +44,8 @@ export default function WebhooksManager({
   const [supportedProviders, setSupportedProviders] = useState<{ id: string; name: string; label: string; is_supported: boolean }[]>([
     { id: "paystack", name: "paystack", label: "Paystack", is_supported: true },
     { id: "flutterwave", name: "flutterwave", label: "Flutterwave", is_supported: true },
-    { id: "nomba", name: "nomba", label: "Nomba", is_supported: true },
+    { id: "nomba", name: "nomba", label: "Nomba", is_supported: false },
+    { id: "opay", name: "opay", label: "OPay", is_supported: true },
   ])
 
   useEffect(() => {

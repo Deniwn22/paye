@@ -1,6 +1,16 @@
 // internal/providers/provider.go
 package providers
 
+type TransactionStatus string
+
+const (
+	StatusSuccess TransactionStatus = "SUCCESS"
+	StatusFailed  TransactionStatus = "FAIL"
+	StatusPending TransactionStatus = "PENDING"
+	StatusInitial TransactionStatus = "INITIAL"
+	StatusClose   TransactionStatus = "CLOSE"
+)
+
 type TransactionRequest struct {
 	Amount      float64
 	Email       string
@@ -11,7 +21,8 @@ type TransactionRequest struct {
 }
 
 type TransactionResponse struct {
-	Status            bool
+	Status bool
+	StatusText        string
 	Message           string
 	Reference         string
 	AuthURL           string

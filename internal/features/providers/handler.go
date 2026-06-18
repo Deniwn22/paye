@@ -472,3 +472,36 @@ func (h *ProviderHandler) ListPaymentProvidersHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, api.Success("Payment providers retrieved successfully", dto.ToPaymentProviderResponseList(resp)))
 }
+
+// TogglePaymentProviderSupportHandler godoc
+// @Summary Toggle payment provider support status
+// @Description Toggle the global support status of a payment provider (admin only)
+// @Tags Providers
+// @Security BearerAuth
+// @Produce json
+// @Param name path string true "Payment Provider Name"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 403 {object} api.SwaggerSimpleResponse
+// @Failure 404 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /payment-providers/{name}/toggle-support [post]
+func (h *ProviderHandler) TogglePaymentProviderSupportHandler(c *gin.Context) {
+	name := c.Param("name")
+	if name == "" {
+		c.JSON(http.StatusBadRequest, api.Error("Provider name is required"))
+		return
+	}
+
+	provider, err := h.service.TogglePaymentProviderSupport(c.Request.Context(), name)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success("Payment provider support status updated successfully", provider))
+}
+
+func RegisterAdminRoutes(rg *gin.RouterGroup, h *ProviderHandler) {
+	rg.POST("/payment-providers/:name/toggle-support", h.TogglePaymentProviderSupportHandler)
+}

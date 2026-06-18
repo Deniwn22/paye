@@ -83,3 +83,18 @@ func (p *ProviderRepo) ListPaymentProviders(ctx context.Context) ([]*models.Paym
 	return providers, nil
 }
 
+// UpdatePaymentProvider updates a payment provider's details (e.g. IsSupported)
+func (p *ProviderRepo) UpdatePaymentProvider(ctx context.Context, provider *models.PaymentProvider) error {
+	return p.db.WithContext(ctx).Save(provider).Error
+}
+
+// FindPaymentProviderByName looks up a payment provider by its unique name
+func (p *ProviderRepo) FindPaymentProviderByName(ctx context.Context, name string) (*models.PaymentProvider, error) {
+	var provider models.PaymentProvider
+	err := p.db.WithContext(ctx).First(&provider, "name = ?", name).Error
+	if err != nil {
+		return nil, err
+	}
+	return &provider, nil
+}
+

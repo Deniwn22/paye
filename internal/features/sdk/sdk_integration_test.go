@@ -18,6 +18,7 @@ import (
 	"github.com/ttomsin/paye/internal/features/subscriptions"
 	"github.com/ttomsin/paye/internal/features/transactions"
 	"github.com/ttomsin/paye/internal/features/user"
+	"github.com/ttomsin/paye/internal/features/webhooks"
 	"github.com/ttomsin/paye/internal/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -62,9 +63,10 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 	userRepo := user.NewUserRepo(db)
 	projectRepo := projects.NewProjectRepo(db)
 	providerRepo := providers.NewProviderRepo(db)
+	webhookRepo := webhooks.NewWebhookRepo(db)
 	txRepo := transactions.NewTransactionRepo(db)
 
-	txService := transactions.NewTransactionService(txRepo, providerRepo, encryptionKey)
+	txService := transactions.NewTransactionService(txRepo, providerRepo, webhookRepo, encryptionKey)
 	subscriptionService := subscriptions.NewSubscriptionService(db, providerRepo, encryptionKey)
 	sdkHandler := sdk.NewSDKHandler(userRepo, projectRepo, providerRepo, txService, encryptionKey, db, subscriptionService)
 
