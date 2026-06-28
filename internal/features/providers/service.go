@@ -144,6 +144,14 @@ func (s *ProviderService) AddProvider(ctx context.Context, pcreq *dto.ProviderCo
 		pcreq.LivePublicKey, err = crypto.Encrypt(pcreq.LivePublicKey, s.encryptionKey)
 		if err != nil { return nil, err }
 	}
+	if pcreq.TestWebhookSecret != "" {
+		pcreq.TestWebhookSecret, err = crypto.Encrypt(pcreq.TestWebhookSecret, s.encryptionKey)
+		if err != nil { return nil, err }
+	}
+	if pcreq.LiveWebhookSecret != "" {
+		pcreq.LiveWebhookSecret, err = crypto.Encrypt(pcreq.LiveWebhookSecret, s.encryptionKey)
+		if err != nil { return nil, err }
+	}
 
 	pc := dto.ToProviderConfig(pcreq)
 	provider, err := s.repo.AddProvider(ctx, pc, projectID)
@@ -215,6 +223,22 @@ func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.Provide
 		pcreq.LivePublicKey, err = crypto.Encrypt(pcreq.LivePublicKey, s.encryptionKey)
 		if err != nil { return nil, err }
 	}
+	if pcreq.TestWebhookSecret != "" {
+		if !strings.Contains(pcreq.TestWebhookSecret, "*") {
+			pcreq.TestWebhookSecret, err = crypto.Encrypt(pcreq.TestWebhookSecret, s.encryptionKey)
+			if err != nil { return nil, err }
+		} else {
+			pcreq.TestWebhookSecret = provider.TestWebhookSecret
+		}
+	}
+	if pcreq.LiveWebhookSecret != "" {
+		if !strings.Contains(pcreq.LiveWebhookSecret, "*") {
+			pcreq.LiveWebhookSecret, err = crypto.Encrypt(pcreq.LiveWebhookSecret, s.encryptionKey)
+			if err != nil { return nil, err }
+		} else {
+			pcreq.LiveWebhookSecret = provider.LiveWebhookSecret
+		}
+	}
 
 	// update provider fields
 	provider.SecretKey = pcreq.SecretKey
@@ -223,6 +247,8 @@ func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.Provide
 	provider.TestPublicKey = pcreq.TestPublicKey
 	provider.LiveSecretKey = pcreq.LiveSecretKey
 	provider.LivePublicKey = pcreq.LivePublicKey
+	provider.TestWebhookSecret = pcreq.TestWebhookSecret
+	provider.LiveWebhookSecret = pcreq.LiveWebhookSecret
 	provider.Label = pcreq.Label
 	provider.IsActive = pcreq.IsActive
 
@@ -291,6 +317,18 @@ func (s *ProviderService) decryptConfigKeys(config *models.ProviderConfig) (*mod
 		decryptedPublic, err := crypto.Decrypt(config.LivePublicKey, s.encryptionKey)
 		if err == nil {
 			cloned.LivePublicKey = decryptedPublic
+		}
+	}
+	if config.TestWebhookSecret != "" {
+		decryptedSecret, err := crypto.Decrypt(config.TestWebhookSecret, s.encryptionKey)
+		if err == nil {
+			cloned.TestWebhookSecret = maskKey(decryptedSecret)
+		}
+	}
+	if config.LiveWebhookSecret != "" {
+		decryptedSecret, err := crypto.Decrypt(config.LiveWebhookSecret, s.encryptionKey)
+		if err == nil {
+			cloned.LiveWebhookSecret = maskKey(decryptedSecret)
 		}
 	}
 
@@ -594,5 +632,26 @@ func (s *ProviderService) TogglePaymentProviderSupport(ctx context.Context, name
 	}
 	return provider, nil
 }
+
+// UpdatePaymentProvider updates a payment provider's metadata, notes, and test credentials system-wide (admin only)
+func (s *ProviderService) UpdatePaymentProvider(ctx context.Context, name string, req *dto.UpdatePaymentProviderRequest) (*models.PaymentProvider, error) {
+	provider, err := s.repo.FindPaymentProviderByName(ctx, name)
+	if err != nil {
+		return nil, fmt.Errorf("payment provider not found: %w", err)
+	}
+
+	provider.Description = req.Description
+	if req.IsSupported != nil {
+		provider.IsSupported = *req.IsSupported
+	}
+	provider.TestCredentials = req.TestCredentials
+	provider.Notes = req.Notes
+
+	if err := s.repo.UpdatePaymentProvider(ctx, provider); err != nil {
+		return nil, fmt.Errorf("failed to update payment provider: %w", err)
+	}
+	return provider, nil
+}
+
 
 

@@ -109,27 +109,20 @@ export default function WebhookLogsTable({ logs }: { logs: WebhookLog[] }) {
     setTimeout(() => setCopiedLogId(null), 2000)
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "success":
-        return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#F0FDF4] text-[#16A34A] dark:bg-[#14291A] dark:text-[#22C55E] select-none">
-            Verified
-          </span>
-        )
-      case "failed":
-        return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#FEF2F2] text-[#DC2626] dark:bg-[#2A0A0A] dark:text-[#EF4444] select-none">
-            Bad Signature
-          </span>
-        )
-      default:
-        return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-zinc-100 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400 select-none">
-            Unverified
-          </span>
-        )
+  const getStatusBadge = (status: string, errorMessage: string) => {
+    const isBadSig = status === "failed" && errorMessage?.toLowerCase().includes("signature")
+    if (isBadSig) {
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#FEF2F2] text-[#DC2626] dark:bg-[#2A0A0A] dark:text-[#EF4444] select-none">
+          Bad Signature
+        </span>
+      )
     }
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#F0FDF4] text-[#16A34A] dark:bg-[#14291A] dark:text-[#22C55E] select-none">
+        Verified
+      </span>
+    )
   }
 
   const getForwardBadge = (statusCode: number) => {
@@ -201,7 +194,7 @@ export default function WebhookLogsTable({ logs }: { logs: WebhookLog[] }) {
                     <td className="px-6 py-4 text-foreground font-semibold font-mono">
                       {log.amount > 0 ? `₦${log.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "—"}
                     </td>
-                    <td className="px-6 py-4">{getStatusBadge(log.status)}</td>
+                    <td className="px-6 py-4">{getStatusBadge(log.status, log.error_message)}</td>
                     <td className="px-6 py-4">{getForwardBadge(log.forwarded_status)}</td>
                     <td className="px-6 py-4 text-right text-muted-foreground">
                       <div className="flex items-center justify-end gap-2 text-xs">

@@ -19,6 +19,7 @@ import (
 	"github.com/ttomsin/paye/internal/features/auth"
 	"github.com/ttomsin/paye/internal/features/dashboard"
 	"github.com/ttomsin/paye/internal/features/paystack"
+	"github.com/ttomsin/paye/internal/features/notifications"
 	"github.com/ttomsin/paye/internal/features/projects"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/sdk"
@@ -119,15 +120,20 @@ func main() {
 	transactionRepo := transactions.NewTransactionRepo(database.DB)
 	paystackRepo := paystack.NewPaystackRepository(database.DB)
 
+	// init notifications
+	notificationRepo := notifications.NewNotificationRepo(database.DB)
+	notificationBroker := notifications.NewNotificationBroker()
+	notificationService := notifications.NewNotificationService(notificationRepo, notificationBroker)
+
 	// init services
 	authService := auth.NewAuthService(userRepo, projectRepo, jwtSecret)
 	projectService := projects.NewProjectService(projectRepo)
 	paystackService := paystack.NewPaystackService(paystackRepo, providerRepo, derivedEncryptionKey)
 	providerService := providers.NewProviderService(providerRepo, derivedEncryptionKey, database.DB)
 	providerService.SetPaystackService(paystackService)
-	webhookService := webhooks.NewWebhookService(webhookRepo, providerRepo, userRepo, derivedEncryptionKey)
+	webhookService := webhooks.NewWebhookService(webhookRepo, providerRepo, userRepo, derivedEncryptionKey, notificationService)
 	dashboardService := dashboard.NewDashboardService(dashboardRepo)
-	transactionService := transactions.NewTransactionService(transactionRepo, providerRepo, webhookRepo, derivedEncryptionKey)
+	transactionService := transactions.NewTransactionService(transactionRepo, providerRepo, webhookRepo, derivedEncryptionKey, notificationService)
 	subscriptionService := subscriptions.NewSubscriptionService(database.DB, providerRepo, derivedEncryptionKey)
 
 	// Background worker for processing due subscriptions
@@ -163,6 +169,7 @@ func main() {
 	authHandler := auth.NewAuthHandler(*authService)
 	projectHandler := projects.NewProjectHandler(projectService)
 	providerHandler := providers.NewProviderHandler(providerService)
+	notificationHandler := notifications.NewNotificationHandler(notificationService)
 	webhookHandler := webhooks.NewWebhookHandler(webhookService)
 	dashboardHandler := dashboard.NewDashboardHandler(dashboardService)
 	transactionHandler := transactions.NewTransactionHandler(transactionService)
@@ -232,6 +239,9 @@ func main() {
 
 	// Register Provider Config routes (Protected)
 	providers.RegisterRoutes(protected, providerHandler)
+
+	// Register Notifications routes (Protected)
+	notifications.RegisterRoutes(protected, notificationHandler)
 
 	// Admin Protected Group (Requires JWT token and Admin role)
 	adminProtected := v1.Group("")

@@ -32,7 +32,7 @@ func TestTokenManager_GetToken(t *testing.T) {
 	}))
 	defer server.Close()
 
-	tm := NewTokenManager("client_id", "client_secret", "account_id")
+	tm := NewTokenManager("client_id", "client_secret", "account_id", false)
 	tm.BaseURL = server.URL
 
 	// First call - should trigger /auth/token/issue
@@ -117,7 +117,7 @@ func TestNomba_AllFlows(t *testing.T) {
 						{
 							"id": "nomba_tx_id",
 							"status": "SUCCESS",
-							"amount": 1000.00,
+							"amount": "1000.00",
 							"merchantTxRef": "` + ref + `"
 						}
 					]
@@ -129,7 +129,7 @@ func TestNomba_AllFlows(t *testing.T) {
 	}))
 	defer server.Close()
 
-	n := New("client_id", "client_secret", "account_id")
+	n := New("client_id", "client_secret", "account_id", false)
 	n.SetBaseURL(server.URL)
 
 	// Test InitializeTransaction
@@ -171,7 +171,7 @@ func TestNomba_AllFlows(t *testing.T) {
 }
 
 func TestNomba_HandleWebhook(t *testing.T) {
-	n := New("client_id", "client_secret", "account_id")
+	n := New("client_id", "client_secret", "account_id", false)
 
 	payloadStr := `{
 		"event_type": "TRANSACTION_SUCCESS",

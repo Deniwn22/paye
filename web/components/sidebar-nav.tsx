@@ -14,6 +14,7 @@ import {
   Send,
   Landmark,
   Sparkles,
+  Bell,
 } from "lucide-react"
 
 export default function SidebarNav() {
@@ -25,6 +26,7 @@ export default function SidebarNav() {
       { label: "Providers", href: "/providers", icon: Layers },
       { label: "Webhooks", href: "/webhooks", icon: Webhook },
       { label: "API Keys", href: "/api-key", icon: Key },
+      { label: "Notifications", href: "/notifications", icon: Bell },
       { label: "Paye AI", href: "/dashboard/ai", icon: Sparkles },
     ],
     [

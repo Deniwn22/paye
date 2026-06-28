@@ -66,7 +66,7 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 	webhookRepo := webhooks.NewWebhookRepo(db)
 	txRepo := transactions.NewTransactionRepo(db)
 
-	txService := transactions.NewTransactionService(txRepo, providerRepo, webhookRepo, encryptionKey)
+	txService := transactions.NewTransactionService(txRepo, providerRepo, webhookRepo, encryptionKey, nil)
 	subscriptionService := subscriptions.NewSubscriptionService(db, providerRepo, encryptionKey)
 	sdkHandler := sdk.NewSDKHandler(userRepo, projectRepo, providerRepo, txService, encryptionKey, db, subscriptionService)
 

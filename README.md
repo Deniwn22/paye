@@ -4,6 +4,122 @@ Unified payment routing engine and secure webhook proxies for African developers
 
 Paye acts as a unified middle-layer connecting your apps to payment providers like Paystack and Flutterwave. Build your integration once against the Paye REST API or drop in our JS SDK, manage API credentials dynamically via the dashboard, and route webhook events securely through isolated proxy slugs.
 
+## Architecture
+
+### How Paye Works
+
+Paye sits as a unified middleware between your platform and payment providers. Your code integrates once against Paye's stable API — providers can be swapped from the dashboard without touching your codebase.
+
+```mermaid
+flowchart TD
+    subgraph YOUR_PLATFORM ["🏪 Your Platform"]
+        APP["Your App\n(web / mobile / backend)"]
+        SDK["Paye JS SDK\n&lt;script&gt; embed"]
+    end
+
+    subgraph PAYE ["⚡ Paye Infrastructure"]
+        direction TB
+        GW["API Gateway\n/api/v1/*"]
+        SDKEP["SDK Endpoint\n/sdk/:public_id.js"]
+        ROUTER["Unified Router\nProvider Resolution"]
+        WEBHOOK["Webhook Proxy\n/webhooks/:slug"]
+        DB[("PostgreSQL\nEncrypted Credentials\nTransaction Logs")]
+        DASH["Merchant Dashboard"]
+    end
+
+    subgraph PROVIDERS ["💳 Payment Providers"]
+        PS["Paystack"]
+        FW["Flutterwave"]
+        NB["Nomba"]
+    end
+
+    APP -->|"REST API\nX-Paye-API-Key"| GW
+    SDK -->|"Inline Checkout"| SDKEP
+    SDKEP --> ROUTER
+    GW --> ROUTER
+    ROUTER -->|"Active Provider"| PS
+    ROUTER -->|"Active Provider"| FW
+    ROUTER -->|"Active Provider"| NB
+    ROUTER <--> DB
+    DASH -->|"Switch Provider\nManage Keys"| DB
+    PS -->|"Webhook Events"| WEBHOOK
+    FW -->|"Webhook Events"| WEBHOOK
+    NB -->|"Webhook Events"| WEBHOOK
+    WEBHOOK -->|"Verified &amp; Forwarded"| APP
+```
+
+---
+
+### Unified Checkout Flow
+
+When a payment is initialized, Paye resolves the active provider, forwards the request, and returns a stable response — the same shape regardless of which provider handled it.
+
+```mermaid
+sequenceDiagram
+    participant Platform as Your Platform
+    participant Paye as Paye API
+    participant Provider as Active Provider<br/>(Paystack / Flutterwave / Nomba)
+    participant Customer as Customer Browser
+
+    Platform->>Paye: POST /api/v1/transactions/initialize<br/>{ amount, email, currency }
+    Paye->>Paye: Resolve active provider<br/>Decrypt credentials
+    Paye->>Provider: Initialize transaction<br/>(provider-specific API)
+    Provider-->>Paye: Checkout URL + Reference
+    Paye-->>Platform: { auth_url, reference }
+    Platform->>Customer: Redirect to auth_url
+    Customer->>Provider: Complete payment
+    Provider->>Paye: Webhook event (payment_success)
+    Paye->>Paye: Verify signature<br/>Log transaction
+    Paye->>Platform: Forwarded webhook<br/>(normalized payload)
+```
+
+---
+
+### Webhook Proxy Flow
+
+Each Paye project gets an isolated webhook slug. Provider webhooks are verified (signature checked), normalized, and forwarded to your endpoint — so your server never needs to handle raw provider formats.
+
+```mermaid
+flowchart LR
+    PS["Paystack\nWebhook"]
+    FW["Flutterwave\nWebhook"]
+    NB["Nomba\nWebhook"]
+
+    PROXY["Paye Webhook Proxy\n/webhooks/:project_slug\n\n✓ Signature Verified\n✓ Logged\n✓ Normalized"]
+
+    YOUR["Your Server\nOne endpoint\nOne format"]
+
+    PS --> PROXY
+    FW --> PROXY
+    NB --> PROXY
+    PROXY --> YOUR
+```
+
+---
+
+### Provider Switch — Zero Code Change
+
+Switching providers in the dashboard triggers zero changes on the platform side. Paye handles the resolution underneath.
+
+```mermaid
+flowchart TD
+    subgraph BEFORE ["Before Switch"]
+        A1["paye_ref_abc123"] --> B1["Paystack\n✓ Active"]
+        A1 -.->|"inactive"| C1["Nomba"]
+    end
+
+    subgraph AFTER ["After Switch (Dashboard Click)"]
+        A2["paye_ref_abc123"] -.->|"inactive"| B2["Paystack"]
+        A2 --> C2["Nomba\n✓ Active"]
+    end
+
+    DASH["Merchant Dashboard\nOne Click"] -->|"Toggle Active Provider"| AFTER
+```
+
+> Your platform always calls the same Paye endpoint with the same reference format. What changes underneath is invisible to your code.
+
+---
+
 ## Core Features
 
 - **Dynamic Router**: Connect Paystack or Flutterwave credentials and switch active providers instantly from the dashboard without modifying your codebase.

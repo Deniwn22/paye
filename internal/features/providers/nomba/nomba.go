@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"strconv"
 	"strings"
 
 	"github.com/ttomsin/paye/internal/features/providers"
@@ -16,11 +18,13 @@ import (
 type Nomba struct {
 	tokenManager *TokenManager
 	BaseURL      string
+	isLive       bool
 }
 
-func New(clientID, clientSecret, accountID string) *Nomba {
+func New(clientID, clientSecret, accountID string, isLive bool) *Nomba {
 	return &Nomba{
-		tokenManager: NewTokenManager(clientID, clientSecret, accountID),
+		tokenManager: NewTokenManager(clientID, clientSecret, accountID, isLive),
+		isLive:       isLive,
 	}
 }
 
@@ -28,7 +32,17 @@ func (n *Nomba) getBaseURL() string {
 	if n.BaseURL != "" {
 		return n.BaseURL
 	}
-	return baseURL
+	if n.isLive {
+		if envLive := os.Getenv("NOMBA_LIVE_BASE_URL"); envLive != "" {
+			return envLive
+		}
+		// Default to sandbox for now per user request
+		return "https://sandbox.nomba.com/v1"
+	}
+	if envSandbox := os.Getenv("NOMBA_SANDBOX_BASE_URL"); envSandbox != "" {
+		return envSandbox
+	}
+	return "https://sandbox.nomba.com/v1"
 }
 
 func (n *Nomba) SetBaseURL(url string) {
@@ -153,10 +167,10 @@ type nombaFilterRequest struct {
 }
 
 type nombaTransactionResult struct {
-	ID            string  `json:"id"`
-	Status        string  `json:"status"`
-	Amount        float64 `json:"amount"`
-	MerchantTxRef string  `json:"merchantTxRef"`
+	ID            string `json:"id"`
+	Status        string `json:"status"`
+	Amount        string `json:"amount"`
+	MerchantTxRef string `json:"merchantTxRef"`
 }
 
 type nombaFilterData struct {
@@ -206,11 +220,16 @@ func (n *Nomba) VerifyTransaction(reference string) (*providers.TransactionRespo
 
 	tx := result.Data.Results[0]
 
+	var amount float64
+	if tx.Amount != "" {
+		amount, _ = strconv.ParseFloat(tx.Amount, 64)
+	}
+
 	return &providers.TransactionResponse{
 		Status:    tx.Status == "SUCCESS",
 		Message:   result.Description,
 		Reference: reference,
-		Amount:    tx.Amount,
+		Amount:    amount,
 		Provider:  n.Name(),
 	}, nil
 }

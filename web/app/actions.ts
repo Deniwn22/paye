@@ -205,6 +205,8 @@ export async function addProviderAction(prevState: any, formData: FormData) {
   const testPublicKey = formData.get("testPublicKey") as string
   const liveSecretKey = formData.get("liveSecretKey") as string
   const livePublicKey = formData.get("livePublicKey") as string
+  const testWebhookSecret = formData.get("testWebhookSecret") as string
+  const liveWebhookSecret = formData.get("liveWebhookSecret") as string
   const metadataStr = formData.get("metadata") as string
 
   let metadata = {}
@@ -232,6 +234,8 @@ export async function addProviderAction(prevState: any, formData: FormData) {
         test_public_key: testPublicKey,
         live_secret_key: liveSecretKey,
         live_public_key: livePublicKey,
+        test_webhook_secret: testWebhookSecret,
+        live_webhook_secret: liveWebhookSecret,
         is_active: true,
         metadata: metadata,
       }),
@@ -503,4 +507,93 @@ export async function togglePaymentProviderAction(name: string) {
     return { success: false, error: "Network error occurred" }
   }
 }
+
+export async function updatePaymentProviderAction(
+  name: string,
+  data: { description: string; test_credentials: string; notes: string; is_supported?: boolean }
+) {
+  try {
+    const res = await fetchWithAuth(`/payment-providers/${name}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        description: data.description,
+        test_credentials: data.test_credentials,
+        notes: data.notes,
+        is_supported: data.is_supported,
+      }),
+    })
+
+    const result = await res.json()
+    if (!res.ok || !result.status) {
+      return { success: false, error: result.message || "Failed to update payment provider" }
+    }
+
+    revalidatePath("/providers")
+    return { success: true, message: "Payment provider updated successfully" }
+  } catch (err) {
+    return { success: false, error: "Network error occurred" }
+  }
+}
+
+export async function getNotificationsAction() {
+  try {
+    const res = await fetchWithAuth("/notifications")
+    const result = await res.json()
+    if (!res.ok || !result.status) {
+      return { success: false, error: result.message || "Failed to fetch notifications" }
+    }
+    return { success: true, notifications: result.data }
+  } catch (err) {
+    return { success: false, error: "Network error occurred" }
+  }
+}
+
+export async function markNotificationAsReadAction(id: string) {
+  try {
+    const res = await fetchWithAuth(`/notifications/${id}/read`, {
+      method: "POST"
+    })
+    const result = await res.json()
+    if (!res.ok || !result.status) {
+      return { success: false, error: result.message || "Failed to mark notification as read" }
+    }
+    revalidatePath("/notifications")
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: "Network error occurred" }
+  }
+}
+
+export async function markAllNotificationsAsReadAction() {
+  try {
+    const res = await fetchWithAuth("/notifications/read-all", {
+      method: "POST"
+    })
+    const result = await res.json()
+    if (!res.ok || !result.status) {
+      return { success: false, error: result.message || "Failed to mark all notifications as read" }
+    }
+    revalidatePath("/notifications")
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: "Network error occurred" }
+  }
+}
+
+export async function deleteNotificationAction(id: string) {
+  try {
+    const res = await fetchWithAuth(`/notifications/${id}`, {
+      method: "DELETE"
+    })
+    const result = await res.json()
+    if (!res.ok || !result.status) {
+      return { success: false, error: result.message || "Failed to delete notification" }
+    }
+    revalidatePath("/notifications")
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: "Network error occurred" }
+  }
+}
+
 

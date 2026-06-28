@@ -42,6 +42,12 @@ func (m *ApiJwtMiddleware) Handle(c *gin.Context) {
 	// Extract JWT token from the request
 	token := c.GetHeader("Authorization")
 	if token == "" {
+		token = c.Query("token")
+		if token != "" && !strings.HasPrefix(token, "Bearer ") {
+			token = "Bearer " + token
+		}
+	}
+	if token == "" {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}

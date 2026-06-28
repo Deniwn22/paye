@@ -16,6 +16,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/dto"
+	"github.com/ttomsin/paye/internal/features/notifications"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/providers/flutterwave"
 	"github.com/ttomsin/paye/internal/features/providers/nomba"
@@ -31,9 +32,10 @@ type WebhookService struct {
 	userRepo      user.IUserRepo
 	encryptionKey string
 	httpClient    *http.Client
+	notifier      *notifications.NotificationService
 }
 
-func NewWebhookService(repo *WebhookRepo, providerRepo *providers.ProviderRepo, userRepo user.IUserRepo, encryptionKey string) *WebhookService {
+func NewWebhookService(repo *WebhookRepo, providerRepo *providers.ProviderRepo, userRepo user.IUserRepo, encryptionKey string, notifier *notifications.NotificationService) *WebhookService {
 	return &WebhookService{
 		repo:          repo,
 		providerRepo:  providerRepo,
@@ -42,6 +44,7 @@ func NewWebhookService(repo *WebhookRepo, providerRepo *providers.ProviderRepo, 
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
 		},
+		notifier: notifier,
 	}
 }
 
@@ -132,7 +135,10 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 	var verifyErr error
 
 	// Try Live key — only if explicitly configured, no legacy fallback
-	liveSecret := pc.LiveSecretKey
+	liveSecret := pc.LiveWebhookSecret
+	if liveSecret == "" {
+		liveSecret = pc.LiveSecretKey
+	}
 	if liveSecret != "" {
 		decryptedSecret, err := crypto.Decrypt(liveSecret, s.encryptionKey)
 		if err == nil {
@@ -145,7 +151,7 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 			case "nomba":
 				decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
 				accountID := pc.Metadata["account_id"]
-				providerClient = nomba.New(decryptedPublic, decryptedSecret, accountID)
+				providerClient = nomba.New(decryptedPublic, decryptedSecret, accountID, true)
 			case "opay":
 				decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
 				merchantID := pc.Metadata["merchant_id"]
@@ -163,9 +169,12 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 
 	// Try Test key — with legacy fallback
 	if webhookEvent == nil {
-		testSecret := pc.TestSecretKey
+		testSecret := pc.TestWebhookSecret
 		if testSecret == "" {
-			testSecret = pc.SecretKey // legacy fallback
+			testSecret = pc.TestSecretKey
+			if testSecret == "" {
+				testSecret = pc.SecretKey // legacy fallback
+			}
 		}
 		if testSecret != "" {
 			decryptedSecret, err := crypto.Decrypt(testSecret, s.encryptionKey)
@@ -179,7 +188,7 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 				case "nomba":
 					decryptedPublic, _ := crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
 					accountID := pc.Metadata["account_id"]
-					providerClient = nomba.New(decryptedPublic, decryptedSecret, accountID)
+					providerClient = nomba.New(decryptedPublic, decryptedSecret, accountID, false)
 				case "opay":
 					decryptedPublic, _ := crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
 					merchantID := pc.Metadata["merchant_id"]
@@ -289,6 +298,23 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 		webhookEvent.Status,
 		string(payload),
 	)
+
+	// Fetch transaction and broadcast real-time notification
+	var tx models.Transaction
+	if s.repo.db.WithContext(ctx).Where("reference = ?", webhookEvent.Reference).First(&tx).Error == nil {
+		if s.notifier != nil {
+			title := "Transaction Pending"
+			message := fmt.Sprintf("Transaction reference %s of %s %.2f is pending via %s.", tx.Reference, tx.Currency, tx.Amount, tx.Provider)
+			if tx.Status == "success" {
+				title = "Transaction Successful"
+				message = fmt.Sprintf("Transaction reference %s of %s %.2f was successful via %s.", tx.Reference, tx.Currency, tx.Amount, tx.Provider)
+			} else if tx.Status == "failed" {
+				title = "Transaction Failed"
+				message = fmt.Sprintf("Transaction reference %s of %s %.2f failed via %s.", tx.Reference, tx.Currency, tx.Amount, tx.Provider)
+			}
+			_ = s.notifier.CreateAndNotify(ctx, tx.ProjectID.String(), title, message, tx.Status, dto.ToVerifyTransactionResponse(&tx, ""))
+		}
+	}
 
 	// Forward webhook if TargetURL is not empty
 	if wc.TargetURL != "" {

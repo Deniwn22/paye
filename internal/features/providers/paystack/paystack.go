@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/ttomsin/paye/internal/features/providers"
 )
@@ -29,6 +31,19 @@ type Paystack struct {
 func (p *Paystack) getBaseURL() string {
 	if p.BaseURL != "" {
 		return p.BaseURL
+	}
+	isTest := strings.HasPrefix(p.apiKey, "sk_test_")
+	if isTest {
+		if envSandbox := os.Getenv("PAYSTACK_SANDBOX_BASE_URL"); envSandbox != "" {
+			return envSandbox
+		}
+	} else {
+		if envLive := os.Getenv("PAYSTACK_LIVE_BASE_URL"); envLive != "" {
+			return envLive
+		}
+	}
+	if envBase := os.Getenv("PAYSTACK_BASE_URL"); envBase != "" {
+		return envBase
 	}
 	return "https://api.paystack.co"
 }
