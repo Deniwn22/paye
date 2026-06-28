@@ -107,53 +107,6 @@ definitions:
       status:
         type: boolean
     type: object
-  auth.AuthResponse:
-    properties:
-      api_key:
-        type: string
-      email:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      token:
-        type: string
-    type: object
-  auth.LoginRequest:
-    properties:
-      email:
-        type: string
-      password:
-        minLength: 8
-        type: string
-    required:
-    - email
-    - password
-    type: object
-  auth.SignupRequest:
-    properties:
-      email:
-        type: string
-      name:
-        type: string
-      password:
-        minLength: 8
-        type: string
-    required:
-    - email
-    - name
-    - password
-    type: object
-  auth.SwaggerAuthResponse:
-    properties:
-      data:
-        $ref: '#/definitions/auth.AuthResponse'
-      message:
-        type: string
-      status:
-        type: boolean
-    type: object
   dto.CreateVirtualAccountDTO:
     properties:
       account_name:
@@ -471,66 +424,6 @@ info:
   title: Paye API
   version: "1.0"
 paths:
-  /auth/signin:
-    post:
-      consumes:
-      - application/json
-      description: Sign in using email and password
-      parameters:
-      - description: Login payload
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/auth.LoginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/auth.SwaggerAuthResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
-      summary: Authenticate user
-      tags:
-      - Auth
-  /auth/signup:
-    post:
-      consumes:
-      - application/json
-      description: Create a user account and return JWT credentials
-      parameters:
-      - description: Signup payload
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/auth.SignupRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/auth.SwaggerAuthResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
-      summary: Register a new user
-      tags:
-      - Auth
   /dashboard/logs:
     get:
       description: Retrieve recent webhook proxy delivery log history (paginated)

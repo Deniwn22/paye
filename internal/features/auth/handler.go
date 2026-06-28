@@ -59,17 +59,7 @@ func formatValidationError(err error) string {
 	return err.Error()
 }
 
-// SignupHandler godoc
-// @Summary Register a new user
-// @Description Create a user account and return JWT credentials
-// @Tags Auth
-// @Accept json
-// @Produce json
-// @Param request body SignupRequest true "Signup payload"
-// @Success 200 {object} SwaggerAuthResponse
-// @Failure 400 {object} api.SwaggerSimpleResponse
-// @Failure 500 {object} api.SwaggerSimpleResponse
-// @Router /auth/signup [post]
+// SignupHandler handles new user registration
 func (h *AuthHandler) SignupHandler(c *gin.Context) {
 	var req SignupRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -98,17 +88,7 @@ func (h *AuthHandler) SignupHandler(c *gin.Context) {
 	c.JSON(200, api.Success("signup successful", resp))
 }
 
-// LoginHandler godoc
-// @Summary Authenticate user
-// @Description Sign in using email and password
-// @Tags Auth
-// @Accept json
-// @Produce json
-// @Param request body LoginRequest true "Login payload"
-// @Success 200 {object} SwaggerAuthResponse
-// @Failure 400 {object} api.SwaggerSimpleResponse
-// @Failure 500 {object} api.SwaggerSimpleResponse
-// @Router /auth/signin [post]
+// LoginHandler handles user authentication
 func (h *AuthHandler) LoginHandler(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

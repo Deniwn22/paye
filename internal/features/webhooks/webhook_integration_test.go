@@ -22,6 +22,7 @@ import (
 	"github.com/ttomsin/paye/internal/features/dashboard"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/user"
+	"github.com/ttomsin/paye/internal/features/virtual_accounts"
 	"github.com/ttomsin/paye/internal/features/webhooks"
 	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
@@ -74,9 +75,10 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 	userRepo := user.NewUserRepo(db)
 	providerRepo := providers.NewProviderRepo(db)
 	webhookRepo := webhooks.NewWebhookRepo(db)
+	vaRepo := virtual_accounts.NewVARepository(db)
 
 	providerService := providers.NewProviderService(providerRepo, encryptionKey, db)
-	webhookService := webhooks.NewWebhookService(webhookRepo, providerRepo, userRepo, encryptionKey, nil)
+	webhookService := webhooks.NewWebhookService(webhookRepo, vaRepo, providerRepo, userRepo, encryptionKey, nil)
 
 	providerHandler := providers.NewProviderHandler(providerService)
 	webhookHandler := webhooks.NewWebhookHandler(webhookService)

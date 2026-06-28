@@ -23,11 +23,13 @@ import (
 	"github.com/ttomsin/paye/internal/features/providers/opay"
 	"github.com/ttomsin/paye/internal/features/providers/paystack"
 	"github.com/ttomsin/paye/internal/features/user"
+	"github.com/ttomsin/paye/internal/features/virtual_accounts"
 	"github.com/ttomsin/paye/internal/models"
 )
 
 type WebhookService struct {
 	repo          *WebhookRepo
+	vaRepo        *virtual_accounts.VARepository
 	providerRepo  *providers.ProviderRepo
 	userRepo      user.IUserRepo
 	encryptionKey string
@@ -35,9 +37,10 @@ type WebhookService struct {
 	notifier      *notifications.NotificationService
 }
 
-func NewWebhookService(repo *WebhookRepo, providerRepo *providers.ProviderRepo, userRepo user.IUserRepo, encryptionKey string, notifier *notifications.NotificationService) *WebhookService {
+func NewWebhookService(repo *WebhookRepo, vaRepo *virtual_accounts.VARepository, providerRepo *providers.ProviderRepo, userRepo user.IUserRepo, encryptionKey string, notifier *notifications.NotificationService) *WebhookService {
 	return &WebhookService{
 		repo:          repo,
+		vaRepo:        vaRepo,
 		providerRepo:  providerRepo,
 		userRepo:      userRepo,
 		encryptionKey: encryptionKey,
@@ -241,6 +244,11 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 			}
 		}
 
+		// Branch based on webhook type
+		if wc.Type == models.VA {
+			return s.processVAWebhook(ctx, wc, webhookEvent, payload, isLive)
+		}
+
 		// Create a failed WebhookLog record in the database for debugging
 		wl := &models.WebhookLog{
 			ProjectID:       wc.ProjectID,
@@ -383,4 +391,99 @@ func (s *WebhookService) ListLogs(ctx context.Context, projectID string, isLive 
 
 func (s *WebhookService) ListAllLogs(ctx context.Context, projectID string, limit int, offset int) ([]*models.WebhookLog, error) {
 	return s.repo.ListAllLogs(ctx, projectID, limit, offset)
+}
+
+func (s *WebhookService) processVAWebhook(ctx context.Context, wc *models.WebhookConfig, webhookEvent *providers.WebhookEvent, payload []byte, isLive bool) error {
+	// Parse the accountRef from the payload — Nomba sends this as the identifier
+	var nombaPayload struct {
+		Data struct {
+			AccountRef string  `json:"accountRef"`
+			Amount     float64 `json:"transactionAmount"`
+			Currency   string  `json:"currency"`
+			SenderName string  `json:"originatorName"`
+			SenderAcct string  `json:"originatorAccountNumber"`
+			SenderBank string  `json:"originatorBankName"`
+			Reference  string  `json:"transactionReference"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(payload, &nombaPayload); err != nil {
+		return fmt.Errorf("va webhook: failed to parse payload: %w", err)
+	}
+
+	accountRef := nombaPayload.Data.AccountRef
+	if accountRef == "" {
+		return fmt.Errorf("va webhook: accountRef missing from payload")
+	}
+
+	// Look up the VA by accountRef scoped to the project
+	va, err := s.vaRepo.FindByAccountRef(ctx, accountRef, wc.ProjectID.String())
+	if err != nil {
+		return fmt.Errorf("va webhook: virtual account not found for accountRef %s: %w", accountRef, err)
+	}
+
+	// Create VirtualAccountTransaction record
+	vatx := &models.VirtualAccountTransaction{
+		VirtualAccountID: va.Base.ID,
+		ProjectID:        wc.ProjectID,
+		PvcID:            va.PvcID,
+		Amount:           nombaPayload.Data.Amount,
+		Currency:         nombaPayload.Data.Currency,
+		SenderName:       nombaPayload.Data.SenderName,
+		SenderAccount:    nombaPayload.Data.SenderAcct,
+		SenderBank:       nombaPayload.Data.SenderBank,
+		Reference:        nombaPayload.Data.Reference,
+		Status:           "success",
+		Provider:         "nomba",
+		IsLive:           isLive,
+	}
+
+	if _, err := s.vaRepo.CreateTransaction(ctx, vatx); err != nil {
+		return fmt.Errorf("va webhook: failed to persist transaction: %w", err)
+	}
+
+	// Build merchant-facing payload — provider-agnostic
+	merchantPayload, _ := json.Marshal(map[string]any{
+		"event":              "virtual_account.credit",
+		"pvc_id":             va.PvcID,
+		"customer_reference": va.CustomerReference,
+		"amount":             nombaPayload.Data.Amount,
+		"currency":           nombaPayload.Data.Currency,
+		"sender_name":        nombaPayload.Data.SenderName,
+		"sender_account":     nombaPayload.Data.SenderAcct,
+		"sender_bank":        nombaPayload.Data.SenderBank,
+		"reference":          nombaPayload.Data.Reference,
+	})
+
+	// Log it
+	wl := &models.WebhookLog{
+		ProjectID:       wc.ProjectID,
+		WebhookConfigID: &wc.Base.ID,
+		Event:           "virtual_account.credit",
+		Reference:       nombaPayload.Data.Reference,
+		Amount:          nombaPayload.Data.Amount,
+		Status:          "success",
+		ForwardedStatus: 0,
+		Payload:         string(payload),
+		IsLive:          isLive,
+	}
+
+	if wc.TargetURL == "" {
+		wl.ForwardedStatus = 200
+		wl.ErrorMessage = "Locally stored; no forwarding target URL configured"
+	}
+
+	_ = s.repo.CreateLog(ctx, wl)
+
+	// Forward to merchant with clean Paye payload
+	if wc.TargetURL != "" {
+		apiKey := wc.Project.ApiKey
+		if !isLive {
+			if wc.Project.TestApiKey != "" {
+				apiKey = wc.Project.TestApiKey
+			}
+		}
+		go s.forwardWebhook(wl, wc.TargetURL, apiKey, merchantPayload)
+	}
+
+	return nil
 }

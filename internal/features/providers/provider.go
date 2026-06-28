@@ -1,6 +1,11 @@
 // internal/providers/provider.go
 package providers
 
+import (
+	"context"
+	"time"
+)
+
 type TransactionStatus string
 
 const (
@@ -21,7 +26,7 @@ type TransactionRequest struct {
 }
 
 type TransactionResponse struct {
-	Status bool
+	Status            bool
 	StatusText        string
 	Message           string
 	Reference         string
@@ -161,4 +166,33 @@ type ChargeTokenRequest struct {
 	Email         string
 	Authorization string
 	Reference     string
+}
+
+// For VirtualAccount Implementation
+//
+
+type CreateVARequest struct {
+	AccountRef     string
+	AccountName    string
+	Currency       string
+	BVN            string
+	ExpectedAmount float64
+	ExpiryDate     string
+}
+
+type VirtualAccount struct {
+	PvcID         string
+	AccountRef    string
+	AccountNumber string
+	AccountName   string
+	BankName      string
+	Currency      string
+	Status        string
+	CreatedAt     time.Time
+}
+
+type VirtualAccountProvider interface {
+	CreateVirtualAccount(ctx context.Context, req CreateVARequest) (*VirtualAccount, error)
+	GetVirtualAccount(ctx context.Context, accountRef string) (*VirtualAccount, error)
+	SuspendVirtualAccount(ctx context.Context, accountRef string) error
 }

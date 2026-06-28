@@ -1,0 +1,67 @@
+package virtual_accounts
+
+import (
+	"context"
+
+	"github.com/ttomsin/paye/internal/middleware"
+	"github.com/ttomsin/paye/internal/models"
+	"gorm.io/gorm"
+)
+
+type VARepository struct {
+	db *gorm.DB
+}
+
+func NewVARepository(db *gorm.DB) *VARepository {
+	return &VARepository{db: db}
+}
+
+func (r *VARepository) CreateVirtualAccount(ctx context.Context, va *models.VirtualAccount) (*models.VirtualAccount, error) {
+	if err := r.db.WithContext(ctx).Create(va).Error; err != nil {
+		return nil, err
+	}
+	return va, nil
+}
+
+func (r *VARepository) FindByPvcID(ctx context.Context, pvcID string, projectID string) (*models.VirtualAccount, error) {
+	var va models.VirtualAccount
+	err := r.db.WithContext(ctx).Where("pvc_id = ? AND project_id = ?", pvcID, projectID).First(&va).Error
+	return &va, err
+}
+
+func (r *VARepository) FindByCustomerRef(ctx context.Context, customerRef string, projectID string) (*models.VirtualAccount, error) {
+	var va models.VirtualAccount
+	err := r.db.WithContext(ctx).Where("customer_reference = ? AND project_id = ?", customerRef, projectID).First(&va).Error
+	return &va, err
+}
+
+func (r *VARepository) ListVirtualAccounts(ctx context.Context, projectID string) ([]*models.VirtualAccount, error) {
+	var vas []*models.VirtualAccount
+	isLive := middleware.GetIsLiveFromContext(ctx)
+	err := r.db.WithContext(ctx).Where("project_id = ? AND is_live = ?", projectID, isLive).Order("created_at DESC").Find(&vas).Error
+	return vas, err
+}
+
+func (r *VARepository) UpdateVirtualAccount(ctx context.Context, va *models.VirtualAccount) error {
+	return r.db.WithContext(ctx).Save(va).Error
+}
+
+func (r *VARepository) CreateTransaction(ctx context.Context, tx *models.VirtualAccountTransaction) (*models.VirtualAccountTransaction, error) {
+	if err := r.db.WithContext(ctx).Create(tx).Error; err != nil {
+		return nil, err
+	}
+	return tx, nil
+}
+
+func (r *VARepository) ListTransactions(ctx context.Context, pvcID string, projectID string) ([]*models.VirtualAccountTransaction, error) {
+	var txs []*models.VirtualAccountTransaction
+	isLive := middleware.GetIsLiveFromContext(ctx)
+	err := r.db.WithContext(ctx).Where("pvc_id = ? AND project_id = ? AND is_live = ?", pvcID, projectID, isLive).Order("created_at DESC").Find(&txs).Error
+	return txs, err
+}
+
+func (r *VARepository) FindByAccountRef(ctx context.Context, accountRef string, projectID string) (*models.VirtualAccount, error) {
+	var va models.VirtualAccount
+	err := r.db.WithContext(ctx).Where("account_ref = ? AND project_id = ?", accountRef, projectID).First(&va).Error
+	return &va, err
+}

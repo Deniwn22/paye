@@ -18,14 +18,15 @@ import (
 	"github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/features/auth"
 	"github.com/ttomsin/paye/internal/features/dashboard"
-	"github.com/ttomsin/paye/internal/features/paystack"
 	"github.com/ttomsin/paye/internal/features/notifications"
+	"github.com/ttomsin/paye/internal/features/paystack"
 	"github.com/ttomsin/paye/internal/features/projects"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/sdk"
 	"github.com/ttomsin/paye/internal/features/subscriptions"
 	"github.com/ttomsin/paye/internal/features/transactions"
 	"github.com/ttomsin/paye/internal/features/user"
+	"github.com/ttomsin/paye/internal/features/virtual_accounts"
 	"github.com/ttomsin/paye/internal/features/webhooks"
 	"github.com/ttomsin/paye/internal/middleware"
 )
@@ -125,16 +126,20 @@ func main() {
 	notificationBroker := notifications.NewNotificationBroker()
 	notificationService := notifications.NewNotificationService(notificationRepo, notificationBroker)
 
+	// init virtual accounts
+	vaRepo := virtual_accounts.NewVARepository(database.DB)
+
 	// init services
 	authService := auth.NewAuthService(userRepo, projectRepo, jwtSecret)
 	projectService := projects.NewProjectService(projectRepo)
 	paystackService := paystack.NewPaystackService(paystackRepo, providerRepo, derivedEncryptionKey)
 	providerService := providers.NewProviderService(providerRepo, derivedEncryptionKey, database.DB)
 	providerService.SetPaystackService(paystackService)
-	webhookService := webhooks.NewWebhookService(webhookRepo, providerRepo, userRepo, derivedEncryptionKey, notificationService)
+	webhookService := webhooks.NewWebhookService(webhookRepo, vaRepo, providerRepo, userRepo, derivedEncryptionKey, notificationService)
 	dashboardService := dashboard.NewDashboardService(dashboardRepo)
 	transactionService := transactions.NewTransactionService(transactionRepo, providerRepo, webhookRepo, derivedEncryptionKey, notificationService)
 	subscriptionService := subscriptions.NewSubscriptionService(database.DB, providerRepo, derivedEncryptionKey)
+	vaService := virtual_accounts.NewVAService(vaRepo, providerRepo, derivedEncryptionKey)
 
 	// Background worker for processing due subscriptions
 	c := cron.New()
@@ -174,6 +179,7 @@ func main() {
 	dashboardHandler := dashboard.NewDashboardHandler(dashboardService)
 	transactionHandler := transactions.NewTransactionHandler(transactionService)
 	sdkHandler := sdk.NewSDKHandler(userRepo, projectRepo, providerRepo, transactionService, derivedEncryptionKey, database.DB, subscriptionService)
+	vaHandler := virtual_accounts.NewVAHandler(vaService)
 
 	// Gin config
 	r := gin.Default()
@@ -183,7 +189,7 @@ func main() {
 			"message": "Hello, World!",
 		})
 	})
-	
+
 	// Register Swagger public endpoint
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -192,7 +198,7 @@ func main() {
 
 	// Serve static files in testweb directory for development/testing
 	r.Static("/testweb", "./testweb")
-	
+
 	// Public Group
 	v1 := r.Group("/api/v1")
 	// health check
@@ -201,7 +207,7 @@ func main() {
 			"status": "ok",
 		})
 	})
-	
+
 	// user count (for public landing page stats)
 	v1.GET("/users/count", func(c *gin.Context) {
 		count, err := userRepo.CountUsers(c.Request.Context())
@@ -216,7 +222,7 @@ func main() {
 			},
 		})
 	})
-	
+
 	// Auth Routes (Public)
 	auth.RegisterRoutes(v1, authHandler)
 
@@ -266,8 +272,9 @@ func main() {
 	apiKeyProtected := v1.Group("")
 	apiKeyProtected.Use(apiKeyMiddleware.Handle)
 
-	// Register Transaction routes (Protected by API Key)
+	// Register Transaction & Virtual Account routes (Protected by API Key)
 	transactions.RegisterRoutes(apiKeyProtected, transactionHandler)
+	virtual_accounts.RegisterRoutes(apiKeyProtected, vaHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
