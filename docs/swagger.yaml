@@ -154,6 +154,30 @@ definitions:
       status:
         type: boolean
     type: object
+  dto.CreateVirtualAccountDTO:
+    properties:
+      account_name:
+        type: string
+      bvn:
+        type: string
+      currency:
+        type: string
+      customer_reference:
+        type: string
+      expected_amount:
+        description: dynamic only
+        type: number
+      expiry_date:
+        description: dynamic only
+        type: string
+      type:
+        description: '"static" | "dynamic", defaults to static'
+        type: string
+    required:
+    - account_name
+    - currency
+    - customer_reference
+    type: object
   dto.DashboardStatsResponse:
     properties:
       active_providers_count:
@@ -173,6 +197,8 @@ definitions:
     properties:
       amount:
         type: number
+      callbackUrl:
+        type: string
       currency:
         type: string
       email:
@@ -220,6 +246,10 @@ definitions:
         type: string
       name:
         type: string
+      notes:
+        type: string
+      test_credentials:
+        type: string
     type: object
   dto.ProviderConfigRequest:
     properties:
@@ -230,6 +260,8 @@ definitions:
       live_public_key:
         type: string
       live_secret_key:
+        type: string
+      live_webhook_secret:
         type: string
       metadata:
         additionalProperties:
@@ -247,6 +279,8 @@ definitions:
         type: string
       test_secret_key:
         type: string
+      test_webhook_secret:
+        type: string
     required:
     - label
     - provider_name
@@ -262,6 +296,8 @@ definitions:
       live_public_key:
         type: string
       live_secret_key:
+        type: string
+      live_webhook_secret:
         type: string
       metadata:
         additionalProperties:
@@ -279,6 +315,8 @@ definitions:
         type: string
       test_secret_key:
         type: string
+      test_webhook_secret:
+        type: string
     type: object
   dto.ProviderType:
     enum:
@@ -286,6 +324,17 @@ definitions:
     type: string
     x-enum-varnames:
     - Paystack
+  dto.UpdatePaymentProviderRequest:
+    properties:
+      description:
+        type: string
+      is_supported:
+        type: boolean
+      notes:
+        type: string
+      test_credentials:
+        type: string
+    type: object
   dto.VerifyTransactionResponse:
     properties:
       amount:
@@ -310,6 +359,10 @@ definitions:
         type: string
       target_url:
         type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/models.WbhookType'
+        description: '"payment" | "va" | "all", defaults to "payment"'
     required:
     - provider_name
     type: object
@@ -323,6 +376,8 @@ definitions:
         type: string
       target_url:
         type: string
+      type:
+        $ref: '#/definitions/models.WbhookType'
     type: object
   dto.WebhookLogResponse:
     properties:
@@ -346,6 +401,60 @@ definitions:
         type: string
       webhook_config_id:
         type: string
+    type: object
+  models.WbhookType:
+    enum:
+    - va
+    - payment
+    - all
+    type: string
+    x-enum-varnames:
+    - VA
+    - PAYMENT
+    - ALL
+  projects.CreateProjectRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  sdk.CreateSDKSubscriptionRequest:
+    properties:
+      customerEmail:
+        type: string
+      planId:
+        type: string
+      publicId:
+        type: string
+      reference:
+        type: string
+    required:
+    - customerEmail
+    - planId
+    - publicId
+    - reference
+    type: object
+  sdk.InitializeSDKTransactionRequest:
+    properties:
+      amount:
+        type: number
+      callbackUrl:
+        type: string
+      currency:
+        type: string
+      email:
+        type: string
+      provider:
+        type: string
+      publicId:
+        type: string
+      reference:
+        type: string
+    required:
+    - amount
+    - email
+    - publicId
     type: object
 host: localhost:8080
 info:
@@ -478,6 +587,137 @@ paths:
       summary: Get dashboard statistics
       tags:
       - Dashboard
+  /notifications:
+    get:
+      description: List all notifications for the authenticated project
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: List notifications
+      tags:
+      - Notifications
+  /notifications/{id}:
+    delete:
+      description: Delete a specific notification by its ID
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a notification
+      tags:
+      - Notifications
+  /notifications/{id}/read:
+    post:
+      description: Mark a specific notification as read by its ID
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Mark notification as read
+      tags:
+      - Notifications
+  /notifications/read-all:
+    post:
+      description: Mark all unread notifications as read for the authenticated project
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Mark all notifications as read
+      tags:
+      - Notifications
+  /notifications/stream:
+    get:
+      description: Connect to the Server-Sent Events stream for real-time notifications
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: SSE Stream
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Stream notifications (SSE)
+      tags:
+      - Notifications
   /payment-providers:
     get:
       description: Retrieve a list of all payment providers from the system database
@@ -495,6 +735,216 @@ paths:
       summary: List supported payment providers
       tags:
       - Providers
+  /payment-providers/{name}:
+    put:
+      consumes:
+      - application/json
+      description: Update metadata, notes, and test credentials of a payment provider
+        (admin only)
+      parameters:
+      - description: Payment Provider Name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Payment Provider Update Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdatePaymentProviderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "455":
+          description: ""
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Update payment provider details
+      tags:
+      - Providers
+  /payment-providers/{name}/toggle-support:
+    post:
+      description: Toggle the global support status of a payment provider (admin only)
+      parameters:
+      - description: Payment Provider Name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Toggle payment provider support status
+      tags:
+      - Providers
+  /projects:
+    get:
+      description: List all projects belonging to the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: List user projects
+      tags:
+      - Projects
+    post:
+      consumes:
+      - application/json
+      description: Create a new project for the authenticated user
+      parameters:
+      - description: Project details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/projects.CreateProjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new project
+      tags:
+      - Projects
+  /projects/{id}:
+    delete:
+      description: Delete a specific project by its ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a project
+      tags:
+      - Projects
+    get:
+      description: Get details of a specific project by its ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get project details
+      tags:
+      - Projects
   /providers:
     get:
       description: Retrieve list of all provider configs for the authenticated user
@@ -663,6 +1113,104 @@ paths:
       summary: Toggle provider active status
       tags:
       - Providers
+  /sdk/{publicId}:
+    get:
+      description: Serve the Javascript SDK file customized for the merchant's active
+        providers and keys
+      parameters:
+      - description: Merchant or Project Public ID (ends with .js)
+        in: path
+        name: publicId
+        required: true
+        type: string
+      produces:
+      - application/javascript
+      responses:
+        "200":
+          description: JavaScript SDK Source
+          schema:
+            type: string
+        "400":
+          description: Missing or invalid Public ID
+          schema:
+            type: string
+        "404":
+          description: Project not found
+          schema:
+            type: string
+      summary: Serve dynamic Paye SDK script
+      tags:
+      - SDK
+  /sdk/subscriptions:
+    post:
+      consumes:
+      - application/json
+      description: Initialize a subscription from the client SDK using a project's
+        Public ID
+      parameters:
+      - description: Subscription details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/sdk.CreateSDKSubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      summary: Create public subscription
+      tags:
+      - SDK
+  /sdk/transactions/initialize:
+    post:
+      consumes:
+      - application/json
+      description: Initialize a payment transaction from the client SDK using a project's
+        Public ID
+      parameters:
+      - description: Transaction details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/sdk.InitializeSDKTransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      summary: Initialize public transaction
+      tags:
+      - SDK
   /transactions:
     get:
       description: Retrieve a list of payment transactions for the authenticated merchant.
@@ -766,6 +1314,163 @@ paths:
       summary: Verify transaction status
       tags:
       - transactions
+  /virtual-accounts:
+    get:
+      description: List all virtual accounts associated with the project
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: List virtual accounts
+      tags:
+      - Virtual Accounts
+    post:
+      consumes:
+      - application/json
+      description: Create a new virtual account for a customer
+      parameters:
+      - description: Virtual Account details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateVirtualAccountDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a virtual account
+      tags:
+      - Virtual Accounts
+  /virtual-accounts/{pvc_id}:
+    get:
+      description: Retrieve details of a specific virtual account by its PVC ID
+      parameters:
+      - description: PVC ID
+        in: path
+        name: pvc_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a virtual account
+      tags:
+      - Virtual Accounts
+  /virtual-accounts/{pvc_id}/suspend:
+    patch:
+      description: Suspend an active virtual account
+      parameters:
+      - description: PVC ID
+        in: path
+        name: pvc_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Suspend a virtual account
+      tags:
+      - Virtual Accounts
+  /virtual-accounts/{pvc_id}/transactions:
+    get:
+      description: List all transactions made to a specific virtual account
+      parameters:
+      - description: PVC ID
+        in: path
+        name: pvc_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: List transactions for a virtual account
+      tags:
+      - Virtual Accounts
   /webhooks/configs:
     get:
       description: Retrieve all webhook configs for the authenticated user

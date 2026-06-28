@@ -1,0 +1,186 @@
+package virtual_accounts
+
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/ttomsin/paye/internal/api"
+	"github.com/ttomsin/paye/internal/dto"
+	"github.com/ttomsin/paye/internal/middleware"
+)
+
+type VAHandler struct {
+	service *VAService
+}
+
+func NewVAHandler(service *VAService) *VAHandler {
+	return &VAHandler{service: service}
+}
+
+// @Summary Create a virtual account
+// @Description Create a new virtual account for a customer
+// @Tags Virtual Accounts
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param request body dto.CreateVirtualAccountDTO true "Virtual Account details"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /virtual-accounts [post]
+func (h *VAHandler) CreateVirtualAccountHandler(c *gin.Context) {
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		return
+	}
+
+	var req dto.CreateVirtualAccountDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+		return
+	}
+
+	va, err := h.service.CreateVirtualAccount(c.Request.Context(), projectID.(string), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success("Virtual account created successfully", va))
+}
+
+// @Summary Get a virtual account
+// @Description Retrieve details of a specific virtual account by its PVC ID
+// @Tags Virtual Accounts
+// @Produce json
+// @Security ApiKeyAuth
+// @Param pvc_id path string true "PVC ID"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 404 {object} api.SwaggerSimpleResponse
+// @Router /virtual-accounts/{pvc_id} [get]
+func (h *VAHandler) GetVirtualAccountHandler(c *gin.Context) {
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		return
+	}
+
+	pvcID := c.Param("pvc_id")
+	if pvcID == "" {
+		c.JSON(http.StatusBadRequest, api.Error("pvc_id is required"))
+		return
+	}
+
+	va, err := h.service.GetVirtualAccount(c.Request.Context(), projectID.(string), pvcID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, api.Error("Virtual account not found"))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success("Virtual account retrieved successfully", va))
+}
+
+// @Summary List virtual accounts
+// @Description List all virtual accounts associated with the project
+// @Tags Virtual Accounts
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /virtual-accounts [get]
+func (h *VAHandler) ListVirtualAccountsHandler(c *gin.Context) {
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		return
+	}
+
+	vas, err := h.service.ListVirtualAccounts(c.Request.Context(), projectID.(string))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success("Virtual accounts retrieved successfully", vas))
+}
+
+// @Summary Suspend a virtual account
+// @Description Suspend an active virtual account
+// @Tags Virtual Accounts
+// @Produce json
+// @Security ApiKeyAuth
+// @Param pvc_id path string true "PVC ID"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /virtual-accounts/{pvc_id}/suspend [patch]
+func (h *VAHandler) SuspendVirtualAccountHandler(c *gin.Context) {
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		return
+	}
+
+	pvcID := c.Param("pvc_id")
+	if pvcID == "" {
+		c.JSON(http.StatusBadRequest, api.Error("pvc_id is required"))
+		return
+	}
+
+	if err := h.service.SuspendVirtualAccount(c.Request.Context(), projectID.(string), pvcID); err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success[any]("Virtual account suspended successfully", nil))
+}
+
+// @Summary List transactions for a virtual account
+// @Description List all transactions made to a specific virtual account
+// @Tags Virtual Accounts
+// @Produce json
+// @Security ApiKeyAuth
+// @Param pvc_id path string true "PVC ID"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /virtual-accounts/{pvc_id}/transactions [get]
+func (h *VAHandler) ListTransactionsHandler(c *gin.Context) {
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		return
+	}
+
+	pvcID := c.Param("pvc_id")
+	if pvcID == "" {
+		c.JSON(http.StatusBadRequest, api.Error("pvc_id is required"))
+		return
+	}
+
+	txs, err := h.service.ListTransactions(c.Request.Context(), projectID.(string), pvcID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success("Transactions retrieved successfully", txs))
+}
+
+func RegisterRoutes(rg *gin.RouterGroup, h *VAHandler) {
+	va := rg.Group("/virtual-accounts")
+	{
+		va.POST("", h.CreateVirtualAccountHandler)
+		va.GET("", h.ListVirtualAccountsHandler)
+		va.GET("/:pvc_id", h.GetVirtualAccountHandler)
+		va.PATCH("/:pvc_id/suspend", h.SuspendVirtualAccountHandler)
+		va.GET("/:pvc_id/transactions", h.ListTransactionsHandler)
+	}
+}

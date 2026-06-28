@@ -17,6 +17,18 @@ func NewProjectHandler(service *ProjectService) *ProjectHandler {
 	return &ProjectHandler{service: service}
 }
 
+// @Summary Create a new project
+// @Description Create a new project for the authenticated user
+// @Tags Projects
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param request body CreateProjectRequest true "Project details"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /projects [post]
 func (h *ProjectHandler) CreateProjectHandler(c *gin.Context) {
 	userID, exists := c.Get(userIDContextKey)
 	if !exists {
@@ -48,6 +60,15 @@ func (h *ProjectHandler) CreateProjectHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, api.Success("Project created successfully", resp))
 }
 
+// @Summary List user projects
+// @Description List all projects belonging to the authenticated user
+// @Tags Projects
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /projects [get]
 func (h *ProjectHandler) ListProjectsHandler(c *gin.Context) {
 	userID, exists := c.Get(userIDContextKey)
 	if !exists {
@@ -76,6 +97,18 @@ func (h *ProjectHandler) ListProjectsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, api.Success("Projects retrieved successfully", resp))
 }
 
+// @Summary Get project details
+// @Description Get details of a specific project by its ID
+// @Tags Projects
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "Project ID"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 403 {object} api.SwaggerSimpleResponse
+// @Failure 404 {object} api.SwaggerSimpleResponse
+// @Router /projects/{id} [get]
 func (h *ProjectHandler) GetProjectHandler(c *gin.Context) {
 	userID, exists := c.Get(userIDContextKey)
 	if !exists {
@@ -110,6 +143,17 @@ func (h *ProjectHandler) GetProjectHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, api.Success("Project retrieved successfully", resp))
 }
 
+// @Summary Delete a project
+// @Description Delete a specific project by its ID
+// @Tags Projects
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "Project ID"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /projects/{id} [delete]
 func (h *ProjectHandler) DeleteProjectHandler(c *gin.Context) {
 	userID, exists := c.Get(userIDContextKey)
 	if !exists {

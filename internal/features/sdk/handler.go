@@ -66,6 +66,15 @@ type InitializeSDKTransactionRequest struct {
 }
 
 // ServeSDK serves the dynamic Javascript SDK script file for the merchant
+// @Summary Serve dynamic Paye SDK script
+// @Description Serve the Javascript SDK file customized for the merchant's active providers and keys
+// @Tags SDK
+// @Produce application/javascript
+// @Param publicId path string true "Merchant or Project Public ID (ends with .js)"
+// @Success 200 {string} string "JavaScript SDK Source"
+// @Failure 400 {string} string "Missing or invalid Public ID"
+// @Failure 404 {string} string "Project not found"
+// @Router /sdk/{publicId} [get]
 func (h *SDKHandler) ServeSDK(c *gin.Context) {
 	param := c.Param("publicId")
 	publicID := strings.TrimSuffix(param, ".js")
@@ -131,6 +140,17 @@ func (h *SDKHandler) ServeSDK(c *gin.Context) {
 }
 
 // InitializeSDKTransaction initializes transaction publicly using merchant's PublicID
+// @Summary Initialize public transaction
+// @Description Initialize a payment transaction from the client SDK using a project's Public ID
+// @Tags SDK
+// @Accept json
+// @Produce json
+// @Param request body InitializeSDKTransactionRequest true "Transaction details"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 404 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /sdk/transactions/initialize [post]
 func (h *SDKHandler) InitializeSDKTransaction(c *gin.Context) {
 	var req InitializeSDKTransactionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -233,6 +253,17 @@ type CreateSDKSubscriptionRequest struct {
 	Reference     string `json:"reference" binding:"required"`
 }
 
+// @Summary Create public subscription
+// @Description Initialize a subscription from the client SDK using a project's Public ID
+// @Tags SDK
+// @Accept json
+// @Produce json
+// @Param request body CreateSDKSubscriptionRequest true "Subscription details"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 404 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /sdk/subscriptions [post]
 func (h *SDKHandler) CreateSDKSubscription(c *gin.Context) {
 	var req CreateSDKSubscriptionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

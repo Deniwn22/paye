@@ -195,6 +195,215 @@ const docTemplate = `{
                 }
             }
         },
+        "/notifications": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "List all notifications for the authenticated project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "List notifications",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications/read-all": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Mark all unread notifications as read for the authenticated project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark all notifications as read",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications/stream": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Connect to the Server-Sent Events stream for real-time notifications",
+                "produces": [
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Stream notifications (SSE)",
+                "responses": {
+                    "200": {
+                        "description": "SSE Stream",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete a specific notification by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Delete a notification",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Notification ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications/{id}/read": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Mark a specific notification as read by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark notification as read",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Notification ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/payment-providers": {
             "get": {
                 "description": "Retrieve a list of all payment providers from the system database",
@@ -210,6 +419,334 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/api.SwaggerPaymentProviderListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/payment-providers/{name}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update metadata, notes, and test credentials of a payment provider (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "Update payment provider details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Payment Provider Name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Payment Provider Update Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdatePaymentProviderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "455": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/payment-providers/{name}/toggle-support": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Toggle the global support status of a payment provider (admin only)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "Toggle payment provider support status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Payment Provider Name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "List all projects belonging to the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "List user projects",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a new project for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Create a new project",
+                "parameters": [
+                    {
+                        "description": "Project details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/projects.CreateProjectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get details of a specific project by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Get project details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete a specific project by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Delete a project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
@@ -485,6 +1022,151 @@ const docTemplate = `{
                 }
             }
         },
+        "/sdk/subscriptions": {
+            "post": {
+                "description": "Initialize a subscription from the client SDK using a project's Public ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SDK"
+                ],
+                "summary": "Create public subscription",
+                "parameters": [
+                    {
+                        "description": "Subscription details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/sdk.CreateSDKSubscriptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/sdk/transactions/initialize": {
+            "post": {
+                "description": "Initialize a payment transaction from the client SDK using a project's Public ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SDK"
+                ],
+                "summary": "Initialize public transaction",
+                "parameters": [
+                    {
+                        "description": "Transaction details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/sdk.InitializeSDKTransactionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/sdk/{publicId}": {
+            "get": {
+                "description": "Serve the Javascript SDK file customized for the merchant's active providers and keys",
+                "produces": [
+                    "application/javascript"
+                ],
+                "tags": [
+                    "SDK"
+                ],
+                "summary": "Serve dynamic Paye SDK script",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Merchant or Project Public ID (ends with .js)",
+                        "name": "publicId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JavaScript SDK Source",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or invalid Public ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/transactions": {
             "get": {
                 "description": "Retrieve a list of payment transactions for the authenticated merchant.",
@@ -626,6 +1308,254 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/virtual-accounts": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "List all virtual accounts associated with the project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Virtual Accounts"
+                ],
+                "summary": "List virtual accounts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a new virtual account for a customer",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Virtual Accounts"
+                ],
+                "summary": "Create a virtual account",
+                "parameters": [
+                    {
+                        "description": "Virtual Account details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateVirtualAccountDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/virtual-accounts/{pvc_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve details of a specific virtual account by its PVC ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Virtual Accounts"
+                ],
+                "summary": "Get a virtual account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "PVC ID",
+                        "name": "pvc_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/virtual-accounts/{pvc_id}/suspend": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Suspend an active virtual account",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Virtual Accounts"
+                ],
+                "summary": "Suspend a virtual account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "PVC ID",
+                        "name": "pvc_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/virtual-accounts/{pvc_id}/transactions": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "List all transactions made to a specific virtual account",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Virtual Accounts"
+                ],
+                "summary": "List transactions for a virtual account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "PVC ID",
+                        "name": "pvc_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/api.SwaggerSimpleResponse"
                         }
@@ -1195,6 +2125,40 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CreateVirtualAccountDTO": {
+            "type": "object",
+            "required": [
+                "account_name",
+                "currency",
+                "customer_reference"
+            ],
+            "properties": {
+                "account_name": {
+                    "type": "string"
+                },
+                "bvn": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "customer_reference": {
+                    "type": "string"
+                },
+                "expected_amount": {
+                    "description": "dynamic only",
+                    "type": "number"
+                },
+                "expiry_date": {
+                    "description": "dynamic only",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "\"static\" | \"dynamic\", defaults to static",
+                    "type": "string"
+                }
+            }
+        },
         "dto.DashboardStatsResponse": {
             "type": "object",
             "properties": {
@@ -1229,6 +2193,9 @@ const docTemplate = `{
             "properties": {
                 "amount": {
                     "type": "number"
+                },
+                "callbackUrl": {
+                    "type": "string"
                 },
                 "currency": {
                     "type": "string"
@@ -1292,6 +2259,12 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "test_credentials": {
+                    "type": "string"
                 }
             }
         },
@@ -1312,6 +2285,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "live_secret_key": {
+                    "type": "string"
+                },
+                "live_webhook_secret": {
                     "type": "string"
                 },
                 "metadata": {
@@ -1336,6 +2312,9 @@ const docTemplate = `{
                 },
                 "test_secret_key": {
                     "type": "string"
+                },
+                "test_webhook_secret": {
+                    "type": "string"
                 }
             }
         },
@@ -1355,6 +2334,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "live_secret_key": {
+                    "type": "string"
+                },
+                "live_webhook_secret": {
                     "type": "string"
                 },
                 "metadata": {
@@ -1379,6 +2361,9 @@ const docTemplate = `{
                 },
                 "test_secret_key": {
                     "type": "string"
+                },
+                "test_webhook_secret": {
+                    "type": "string"
                 }
             }
         },
@@ -1390,6 +2375,23 @@ const docTemplate = `{
             "x-enum-varnames": [
                 "Paystack"
             ]
+        },
+        "dto.UpdatePaymentProviderRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "is_supported": {
+                    "type": "boolean"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "test_credentials": {
+                    "type": "string"
+                }
+            }
         },
         "dto.VerifyTransactionResponse": {
             "type": "object",
@@ -1429,6 +2431,14 @@ const docTemplate = `{
                 },
                 "target_url": {
                     "type": "string"
+                },
+                "type": {
+                    "description": "\"payment\" | \"va\" | \"all\", defaults to \"payment\"",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.WbhookType"
+                        }
+                    ]
                 }
             }
         },
@@ -1446,6 +2456,9 @@ const docTemplate = `{
                 },
                 "target_url": {
                     "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/models.WbhookType"
                 }
             }
         },
@@ -1480,6 +2493,84 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "webhook_config_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.WbhookType": {
+            "type": "string",
+            "enum": [
+                "va",
+                "payment",
+                "all"
+            ],
+            "x-enum-varnames": [
+                "VA",
+                "PAYMENT",
+                "ALL"
+            ]
+        },
+        "projects.CreateProjectRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "sdk.CreateSDKSubscriptionRequest": {
+            "type": "object",
+            "required": [
+                "customerEmail",
+                "planId",
+                "publicId",
+                "reference"
+            ],
+            "properties": {
+                "customerEmail": {
+                    "type": "string"
+                },
+                "planId": {
+                    "type": "string"
+                },
+                "publicId": {
+                    "type": "string"
+                },
+                "reference": {
+                    "type": "string"
+                }
+            }
+        },
+        "sdk.InitializeSDKTransactionRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "email",
+                "publicId"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "callbackUrl": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "publicId": {
+                    "type": "string"
+                },
+                "reference": {
                     "type": "string"
                 }
             }

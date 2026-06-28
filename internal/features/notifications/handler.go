@@ -17,7 +17,14 @@ func NewNotificationHandler(service *NotificationService) *NotificationHandler {
 	return &NotificationHandler{service: service}
 }
 
-// StreamNotifications handles SSE connections, sending real-time messages to active dashboard users
+// @Summary Stream notifications (SSE)
+// @Description Connect to the Server-Sent Events stream for real-time notifications
+// @Tags Notifications
+// @Produce text/event-stream
+// @Security ApiKeyAuth
+// @Success 200 {string} string "SSE Stream"
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Router /notifications/stream [get]
 func (h *NotificationHandler) StreamNotifications(c *gin.Context) {
 	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
@@ -51,6 +58,15 @@ func (h *NotificationHandler) StreamNotifications(c *gin.Context) {
 	})
 }
 
+// @Summary List notifications
+// @Description List all notifications for the authenticated project
+// @Tags Notifications
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /notifications [get]
 func (h *NotificationHandler) ListNotificationsHandler(c *gin.Context) {
 	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
@@ -67,6 +83,17 @@ func (h *NotificationHandler) ListNotificationsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, api.Success("Notifications retrieved successfully", list))
 }
 
+// @Summary Mark notification as read
+// @Description Mark a specific notification as read by its ID
+// @Tags Notifications
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "Notification ID"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /notifications/{id}/read [post]
 func (h *NotificationHandler) MarkAsReadHandler(c *gin.Context) {
 	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
@@ -89,6 +116,15 @@ func (h *NotificationHandler) MarkAsReadHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, api.Success[any]("Notification marked as read", nil))
 }
 
+// @Summary Mark all notifications as read
+// @Description Mark all unread notifications as read for the authenticated project
+// @Tags Notifications
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /notifications/read-all [post]
 func (h *NotificationHandler) MarkAllAsReadHandler(c *gin.Context) {
 	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
@@ -105,6 +141,17 @@ func (h *NotificationHandler) MarkAllAsReadHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, api.Success[any]("All notifications marked as read", nil))
 }
 
+// @Summary Delete a notification
+// @Description Delete a specific notification by its ID
+// @Tags Notifications
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "Notification ID"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /notifications/{id} [delete]
 func (h *NotificationHandler) DeleteNotificationHandler(c *gin.Context) {
 	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
