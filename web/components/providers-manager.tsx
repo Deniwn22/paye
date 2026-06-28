@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition, useEffect } from "react"
+import Image from "next/image"
 import { addProviderAction, deleteProviderAction, toggleProviderAction, getPaymentProvidersAction, togglePaymentProviderAction, updatePaymentProviderAction } from "@/app/actions"
 import { Plus, Trash2, Key, HelpCircle, ShieldCheck, Check, AlertCircle, Eye, EyeOff, Radio, Sliders, Edit2, Copy, Info } from "lucide-react"
 import {
@@ -41,6 +42,7 @@ interface PaymentProvider {
 export default function ProvidersManager({ initialProviders = [], userRole = "merchant" }: { initialProviders?: ProviderConfig[], userRole?: string }) {
   const [providers, setProviders] = useState<ProviderConfig[]>(initialProviders || [])
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [addStep, setAddStep] = useState(1)
   const [isPending, startTransition] = useTransition()
 
   // Form states
@@ -469,7 +471,10 @@ export default function ProvidersManager({ initialProviders = [], userRole = "me
           <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1 font-medium">Manage credentials for your payment providers.</p>
         </div>
 
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <Dialog open={dialogOpen} onOpenChange={(open) => {
+          setDialogOpen(open)
+          if (open) setAddStep(1)
+        }}>
           <DialogTrigger asChild>
             <button className="px-3.5 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-all cursor-pointer select-none">
               <Plus className="w-4.5 h-4.5" />
@@ -483,12 +488,44 @@ export default function ProvidersManager({ initialProviders = [], userRole = "me
                 <span>Add Payment Provider</span>
               </DialogTitle>
               <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
-                Your API keys are encrypted and stored securely. We verify key prefixes to match sandbox and production gates.
+                Your API keys are encrypted and stored securely.
               </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleAddSubmit} className="space-y-4 pt-3">
-              <div className="grid grid-cols-2 gap-4">
+            {/* Step indicator */}
+            {(() => {
+              const steps = ["Choose Provider", "Sandbox Keys", "Live Keys"]
+              return (
+                <div className="flex items-center gap-0 pt-1">
+                  {steps.map((s, i) => {
+                    const step = i + 1
+                    const active = addStep === step
+                    const done = addStep > step
+                    return (
+                      <div key={s} className="flex items-center flex-1 last:flex-none">
+                        <div className="flex items-center gap-1.5">
+                          <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-all ${
+                            done ? "bg-[#2563EB] text-white" : active ? "bg-[#2563EB] text-white" : "bg-zinc-100 text-zinc-400 dark:bg-zinc-800"
+                          }`}>
+                            {done ? (
+                              <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            ) : step}
+                          </div>
+                          <span className={`text-[10px] font-semibold whitespace-nowrap ${active ? "text-zinc-800 dark:text-zinc-100" : "text-zinc-400 dark:text-zinc-600"}`}>{s}</span>
+                        </div>
+                        {i < steps.length - 1 && (
+                          <div className={`mx-2 h-px flex-1 transition-all ${done ? "bg-[#2563EB]" : "bg-zinc-200 dark:bg-zinc-800"}`} />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })()}
+
+            {/* ── STEP 1: Choose provider + label ── */}
+            {addStep === 1 && (
+              <div className="space-y-4 pt-1 animate-in fade-in duration-150">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">Label (e.g. main-keys)</label>
                   <input
@@ -496,365 +533,258 @@ export default function ProvidersManager({ initialProviders = [], userRole = "me
                     value={label}
                     onChange={(e) => setLabel(e.target.value)}
                     placeholder="e.g. core-keys"
-                    className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-sans transition-colors"
+                    className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-sans transition-colors"
                   />
                 </div>
+
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">Payment Provider</label>
-                  <select
-                    value={providerName}
-                    onChange={(e) => setProviderName(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-semibold cursor-pointer transition-colors"
-                  >
-                    {supportedProviders.map((p) => (
-                      <option key={p.id} value={p.name} disabled={!p.is_supported}>
-                        {p.label}{!p.is_supported ? " (Coming Soon)" : ""}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {(providerName === "nomba" || providerName === "opay") && (
-                <div className="space-y-1.5 animate-in fade-in duration-150">
-                  <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
-                    {providerName === "nomba" ? "Nomba Account ID" : "OPay Merchant ID"}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={accountId}
-                    onChange={(e) => setAccountId(e.target.value)}
-                    placeholder={providerName === "nomba" ? "e.g. acc-xxxxx-xxxx" : "e.g. 256612345678901"}
-                    className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-805 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-sans transition-colors"
-                  />
-                </div>
-              )}
-
-              {/* Global Provider Notes shown before configuring */}
-              {(() => {
-                const info = supportedProviders.find(sp => sp.name === providerName)
-                if (!info?.notes) return null
-                return (
-                  <details className="group border border-indigo-500/10 bg-indigo-500/5 rounded-xl overflow-hidden animate-in fade-in duration-200">
-                    <summary className="flex items-center justify-between px-3 py-1.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 cursor-pointer select-none">
-                      <div className="flex items-center gap-1.5">
-                        <Info className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                        <span className="uppercase tracking-wider">Provider Information & Notes</span>
-                      </div>
-                      <span className="text-[9px] uppercase bg-indigo-500/10 px-1.5 py-0.5 rounded group-open:hidden">Show</span>
-                      <span className="text-[9px] uppercase bg-indigo-500/10 px-1.5 py-0.5 rounded hidden group-open:inline">Hide</span>
-                    </summary>
-                    <div className="px-3 pb-3 pt-1 text-[11px] text-zinc-650 dark:text-zinc-400 leading-relaxed font-medium border-t border-indigo-500/10">
-                      {info.notes}
-                    </div>
-                  </details>
-                )
-              })()}
-
-              {/* Form Environment Tabs */}
-              <div className="flex border-b border-zinc-200 dark:border-zinc-800 mt-2">
-                <button
-                  type="button"
-                  onClick={() => setFormTab("test")}
-                  className={`flex-1 py-1.5 text-center text-xs font-bold border-b-2 transition-all cursor-pointer ${
-                    formTab === "test"
-                      ? "border-amber-500 text-amber-500"
-                      : "border-transparent text-zinc-500"
-                  }`}
-                >
-                  Test Sandbox
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormTab("live")}
-                  className={`flex-1 py-1.5 text-center text-xs font-bold border-b-2 transition-all cursor-pointer ${
-                    formTab === "live"
-                      ? "border-emerald-500 text-emerald-500"
-                      : "border-transparent text-zinc-500"
-                  }`}
-                >
-                  Live Production
-                </button>
-              </div>
-
-              {formTab === "test" ? (
-                <div className="space-y-3 pt-2 animate-in fade-in duration-150">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
-                        {providerName === "nomba" ? "Test Client Secret" : "Test Secret Key"}
-                      </label>
-                      <input
-                        type="password"
-                        value={testSecretKey}
-                        onChange={(e) => setTestSecretKey(e.target.value)}
-                        placeholder={
-                          providerName === "paystack"
-                            ? "sk_test_..."
-                            : providerName === "flutterwave"
-                            ? "FLWSECK_TEST-..."
-                            : providerName === "opay"
-                            ? "OPAYSEC..."
-                            : "e.g. client_secret_..."
-                        }
-                        className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-805 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
-                        {providerName === "nomba" ? "Test Client ID" : providerName === "opay" ? "Test Public Key" : "Test Public Key (Optional)"}
-                      </label>
-                      <input
-                        type="text"
-                        value={testPublicKey}
-                        onChange={(e) => setTestPublicKey(e.target.value)}
-                        placeholder={
-                          providerName === "paystack"
-                            ? "pk_test_..."
-                            : providerName === "flutterwave"
-                            ? "FLWPUBK_TEST-..."
-                            : providerName === "opay"
-                            ? "OPAYPUB..."
-                            : "e.g. client_id_..."
-                        }
-                        className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-805 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Collapsible Webhook Config */}
-                  <details className="group border border-zinc-200 dark:border-zinc-900 rounded-lg overflow-hidden">
-                    <summary className="flex items-center justify-between px-3 py-2 bg-zinc-50 dark:bg-zinc-900/50 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 cursor-pointer select-none hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors">
-                      <span>Webhook Configuration (Optional)</span>
-                      <Sliders className="w-3.5 h-3.5 text-zinc-400 group-open:rotate-180 transition-transform duration-200" />
-                    </summary>
-                    <div className="p-3 border-t border-zinc-200 dark:border-zinc-900 space-y-2 bg-zinc-50/30 dark:bg-zinc-950/20">
-                      <div className="space-y-1.5">
-                        <label className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
-                          Test Webhook Secret
-                        </label>
-                        <input
-                          type="password"
-                          value={testWebhookSecret}
-                          onChange={(e) => setTestWebhookSecret(e.target.value)}
-                          placeholder="e.g. whsec_..."
-                          className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-805 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-xs font-mono transition-colors"
-                        />
-                        <p className="text-[10px] text-zinc-500 dark:text-zinc-450 leading-relaxed font-medium">
-                          Note: Defaults to Test Client Secret Key if left empty.
-                        </p>
-                      </div>
-                    </div>
-                  </details>
-
-                  {/* Sandbox Test Credentials Copy UI */}
-                  {(() => {
-                    const info = supportedProviders.find(sp => sp.name === providerName)
-                    if (!info?.test_credentials) return null
-                    try {
-                      const parsed = JSON.parse(info.test_credentials)
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {([
+                      { name: "paystack", label: "Paystack", logo: "/provider-logos/Paystack/Paystack_idSL4BuSLF_0.svg", color: "#00C3F7" },
+                      { name: "flutterwave", label: "Flutterwave", logo: null, color: "#F5A623" },
+                      { name: "nomba", label: "Nomba", logo: "/provider-logos/Nomba/Nomba_idgTwBzT7P_6.svg", color: "#7C3AED" },
+                      { name: "opay", label: "OPay", logo: "/provider-logos/OPay/OPay_id6sbCso4N_2.svg", color: "#10B981" },
+                    ] as const).map((p) => {
+                      const supported = supportedProviders.find(sp => sp.name === p.name)?.is_supported ?? false
+                      const isSelected = providerName === p.name
                       return (
-                        <div className="p-3 bg-amber-500/5 border border-amber-500/15 rounded-xl space-y-2 text-left">
-                          <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
-                            <Info className="w-3.5 h-3.5 animate-pulse" />
-                            <span>Interactive Sandbox Credentials</span>
+                        <button
+                          key={p.name}
+                          type="button"
+                          disabled={!supported}
+                          onClick={() => supported && setProviderName(p.name)}
+                          className={[
+                            "relative flex flex-col items-center justify-center gap-2 rounded-[12px] border-2 p-3 transition-all",
+                            isSelected ? "border-[#2563EB] bg-[#EFF6FF] dark:bg-[#1E3A5F]" : "border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700",
+                            !supported ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
+                          ].join(" ")}
+                        >
+                          {isSelected && (
+                            <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#2563EB]">
+                              <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </span>
+                          )}
+                          <div className="flex h-8 w-8 items-center justify-center">
+                            {p.logo ? (
+                              <Image src={p.logo} alt={p.label} width={28} height={28} className="object-contain" />
+                            ) : (
+                              <span className="text-[9px] font-bold leading-tight text-center" style={{ color: p.color }}>{p.label}</span>
+                            )}
                           </div>
-                          
-                          <div className="text-[11px] text-zinc-650 dark:text-zinc-400 grid grid-cols-2 gap-2">
-                            {parsed.card_number && (
-                              <div className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 px-2 py-1 rounded-lg">
-                                <span className="font-semibold text-zinc-500">Card:</span>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(parsed.card_number)
-                                    toast.success("Card number copied!")
-                                  }}
-                                  className="font-mono text-zinc-900 dark:text-zinc-200 hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
-                                >
-                                  <span>{parsed.card_number}</span>
-                                  <Copy className="w-3 h-3 text-zinc-400" />
-                                </button>
-                              </div>
-                            )}
-                            {parsed.pin && (
-                              <div className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 px-2 py-1 rounded-lg">
-                                <span className="font-semibold text-zinc-500">PIN:</span>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(parsed.pin)
-                                    toast.success("PIN copied!")
-                                  }}
-                                  className="font-mono text-zinc-900 dark:text-zinc-200 hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
-                                >
-                                  <span>{parsed.pin}</span>
-                                  <Copy className="w-3 h-3 text-zinc-400" />
-                                </button>
-                              </div>
-                            )}
-                            {parsed.cvv && (
-                              <div className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 px-2 py-1 rounded-lg">
-                                <span className="font-semibold text-zinc-500">CVV:</span>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(parsed.cvv)
-                                    toast.success("CVV copied!")
-                                  }}
-                                  className="font-mono text-zinc-900 dark:text-zinc-200 hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
-                                >
-                                  <span>{parsed.cvv}</span>
-                                  <Copy className="w-3 h-3 text-zinc-400" />
-                                </button>
-                              </div>
-                            )}
-                            {parsed.otp && (
-                              <div className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-805 px-2 py-1 rounded-lg">
-                                <span className="font-semibold text-zinc-500">OTP:</span>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(parsed.otp)
-                                    toast.success("OTP copied!")
-                                  }}
-                                  className="font-mono text-zinc-900 dark:text-zinc-200 hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
-                                >
-                                  <span>{parsed.otp}</span>
-                                  <Copy className="w-3 h-3 text-zinc-400" />
-                                </button>
-                              </div>
-                            )}
-                            {parsed.wallets && parsed.wallets.map((w: any, idx: number) => (
-                              <div key={idx} className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 px-2 py-1 rounded-lg col-span-2">
-                                <span className="font-semibold text-zinc-500">Wallet ({w.outcome}):</span>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(w.phone)
-                                    toast.success("Wallet phone copied!")
-                                  }}
-                                  className="font-mono text-zinc-900 dark:text-zinc-200 hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
-                                >
-                                  <span>{w.phone}</span>
-                                  <Copy className="w-3 h-3 text-zinc-400" />
-                                </button>
-                              </div>
-                            ))}
-                            {parsed.bank_accounts && parsed.bank_accounts.map((b: any, idx: number) => (
-                              <div key={idx} className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 px-2 py-1 rounded-lg col-span-2">
-                                <span className="font-semibold text-zinc-500">Bank ({b.bank}):</span>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(b.number)
-                                    toast.success("Bank account number copied!")
-                                  }}
-                                  className="font-mono text-zinc-900 dark:text-zinc-200 hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
-                                >
-                                  <span>{b.number}</span>
-                                  <Copy className="w-3 h-3 text-zinc-400" />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                          <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">{p.label}</span>
+                          {!supported && <span className="text-[9px] text-zinc-400">Soon</span>}
+                        </button>
                       )
-                    } catch (e) {
-                      return null
-                    }
-                  })()}
-                </div>
-              ) : (
-                <div className="space-y-3 pt-2 animate-in fade-in duration-150">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
-                        {providerName === "nomba" ? "Live Client Secret" : "Live Secret Key"}
-                      </label>
-                      <input
-                        type="password"
-                        value={liveSecretKey}
-                        onChange={(e) => setLiveSecretKey(e.target.value)}
-                        placeholder={
-                          providerName === "paystack"
-                            ? "sk_live_..."
-                            : providerName === "flutterwave"
-                            ? "FLWSECK-..."
-                            : providerName === "opay"
-                            ? "OPAYSEC..."
-                            : "e.g. client_secret_..."
-                        }
-                        className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
-                        {providerName === "nomba" ? "Live Client ID" : providerName === "opay" ? "Live Public Key" : "Live Public Key (Optional)"}
-                      </label>
-                      <input
-                        type="text"
-                        value={livePublicKey}
-                        onChange={(e) => setLivePublicKey(e.target.value)}
-                        placeholder={
-                          providerName === "paystack"
-                            ? "pk_live_..."
-                            : providerName === "flutterwave"
-                            ? "FLWPUBK-..."
-                            : providerName === "opay"
-                            ? "OPAYPUB..."
-                            : "e.g. client_id_..."
-                        }
-                        className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
-                      />
-                    </div>
+                    })}
                   </div>
-
-                  {/* Collapsible Webhook Config */}
-                  <details className="group border border-zinc-200 dark:border-zinc-900 rounded-lg overflow-hidden">
-                    <summary className="flex items-center justify-between px-3 py-2 bg-zinc-50 dark:bg-zinc-900/50 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 cursor-pointer select-none hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors">
-                      <span>Webhook Configuration (Optional)</span>
-                      <Sliders className="w-3.5 h-3.5 text-zinc-400 group-open:rotate-180 transition-transform duration-200" />
-                    </summary>
-                    <div className="p-3 border-t border-zinc-200 dark:border-zinc-900 space-y-2 bg-zinc-50/30 dark:bg-zinc-950/20">
-                      <div className="space-y-1.5">
-                        <label className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
-                          Live Webhook Secret
-                        </label>
-                        <input
-                          type="password"
-                          value={liveWebhookSecret}
-                          onChange={(e) => setLiveWebhookSecret(e.target.value)}
-                          placeholder="e.g. whsec_..."
-                          className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-xs font-mono transition-colors"
-                        />
-                        <p className="text-[10px] text-zinc-500 dark:text-zinc-450 leading-relaxed font-medium">
-                          Note: Defaults to Live Client Secret Key if left empty.
-                        </p>
-                      </div>
-                    </div>
-                  </details>
                 </div>
-              )}
 
-              <div className="pt-2 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setDialogOpen(false)}
-                  className="px-3.5 py-1.5 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg font-semibold text-zinc-700 dark:text-zinc-300 text-xs transition-all cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="px-3.5 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg cursor-pointer disabled:opacity-50 transition-all text-xs"
-                >
-                  {isPending ? "Saving..." : "Save Provider"}
-                </button>
+                {(providerName === "nomba" || providerName === "opay") && (
+                  <div className="space-y-1.5 animate-in fade-in duration-150">
+                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      {providerName === "nomba" ? "Nomba Account ID" : "OPay Merchant ID"}
+                    </label>
+                    <input
+                      type="text"
+                      value={accountId}
+                      onChange={(e) => setAccountId(e.target.value)}
+                      placeholder={providerName === "nomba" ? "e.g. acc-xxxxx-xxxx" : "e.g. 256612345678901"}
+                      className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-sans transition-colors"
+                    />
+                  </div>
+                )}
+
+                {/* Provider notes */}
+                {(() => {
+                  const info = supportedProviders.find(sp => sp.name === providerName)
+                  if (!info?.notes) return null
+                  return (
+                    <details className="group border border-indigo-500/10 bg-indigo-500/5 rounded-xl overflow-hidden">
+                      <summary className="flex items-center justify-between px-3 py-1.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 cursor-pointer select-none">
+                        <div className="flex items-center gap-1.5">
+                          <Info className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                          <span className="uppercase tracking-wider">Provider Notes</span>
+                        </div>
+                        <span className="text-[9px] uppercase bg-indigo-500/10 px-1.5 py-0.5 rounded group-open:hidden">Show</span>
+                        <span className="text-[9px] uppercase bg-indigo-500/10 px-1.5 py-0.5 rounded hidden group-open:inline">Hide</span>
+                      </summary>
+                      <div className="px-3 pb-3 pt-1 text-[11px] text-zinc-650 dark:text-zinc-400 leading-relaxed font-medium border-t border-indigo-500/10">
+                        {info.notes}
+                      </div>
+                    </details>
+                  )
+                })()}
+
+                <div className="flex justify-end gap-2 pt-1">
+                  <button type="button" onClick={() => setDialogOpen(false)} className="px-3.5 py-1.5 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg font-semibold text-zinc-700 dark:text-zinc-300 text-xs transition-all cursor-pointer">
+                    Cancel
+                  </button>
+                  <button type="button" onClick={() => setAddStep(2)} className="px-4 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg text-xs transition-all cursor-pointer">
+                    Next →
+                  </button>
+                </div>
               </div>
-            </form>
+            )}
+
+            {/* ── STEP 2: Test / Sandbox keys ── */}
+            {addStep === 2 && (
+              <div className="space-y-3 pt-1 animate-in fade-in duration-150">
+                <div className="flex items-center gap-2 rounded-lg bg-amber-500/8 border border-amber-500/15 px-3 py-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500"/>
+                  <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-400">Sandbox / Test Environment</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      {providerName === "nomba" ? "Test Client Secret" : "Test Secret Key"}
+                    </label>
+                    <input
+                      type="password"
+                      value={testSecretKey}
+                      onChange={(e) => setTestSecretKey(e.target.value)}
+                      placeholder={providerName === "paystack" ? "sk_test_..." : providerName === "flutterwave" ? "FLWSECK_TEST-..." : providerName === "opay" ? "OPAYSEC..." : "client_secret_..."}
+                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      {providerName === "nomba" ? "Test Client ID" : providerName === "opay" ? "Test Public Key" : "Test Public Key"}
+                    </label>
+                    <input
+                      type="text"
+                      value={testPublicKey}
+                      onChange={(e) => setTestPublicKey(e.target.value)}
+                      placeholder={providerName === "paystack" ? "pk_test_..." : providerName === "flutterwave" ? "FLWPUBK_TEST-..." : providerName === "opay" ? "OPAYPUB..." : "client_id_..."}
+                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <details className="group border border-zinc-200 dark:border-zinc-900 rounded-lg overflow-hidden">
+                  <summary className="flex items-center justify-between px-3 py-2 bg-zinc-50 dark:bg-zinc-900/50 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 cursor-pointer select-none hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors">
+                    <span>Webhook Secret (Optional)</span>
+                    <Sliders className="w-3.5 h-3.5 text-zinc-400 group-open:rotate-180 transition-transform duration-200" />
+                  </summary>
+                  <div className="p-3 border-t border-zinc-200 dark:border-zinc-900 space-y-1.5">
+                    <input
+                      type="password"
+                      value={testWebhookSecret}
+                      onChange={(e) => setTestWebhookSecret(e.target.value)}
+                      placeholder="e.g. whsec_..."
+                      className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-[#2563eb] rounded-lg text-xs font-mono transition-colors"
+                    />
+                    <p className="text-[10px] text-zinc-400 leading-relaxed">Defaults to Test Secret Key if left empty.</p>
+                  </div>
+                </details>
+
+                {/* Sandbox test credentials copy */}
+                {(() => {
+                  const info = supportedProviders.find(sp => sp.name === providerName)
+                  if (!info?.test_credentials) return null
+                  try {
+                    const parsed = JSON.parse(info.test_credentials)
+                    return (
+                      <div className="p-3 bg-amber-500/5 border border-amber-500/15 rounded-xl space-y-2">
+                        <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                          <Info className="w-3.5 h-3.5" />
+                          <span>Sandbox Test Credentials</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-[11px]">
+                          {[
+                            { key: "card_number", label: "Card", msg: "Card number copied!" },
+                            { key: "pin", label: "PIN", msg: "PIN copied!" },
+                            { key: "cvv", label: "CVV", msg: "CVV copied!" },
+                            { key: "otp", label: "OTP", msg: "OTP copied!" },
+                          ].filter(f => parsed[f.key]).map(f => (
+                            <div key={f.key} className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 px-2 py-1 rounded-lg">
+                              <span className="font-semibold text-zinc-500">{f.label}:</span>
+                              <button type="button" onClick={() => { navigator.clipboard.writeText(parsed[f.key]); toast.success(f.msg) }} className="font-mono text-zinc-900 dark:text-zinc-200 hover:text-amber-500 flex items-center gap-1 transition-colors">
+                                <span>{parsed[f.key]}</span>
+                                <Copy className="w-3 h-3 text-zinc-400" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  } catch { return null }
+                })()}
+
+                <div className="flex justify-between gap-2 pt-1">
+                  <button type="button" onClick={() => setAddStep(1)} className="px-3.5 py-1.5 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg font-semibold text-zinc-700 dark:text-zinc-300 text-xs transition-all cursor-pointer">
+                    ← Back
+                  </button>
+                  <button type="button" onClick={() => setAddStep(3)} className="px-4 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg text-xs transition-all cursor-pointer">
+                    Next →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── STEP 3: Live / Production keys ── */}
+            {addStep === 3 && (
+              <form onSubmit={handleAddSubmit} className="space-y-3 pt-1 animate-in fade-in duration-150">
+                <div className="flex items-center gap-2 rounded-lg bg-emerald-500/8 border border-emerald-500/15 px-3 py-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"/>
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">Live / Production Environment</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      {providerName === "nomba" ? "Live Client Secret" : "Live Secret Key"}
+                    </label>
+                    <input
+                      type="password"
+                      value={liveSecretKey}
+                      onChange={(e) => setLiveSecretKey(e.target.value)}
+                      placeholder={providerName === "paystack" ? "sk_live_..." : providerName === "flutterwave" ? "FLWSECK-..." : providerName === "opay" ? "OPAYSEC..." : "client_secret_..."}
+                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      {providerName === "nomba" ? "Live Client ID" : providerName === "opay" ? "Live Public Key" : "Live Public Key"}
+                    </label>
+                    <input
+                      type="text"
+                      value={livePublicKey}
+                      onChange={(e) => setLivePublicKey(e.target.value)}
+                      placeholder={providerName === "paystack" ? "pk_live_..." : providerName === "flutterwave" ? "FLWPUBK-..." : providerName === "opay" ? "OPAYPUB..." : "client_id_..."}
+                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <details className="group border border-zinc-200 dark:border-zinc-900 rounded-lg overflow-hidden">
+                  <summary className="flex items-center justify-between px-3 py-2 bg-zinc-50 dark:bg-zinc-900/50 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 cursor-pointer select-none hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors">
+                    <span>Webhook Secret (Optional)</span>
+                    <Sliders className="w-3.5 h-3.5 text-zinc-400 group-open:rotate-180 transition-transform duration-200" />
+                  </summary>
+                  <div className="p-3 border-t border-zinc-200 dark:border-zinc-900 space-y-1.5">
+                    <input
+                      type="password"
+                      value={liveWebhookSecret}
+                      onChange={(e) => setLiveWebhookSecret(e.target.value)}
+                      placeholder="e.g. whsec_..."
+                      className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-[#2563eb] rounded-lg text-xs font-mono transition-colors"
+                    />
+                    <p className="text-[10px] text-zinc-400 leading-relaxed">Defaults to Live Secret Key if left empty.</p>
+                  </div>
+                </details>
+
+                <div className="flex justify-between gap-2 pt-1">
+                  <button type="button" onClick={() => setAddStep(2)} className="px-3.5 py-1.5 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg font-semibold text-zinc-700 dark:text-zinc-300 text-xs transition-all cursor-pointer">
+                    ← Back
+                  </button>
+                  <button type="submit" disabled={isPending} className="px-4 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg cursor-pointer disabled:opacity-50 transition-all text-xs">
+                    {isPending ? "Saving..." : "Save Provider"}
+                  </button>
+                </div>
+              </form>
+            )}
           </DialogContent>
         </Dialog>
       </div>

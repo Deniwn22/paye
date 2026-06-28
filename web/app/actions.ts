@@ -45,7 +45,7 @@ export async function signUpAction(prevState: any, formData: FormData) {
       await setUserName(result.data.name)
     }
   } catch (err: any) {
-    return { success: false, error: "Network error. Make sure Go API is running." }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 
   redirect("/dashboard")
@@ -77,7 +77,7 @@ export async function signInAction(prevState: any, formData: FormData) {
       await setUserName(result.data.name)
     }
   } catch (err: any) {
-    return { success: false, error: "Network error. Make sure Go API is running." }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 
   redirect("/dashboard")
@@ -139,7 +139,7 @@ export async function createProjectAction(name: string) {
     await setActiveProjectID(result.data.id)
     return { success: true, project: result.data }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -169,7 +169,7 @@ export async function deleteProjectAction(id: string) {
 
     return { success: true }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -192,7 +192,7 @@ export async function getProjectsAction() {
     }
     return { success: true, projects: result.data }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -248,7 +248,7 @@ export async function addProviderAction(prevState: any, formData: FormData) {
 
     return { success: true, message: "Provider added successfully" }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -265,7 +265,7 @@ export async function deleteProviderAction(id: string) {
 
     return { success: true }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -282,7 +282,7 @@ export async function toggleProviderAction(id: string) {
 
     return { success: true }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -314,7 +314,7 @@ export async function addWebhookAction(prevState: any, formData: FormData) {
 
     return { success: true, message: "Webhook configured successfully" }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -331,7 +331,7 @@ export async function deleteWebhookAction(id: string) {
 
     return { success: true }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -355,7 +355,7 @@ export async function refundTransactionAction(reference: string, amount?: number
     }
     return { success: true, refund: result.data }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -380,7 +380,7 @@ export async function createPlanAction(name: string, interval: string, amount: n
     }
     return { success: true, plan: result.data }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -402,7 +402,7 @@ export async function createSubscriptionAction(customerEmail: string, planCode: 
     }
     return { success: true, subscription: result.data }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -421,7 +421,7 @@ export async function cancelSubscriptionAction(code: string, token?: string) {
     }
     return { success: true }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -445,7 +445,7 @@ export async function createRecipientAction(name: string, accountNumber: string,
     }
     return { success: true, recipient: result.data }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -468,7 +468,7 @@ export async function createTransferAction(amount: number, recipientCode: string
     }
     return { success: true, transfer: result.data }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -486,7 +486,7 @@ export async function getPaymentProvidersAction() {
     }
     return { success: true, data: result.data }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -504,7 +504,7 @@ export async function togglePaymentProviderAction(name: string) {
     revalidatePath("/providers")
     return { success: true }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -531,7 +531,7 @@ export async function updatePaymentProviderAction(
     revalidatePath("/providers")
     return { success: true, message: "Payment provider updated successfully" }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -544,7 +544,7 @@ export async function getNotificationsAction() {
     }
     return { success: true, notifications: result.data }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -560,7 +560,7 @@ export async function markNotificationAsReadAction(id: string) {
     revalidatePath("/notifications")
     return { success: true }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -576,7 +576,7 @@ export async function markAllNotificationsAsReadAction() {
     revalidatePath("/notifications")
     return { success: true }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 
@@ -592,7 +592,7 @@ export async function deleteNotificationAction(id: string) {
     revalidatePath("/notifications")
     return { success: true }
   } catch (err) {
-    return { success: false, error: "Network error occurred" }
+    return { success: false, error: "Something went wrong. Please try again later." }
   }
 }
 

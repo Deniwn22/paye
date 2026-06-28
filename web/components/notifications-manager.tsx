@@ -23,10 +23,10 @@ export default function NotificationsManager({ initialNotifications }: Notificat
   const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
-    setNotifications(initialNotifications)
+    setNotifications(initialNotifications || [])
   }, [initialNotifications])
 
-  const unreadCount = notifications.filter((n) => !n.is_read).length
+  const unreadCount = (notifications || []).filter((n) => !n.is_read).length
 
   const handleMarkAsRead = async (id: string) => {
     startTransition(async () => {
@@ -77,7 +77,7 @@ export default function NotificationsManager({ initialNotifications }: Notificat
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
     const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000
 
-    notifications.forEach((n) => {
+    ;(notifications || []).forEach((n) => {
       const time = new Date(n.created_at).getTime()
       if (time >= startOfToday) {
         today.push(n)
@@ -210,7 +210,7 @@ export default function NotificationsManager({ initialNotifications }: Notificat
         )}
       </div>
 
-      {notifications.length === 0 ? (
+      {(notifications || []).length === 0 ? (
         <div className="text-center py-20 text-zinc-500 dark:text-zinc-600 border border-dashed border-zinc-200 dark:border-zinc-900 rounded-xl bg-zinc-50/50 dark:bg-zinc-950/20">
           <BellOff className="w-9 h-9 text-zinc-400 mx-auto mb-3" />
           <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">All caught up!</p>

@@ -10,7 +10,7 @@ export default function LandingNav({ token }: { token: string | null }) {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-black/[0.08] bg-white dark:border-white/[0.08] dark:bg-[#141414]">
-      <div className="mx-auto flex h-[60px] max-w-[1100px] items-center justify-between px-8">
+      <div className="mx-auto flex h-[60px] max-w-[1280px] items-center justify-between px-5">
         {/* Logo */}
         <Link
           href="/"
@@ -24,7 +24,7 @@ export default function LandingNav({ token }: { token: string | null }) {
           {[
             { label: "Product", href: "#product" },
             { label: "How it works", href: "#how-it-works" },
-            { label: "Business", href: "#business" },
+            { label: "Providers", href: "#providers" },
             { label: "Developers", href: "#developers" },
             { label: "Docs", href: "/docs" },
           ].map((l) => (
@@ -82,12 +82,12 @@ export default function LandingNav({ token }: { token: string | null }) {
 
       {/* Mobile dropdown */}
       {isOpen && (
-        <div className="absolute top-[60px] right-0 left-0 z-40 flex animate-in flex-col gap-5 border-b border-black/[0.08] bg-white px-8 py-6 duration-150 slide-in-from-top-2 md:hidden dark:border-white/[0.08] dark:bg-[#141414]">
+        <div className="absolute top-[60px] right-0 left-0 z-40 flex animate-in flex-col gap-5 border-b border-black/[0.08] bg-white px-5 py-6 duration-150 slide-in-from-top-2 md:hidden dark:border-white/[0.08] dark:bg-[#141414]">
           <ul className="flex list-none flex-col gap-4">
             {[
               { label: "Product", href: "#product" },
               { label: "How it works", href: "#how-it-works" },
-              { label: "Business", href: "#business" },
+              { label: "Providers", href: "#providers" },
               { label: "Developers", href: "#developers" },
               { label: "Docs", href: "/docs" },
             ].map((l) => (
