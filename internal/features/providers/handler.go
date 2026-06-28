@@ -502,6 +502,44 @@ func (h *ProviderHandler) TogglePaymentProviderSupportHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, api.Success("Payment provider support status updated successfully", provider))
 }
 
+// UpdatePaymentProviderHandler godoc
+// @Summary Update payment provider details
+// @Description Update metadata, notes, and test credentials of a payment provider (admin only)
+// @Tags Providers
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param name path string true "Payment Provider Name"
+// @Param request body dto.UpdatePaymentProviderRequest true "Payment Provider Update Payload"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 403 {object} api.SwaggerSimpleResponse
+// @Failure 455 {object} api.SwaggerSimpleResponse
+// @Router /payment-providers/{name} [put]
+func (h *ProviderHandler) UpdatePaymentProviderHandler(c *gin.Context) {
+	name := c.Param("name")
+	if name == "" {
+		c.JSON(http.StatusBadRequest, api.Error("Provider name is required"))
+		return
+	}
+
+	var req dto.UpdatePaymentProviderRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+		return
+	}
+
+	provider, err := h.service.UpdatePaymentProvider(c.Request.Context(), name, &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success("Payment provider updated successfully", dto.ToPaymentProviderResponse(provider)))
+}
+
 func RegisterAdminRoutes(rg *gin.RouterGroup, h *ProviderHandler) {
 	rg.POST("/payment-providers/:name/toggle-support", h.TogglePaymentProviderSupportHandler)
+	rg.PUT("/payment-providers/:name", h.UpdatePaymentProviderHandler)
 }

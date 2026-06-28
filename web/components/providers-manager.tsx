@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useTransition, useEffect } from "react"
-import { addProviderAction, deleteProviderAction, toggleProviderAction, getPaymentProvidersAction, togglePaymentProviderAction } from "@/app/actions"
-import { Plus, Trash2, Key, HelpCircle, ShieldCheck, Check, AlertCircle, Eye, EyeOff, Radio, Sliders } from "lucide-react"
+import { addProviderAction, deleteProviderAction, toggleProviderAction, getPaymentProvidersAction, togglePaymentProviderAction, updatePaymentProviderAction } from "@/app/actions"
+import { Plus, Trash2, Key, HelpCircle, ShieldCheck, Check, AlertCircle, Eye, EyeOff, Radio, Sliders, Edit2, Copy, Info } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,8 @@ export interface ProviderConfig {
   test_public_key: string
   live_secret_key: string
   live_public_key: string
+  test_webhook_secret?: string
+  live_webhook_secret?: string
   is_active: boolean
 }
 
@@ -32,6 +34,8 @@ interface PaymentProvider {
   label: string
   description: string
   is_supported: boolean
+  test_credentials?: string
+  notes?: string
 }
 
 export default function ProvidersManager({ initialProviders = [], userRole = "merchant" }: { initialProviders?: ProviderConfig[], userRole?: string }) {
@@ -44,9 +48,70 @@ export default function ProvidersManager({ initialProviders = [], userRole = "me
   const [providerName, setProviderName] = useState("paystack")
   const [testSecretKey, setTestSecretKey] = useState("")
   const [testPublicKey, setTestPublicKey] = useState("")
+  const [testWebhookSecret, setTestWebhookSecret] = useState("")
   const [liveSecretKey, setLiveSecretKey] = useState("")
   const [livePublicKey, setLivePublicKey] = useState("")
+  const [liveWebhookSecret, setLiveWebhookSecret] = useState("")
   const [accountId, setAccountId] = useState("")
+
+  // Admin Editing States
+  const [adminEditingProvider, setAdminEditingProvider] = useState<PaymentProvider | null>(null)
+  const [adminDescription, setAdminDescription] = useState("")
+  const [adminTestCredentials, setAdminTestCredentials] = useState("")
+  const [adminNotes, setAdminNotes] = useState("")
+  const [adminIsSupported, setAdminIsSupported] = useState(true)
+
+  const startAdminEdit = (prov: PaymentProvider) => {
+    setAdminEditingProvider(prov)
+    setAdminDescription(prov.description || "")
+    setAdminTestCredentials(prov.test_credentials || "")
+    setAdminNotes(prov.notes || "")
+    setAdminIsSupported(prov.is_supported)
+  }
+
+  const handleAdminEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!adminEditingProvider) return
+
+    if (adminTestCredentials) {
+      try {
+        JSON.parse(adminTestCredentials)
+      } catch (err) {
+        toast.error("Test credentials must be a valid JSON string")
+        return
+      }
+    }
+
+    startTransition(async () => {
+      const res = await updatePaymentProviderAction(adminEditingProvider.name, {
+        description: adminDescription,
+        test_credentials: adminTestCredentials,
+        notes: adminNotes,
+        is_supported: adminIsSupported,
+      })
+
+      if (!res.success) {
+        toast.error(res.error || "Failed to update provider details")
+      } else {
+        toast.success(res.message || "Provider details updated successfully")
+        setAdminEditingProvider(null)
+        setSupportedProviders(
+          supportedProviders.map((p) => {
+            if (p.name === adminEditingProvider.name) {
+              return {
+                ...p,
+                description: adminDescription,
+                test_credentials: adminTestCredentials,
+                notes: adminNotes,
+                is_supported: adminIsSupported,
+              }
+            }
+            return p
+          })
+        )
+      }
+    })
+  }
 
   const [formTab, setFormTab] = useState<"test" | "live">("test")
   const [revealKeyId, setRevealKeyId] = useState<string | null>(null)
@@ -156,8 +221,10 @@ export default function ProvidersManager({ initialProviders = [], userRole = "me
     formData.append("providerName", providerName)
     formData.append("testSecretKey", testSecretKey)
     formData.append("testPublicKey", testPublicKey)
+    formData.append("testWebhookSecret", testWebhookSecret)
     formData.append("liveSecretKey", liveSecretKey)
     formData.append("livePublicKey", livePublicKey)
+    formData.append("liveWebhookSecret", liveWebhookSecret)
     if (providerName === "nomba") {
       formData.append("metadata", JSON.stringify({ account_id: accountId }))
     } else if (providerName === "opay") {
@@ -173,8 +240,10 @@ export default function ProvidersManager({ initialProviders = [], userRole = "me
         setLabel("")
         setTestSecretKey("")
         setTestPublicKey("")
+        setTestWebhookSecret("")
         setLiveSecretKey("")
         setLivePublicKey("")
+        setLiveWebhookSecret("")
         setAccountId("")
         setDialogOpen(false)
         window.location.reload()
@@ -235,7 +304,7 @@ export default function ProvidersManager({ initialProviders = [], userRole = "me
                 </span>
               </div>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
-                Toggle payment providers availability system-wide. Disabling a provider here will prevent users from selecting it or activating it.
+                Toggle payment providers availability, edit notes, and modify credentials system-wide.
               </p>
             </div>
           </div>
@@ -250,38 +319,148 @@ export default function ProvidersManager({ initialProviders = [], userRole = "me
                     : "bg-zinc-150/40 dark:bg-zinc-950/40 border-zinc-200 dark:border-zinc-900 opacity-80"
                 }`}
               >
-                <div className="space-y-1">
+                <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-zinc-805 dark:text-zinc-195">{prov.label}</span>
+                    <span className="font-extrabold text-zinc-800 dark:text-zinc-200">{prov.label}</span>
                     <span className={`w-1.5 h-1.5 rounded-full ${prov.is_supported ? "bg-emerald-500" : "bg-zinc-400"}`} />
                   </div>
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-normal">{prov.description}</p>
+                  
+                  {prov.notes && (
+                    <div className="text-[10px] text-zinc-650 dark:text-zinc-400 bg-zinc-200/20 dark:bg-zinc-800/25 p-2 rounded border border-zinc-200/30 dark:border-zinc-800/30">
+                      <span className="font-bold text-[9px] text-indigo-500 block uppercase mb-0.5">Notes:</span>
+                      {prov.notes}
+                    </div>
+                  )}
+
+                  {prov.test_credentials && (
+                    <div className="text-[10px] text-zinc-650 dark:text-zinc-400 bg-zinc-200/20 dark:bg-zinc-800/25 p-2 rounded border border-zinc-200/30 dark:border-zinc-800/30">
+                      <span className="font-bold text-[9px] text-amber-500 block uppercase mb-0.5">Test Creds (JSON):</span>
+                      <pre className="font-mono text-[9px] truncate">{prov.test_credentials}</pre>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-zinc-200/50 dark:border-zinc-850/50">
-                  <span className={`text-[10px] font-bold uppercase ${prov.is_supported ? "text-emerald-500" : "text-zinc-400"}`}>
-                    {prov.is_supported ? "Active" : "Disabled"}
-                  </span>
-                  
-                  {/* Custom Toggle Switch */}
                   <button
-                    onClick={() => handleAdminToggle(prov.name)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none cursor-pointer ${
-                      prov.is_supported ? "bg-emerald-500" : "bg-zinc-300 dark:bg-zinc-800"
-                    }`}
+                    onClick={() => startAdminEdit(prov)}
+                    className="px-2 py-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 border border-indigo-500/20 rounded-md hover:bg-indigo-500/5 transition-all cursor-pointer"
                   >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
-                        prov.is_supported ? "translate-x-6" : "translate-x-1"
-                      }`}
-                    />
+                    Edit Details
                   </button>
+
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] font-bold uppercase ${prov.is_supported ? "text-emerald-500" : "text-zinc-400"}`}>
+                      {prov.is_supported ? "Active" : "Disabled"}
+                    </span>
+                    
+                    {/* Custom Toggle Switch */}
+                    <button
+                      onClick={() => handleAdminToggle(prov.name)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none cursor-pointer ${
+                        prov.is_supported ? "bg-emerald-500" : "bg-zinc-300 dark:bg-zinc-800"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+                          prov.is_supported ? "translate-x-6" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
       )}
+
+      {/* Admin Edit Dialog */}
+      <Dialog open={!!adminEditingProvider} onOpenChange={(open) => !open && setAdminEditingProvider(null)}>
+        <DialogContent className="max-w-md bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-2xl p-6">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base font-extrabold text-zinc-900 dark:text-zinc-100">
+              <Sliders className="w-4.5 h-4.5 text-indigo-500" />
+              <span>Edit Provider: {adminEditingProvider?.label}</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
+              Update global description, test credentials, and notes for this provider.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleAdminEditSubmit} className="space-y-4 pt-3">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">Description</label>
+              <textarea
+                value={adminDescription}
+                onChange={(e) => setAdminDescription(e.target.value)}
+                rows={2}
+                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-805 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-indigo-500 rounded-lg text-sm font-sans transition-colors resize-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                Test Credentials (JSON)
+              </label>
+              <textarea
+                value={adminTestCredentials}
+                onChange={(e) => setAdminTestCredentials(e.target.value)}
+                rows={4}
+                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-805 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-indigo-500 rounded-lg text-sm font-mono transition-colors resize-none"
+                placeholder='{"card_number": "...", "pin": "..."}'
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">Admin Notes / Warnings</label>
+              <textarea
+                value={adminNotes}
+                onChange={(e) => setAdminNotes(e.target.value)}
+                rows={3}
+                className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-805 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-indigo-500 rounded-lg text-sm font-sans transition-colors resize-none"
+                placeholder="e.g. Standard Paystack sandbox cards apply."
+              />
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Global Support Enabled</span>
+                <button
+                  type="button"
+                  onClick={() => setAdminIsSupported(!adminIsSupported)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none cursor-pointer ${
+                    adminIsSupported ? "bg-emerald-500" : "bg-zinc-300 dark:bg-zinc-800"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+                      adminIsSupported ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setAdminEditingProvider(null)}
+                className="px-3.5 py-1.5 border border-zinc-200 dark:border-zinc-805 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg font-semibold text-zinc-700 dark:text-zinc-300 text-xs transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isPending}
+                className="px-3.5 py-1.5 bg-indigo-650 hover:bg-indigo-700 text-white font-semibold rounded-lg cursor-pointer disabled:opacity-50 transition-all text-xs"
+              >
+                {isPending ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Header and Add Button wrapped in Dialog */}
       <div className="flex items-center justify-between border-b border-zinc-200/60 dark:border-zinc-900 pb-4">
@@ -347,10 +526,31 @@ export default function ProvidersManager({ initialProviders = [], userRole = "me
                     value={accountId}
                     onChange={(e) => setAccountId(e.target.value)}
                     placeholder={providerName === "nomba" ? "e.g. acc-xxxxx-xxxx" : "e.g. 256612345678901"}
-                    className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-sans transition-colors"
+                    className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-805 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-sans transition-colors"
                   />
                 </div>
               )}
+
+              {/* Global Provider Notes shown before configuring */}
+              {(() => {
+                const info = supportedProviders.find(sp => sp.name === providerName)
+                if (!info?.notes) return null
+                return (
+                  <details className="group border border-indigo-500/10 bg-indigo-500/5 rounded-xl overflow-hidden animate-in fade-in duration-200">
+                    <summary className="flex items-center justify-between px-3 py-1.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 cursor-pointer select-none">
+                      <div className="flex items-center gap-1.5">
+                        <Info className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                        <span className="uppercase tracking-wider">Provider Information & Notes</span>
+                      </div>
+                      <span className="text-[9px] uppercase bg-indigo-500/10 px-1.5 py-0.5 rounded group-open:hidden">Show</span>
+                      <span className="text-[9px] uppercase bg-indigo-500/10 px-1.5 py-0.5 rounded hidden group-open:inline">Hide</span>
+                    </summary>
+                    <div className="px-3 pb-3 pt-1 text-[11px] text-zinc-650 dark:text-zinc-400 leading-relaxed font-medium border-t border-indigo-500/10">
+                      {info.notes}
+                    </div>
+                  </details>
+                )
+              })()}
 
               {/* Form Environment Tabs */}
               <div className="flex border-b border-zinc-200 dark:border-zinc-800 mt-2">
@@ -379,90 +579,262 @@ export default function ProvidersManager({ initialProviders = [], userRole = "me
               </div>
 
               {formTab === "test" ? (
-                <div className="space-y-4 pt-2 animate-in fade-in duration-150">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
-                      {providerName === "nomba" ? "Test Client Secret" : "Test Secret Key"}
-                    </label>
-                    <input
-                      type="password"
-                      value={testSecretKey}
-                      onChange={(e) => setTestSecretKey(e.target.value)}
-                      placeholder={
-                        providerName === "paystack"
-                          ? "sk_test_..."
-                          : providerName === "flutterwave"
-                          ? "FLWSECK_TEST-..."
-                          : providerName === "opay"
-                          ? "OPAYSEC..."
-                          : "e.g. client_secret_..."
-                      }
-                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
-                    />
+                <div className="space-y-3 pt-2 animate-in fade-in duration-150">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                        {providerName === "nomba" ? "Test Client Secret" : "Test Secret Key"}
+                      </label>
+                      <input
+                        type="password"
+                        value={testSecretKey}
+                        onChange={(e) => setTestSecretKey(e.target.value)}
+                        placeholder={
+                          providerName === "paystack"
+                            ? "sk_test_..."
+                            : providerName === "flutterwave"
+                            ? "FLWSECK_TEST-..."
+                            : providerName === "opay"
+                            ? "OPAYSEC..."
+                            : "e.g. client_secret_..."
+                        }
+                        className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-805 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                        {providerName === "nomba" ? "Test Client ID" : providerName === "opay" ? "Test Public Key" : "Test Public Key (Optional)"}
+                      </label>
+                      <input
+                        type="text"
+                        value={testPublicKey}
+                        onChange={(e) => setTestPublicKey(e.target.value)}
+                        placeholder={
+                          providerName === "paystack"
+                            ? "pk_test_..."
+                            : providerName === "flutterwave"
+                            ? "FLWPUBK_TEST-..."
+                            : providerName === "opay"
+                            ? "OPAYPUB..."
+                            : "e.g. client_id_..."
+                        }
+                        className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-805 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
-                      {providerName === "nomba" ? "Test Client ID" : providerName === "opay" ? "Test Public Key" : "Test Public Key (Optional)"}
-                    </label>
-                    <input
-                      type="text"
-                      value={testPublicKey}
-                      onChange={(e) => setTestPublicKey(e.target.value)}
-                      placeholder={
-                        providerName === "paystack"
-                          ? "pk_test_..."
-                          : providerName === "flutterwave"
-                          ? "FLWPUBK_TEST-..."
-                          : providerName === "opay"
-                          ? "OPAYPUB..."
-                          : "e.g. client_id_..."
-                      }
-                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
-                    />
-                  </div>
+
+                  {/* Collapsible Webhook Config */}
+                  <details className="group border border-zinc-200 dark:border-zinc-900 rounded-lg overflow-hidden">
+                    <summary className="flex items-center justify-between px-3 py-2 bg-zinc-50 dark:bg-zinc-900/50 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 cursor-pointer select-none hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors">
+                      <span>Webhook Configuration (Optional)</span>
+                      <Sliders className="w-3.5 h-3.5 text-zinc-400 group-open:rotate-180 transition-transform duration-200" />
+                    </summary>
+                    <div className="p-3 border-t border-zinc-200 dark:border-zinc-900 space-y-2 bg-zinc-50/30 dark:bg-zinc-950/20">
+                      <div className="space-y-1.5">
+                        <label className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                          Test Webhook Secret
+                        </label>
+                        <input
+                          type="password"
+                          value={testWebhookSecret}
+                          onChange={(e) => setTestWebhookSecret(e.target.value)}
+                          placeholder="e.g. whsec_..."
+                          className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-805 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-xs font-mono transition-colors"
+                        />
+                        <p className="text-[10px] text-zinc-500 dark:text-zinc-450 leading-relaxed font-medium">
+                          Note: Defaults to Test Client Secret Key if left empty.
+                        </p>
+                      </div>
+                    </div>
+                  </details>
+
+                  {/* Sandbox Test Credentials Copy UI */}
+                  {(() => {
+                    const info = supportedProviders.find(sp => sp.name === providerName)
+                    if (!info?.test_credentials) return null
+                    try {
+                      const parsed = JSON.parse(info.test_credentials)
+                      return (
+                        <div className="p-3 bg-amber-500/5 border border-amber-500/15 rounded-xl space-y-2 text-left">
+                          <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                            <Info className="w-3.5 h-3.5 animate-pulse" />
+                            <span>Interactive Sandbox Credentials</span>
+                          </div>
+                          
+                          <div className="text-[11px] text-zinc-650 dark:text-zinc-400 grid grid-cols-2 gap-2">
+                            {parsed.card_number && (
+                              <div className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 px-2 py-1 rounded-lg">
+                                <span className="font-semibold text-zinc-500">Card:</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(parsed.card_number)
+                                    toast.success("Card number copied!")
+                                  }}
+                                  className="font-mono text-zinc-900 dark:text-zinc-200 hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
+                                >
+                                  <span>{parsed.card_number}</span>
+                                  <Copy className="w-3 h-3 text-zinc-400" />
+                                </button>
+                              </div>
+                            )}
+                            {parsed.pin && (
+                              <div className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 px-2 py-1 rounded-lg">
+                                <span className="font-semibold text-zinc-500">PIN:</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(parsed.pin)
+                                    toast.success("PIN copied!")
+                                  }}
+                                  className="font-mono text-zinc-900 dark:text-zinc-200 hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
+                                >
+                                  <span>{parsed.pin}</span>
+                                  <Copy className="w-3 h-3 text-zinc-400" />
+                                </button>
+                              </div>
+                            )}
+                            {parsed.cvv && (
+                              <div className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 px-2 py-1 rounded-lg">
+                                <span className="font-semibold text-zinc-500">CVV:</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(parsed.cvv)
+                                    toast.success("CVV copied!")
+                                  }}
+                                  className="font-mono text-zinc-900 dark:text-zinc-200 hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
+                                >
+                                  <span>{parsed.cvv}</span>
+                                  <Copy className="w-3 h-3 text-zinc-400" />
+                                </button>
+                              </div>
+                            )}
+                            {parsed.otp && (
+                              <div className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-805 px-2 py-1 rounded-lg">
+                                <span className="font-semibold text-zinc-500">OTP:</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(parsed.otp)
+                                    toast.success("OTP copied!")
+                                  }}
+                                  className="font-mono text-zinc-900 dark:text-zinc-200 hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
+                                >
+                                  <span>{parsed.otp}</span>
+                                  <Copy className="w-3 h-3 text-zinc-400" />
+                                </button>
+                              </div>
+                            )}
+                            {parsed.wallets && parsed.wallets.map((w: any, idx: number) => (
+                              <div key={idx} className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 px-2 py-1 rounded-lg col-span-2">
+                                <span className="font-semibold text-zinc-500">Wallet ({w.outcome}):</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(w.phone)
+                                    toast.success("Wallet phone copied!")
+                                  }}
+                                  className="font-mono text-zinc-900 dark:text-zinc-200 hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
+                                >
+                                  <span>{w.phone}</span>
+                                  <Copy className="w-3 h-3 text-zinc-400" />
+                                </button>
+                              </div>
+                            ))}
+                            {parsed.bank_accounts && parsed.bank_accounts.map((b: any, idx: number) => (
+                              <div key={idx} className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 px-2 py-1 rounded-lg col-span-2">
+                                <span className="font-semibold text-zinc-500">Bank ({b.bank}):</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(b.number)
+                                    toast.success("Bank account number copied!")
+                                  }}
+                                  className="font-mono text-zinc-900 dark:text-zinc-200 hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
+                                >
+                                  <span>{b.number}</span>
+                                  <Copy className="w-3 h-3 text-zinc-400" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    } catch (e) {
+                      return null
+                    }
+                  })()}
                 </div>
               ) : (
-                <div className="space-y-4 pt-2 animate-in fade-in duration-150">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
-                      {providerName === "nomba" ? "Live Client Secret" : "Live Secret Key"}
-                    </label>
-                    <input
-                      type="password"
-                      value={liveSecretKey}
-                      onChange={(e) => setLiveSecretKey(e.target.value)}
-                      placeholder={
-                        providerName === "paystack"
-                          ? "sk_live_..."
-                          : providerName === "flutterwave"
-                          ? "FLWSECK-..."
-                          : providerName === "opay"
-                          ? "OPAYSEC..."
-                          : "e.g. client_secret_..."
-                      }
-                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
-                    />
+                <div className="space-y-3 pt-2 animate-in fade-in duration-150">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                        {providerName === "nomba" ? "Live Client Secret" : "Live Secret Key"}
+                      </label>
+                      <input
+                        type="password"
+                        value={liveSecretKey}
+                        onChange={(e) => setLiveSecretKey(e.target.value)}
+                        placeholder={
+                          providerName === "paystack"
+                            ? "sk_live_..."
+                            : providerName === "flutterwave"
+                            ? "FLWSECK-..."
+                            : providerName === "opay"
+                            ? "OPAYSEC..."
+                            : "e.g. client_secret_..."
+                        }
+                        className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                        {providerName === "nomba" ? "Live Client ID" : providerName === "opay" ? "Live Public Key" : "Live Public Key (Optional)"}
+                      </label>
+                      <input
+                        type="text"
+                        value={livePublicKey}
+                        onChange={(e) => setLivePublicKey(e.target.value)}
+                        placeholder={
+                          providerName === "paystack"
+                            ? "pk_live_..."
+                            : providerName === "flutterwave"
+                            ? "FLWPUBK-..."
+                            : providerName === "opay"
+                            ? "OPAYPUB..."
+                            : "e.g. client_id_..."
+                        }
+                        className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
-                      {providerName === "nomba" ? "Live Client ID" : providerName === "opay" ? "Live Public Key" : "Live Public Key (Optional)"}
-                    </label>
-                    <input
-                      type="text"
-                      value={livePublicKey}
-                      onChange={(e) => setLivePublicKey(e.target.value)}
-                      placeholder={
-                        providerName === "paystack"
-                          ? "pk_live_..."
-                          : providerName === "flutterwave"
-                          ? "FLWPUBK-..."
-                          : providerName === "opay"
-                          ? "OPAYPUB..."
-                          : "e.g. client_id_..."
-                      }
-                      className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-sm font-mono transition-colors"
-                    />
-                  </div>
+
+                  {/* Collapsible Webhook Config */}
+                  <details className="group border border-zinc-200 dark:border-zinc-900 rounded-lg overflow-hidden">
+                    <summary className="flex items-center justify-between px-3 py-2 bg-zinc-50 dark:bg-zinc-900/50 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 cursor-pointer select-none hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors">
+                      <span>Webhook Configuration (Optional)</span>
+                      <Sliders className="w-3.5 h-3.5 text-zinc-400 group-open:rotate-180 transition-transform duration-200" />
+                    </summary>
+                    <div className="p-3 border-t border-zinc-200 dark:border-zinc-900 space-y-2 bg-zinc-50/30 dark:bg-zinc-950/20">
+                      <div className="space-y-1.5">
+                        <label className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                          Live Webhook Secret
+                        </label>
+                        <input
+                          type="password"
+                          value={liveWebhookSecret}
+                          onChange={(e) => setLiveWebhookSecret(e.target.value)}
+                          placeholder="e.g. whsec_..."
+                          className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-650 focus:outline-none focus:border-[#2563eb] rounded-lg text-xs font-mono transition-colors"
+                        />
+                        <p className="text-[10px] text-zinc-500 dark:text-zinc-450 leading-relaxed font-medium">
+                          Note: Defaults to Live Client Secret Key if left empty.
+                        </p>
+                      </div>
+                    </div>
+                  </details>
                 </div>
               )}
 
@@ -499,6 +871,7 @@ export default function ProvidersManager({ initialProviders = [], userRole = "me
           {providers.map((p) => {
             const isTestRevealed = revealKeyId === p.id && revealType === "test"
             const isLiveRevealed = revealKeyId === p.id && revealType === "live"
+            const globalProv = supportedProviders.find((sp) => sp.name === p.provider_name)
 
             return (
               <div
@@ -579,6 +952,14 @@ export default function ProvidersManager({ initialProviders = [], userRole = "me
                               </div>
                             </div>
                           )}
+                          {p.test_webhook_secret && (
+                            <div className="space-y-1">
+                              <span className="text-zinc-400 dark:text-zinc-500 font-semibold text-[10px] block">WEBHOOK SECRET</span>
+                              <div className="px-2.5 py-1.5 rounded bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 font-mono text-xs text-zinc-700 dark:text-zinc-300 truncate">
+                                {isTestRevealed ? p.test_webhook_secret : `${p.test_webhook_secret.slice(0, 12)}•••••••••••••••••`}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <p className="text-xs text-zinc-400">Not configured</p>
@@ -614,13 +995,99 @@ export default function ProvidersManager({ initialProviders = [], userRole = "me
                               </div>
                             </div>
                           )}
+                          {p.live_webhook_secret && (
+                            <div className="space-y-1">
+                              <span className="text-zinc-400 dark:text-zinc-500 font-semibold text-[10px] block">WEBHOOK SECRET</span>
+                              <div className="px-2.5 py-1.5 rounded bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 font-mono text-xs text-zinc-700 dark:text-zinc-300 truncate">
+                                {isLiveRevealed ? p.live_webhook_secret : `${p.live_webhook_secret.slice(0, 12)}•••••••••••••••••`}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <p className="text-xs text-zinc-400">Not configured</p>
                       )}
                     </div>
-                  </div>
+
+                  {/* Admin Notes rendering in the card */}
+                  {globalProv?.notes && (
+                    <div className="mt-4 p-3 bg-zinc-100/50 dark:bg-zinc-950/40 border border-zinc-200/50 dark:border-zinc-900/50 rounded-xl flex gap-2">
+                      <HelpCircle className="w-4 h-4 text-zinc-400 dark:text-zinc-500 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Admin Notes</span>
+                        <p className="text-[11px] text-zinc-650 dark:text-zinc-400 mt-0.5 leading-normal">{globalProv.notes}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sandbox credentials card copy-UI inside the card */}
+                  {globalProv?.test_credentials && (p.test_secret_key || p.secret_key) && (
+                    <div className="mt-3 p-3 bg-amber-500/5 border border-amber-500/10 rounded-xl space-y-2">
+                      <div className="flex items-center gap-1 text-[9px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                        <Info className="w-3 h-3" />
+                        <span>Interactive Sandbox Credentials</span>
+                      </div>
+                      {(() => {
+                        try {
+                          const parsed = JSON.parse(globalProv.test_credentials)
+                          return (
+                            <div className="text-[10px] text-zinc-600 dark:text-zinc-400 space-y-1">
+                              {parsed.card_number && (
+                                <div className="flex items-center justify-between px-1.5 py-0.5 rounded hover:bg-zinc-200/20 dark:hover:bg-zinc-800/30">
+                                  <span>Card:</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(parsed.card_number)
+                                      toast.success("Card number copied!")
+                                    }}
+                                    className="font-mono hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
+                                  >
+                                    <span>{parsed.card_number}</span>
+                                    <Copy className="w-2.5 h-2.5 text-zinc-400" />
+                                  </button>
+                                </div>
+                              )}
+                              {parsed.pin && (
+                                <div className="flex items-center justify-between px-1.5 py-0.5 rounded hover:bg-zinc-200/20 dark:hover:bg-zinc-800/30">
+                                  <span>PIN:</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(parsed.pin)
+                                      toast.success("PIN copied!")
+                                    }}
+                                    className="font-mono hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
+                                  >
+                                    <span>{parsed.pin}</span>
+                                    <Copy className="w-2.5 h-2.5 text-zinc-400" />
+                                  </button>
+                                </div>
+                              )}
+                              {parsed.otp && (
+                                <div className="flex items-center justify-between px-1.5 py-0.5 rounded hover:bg-zinc-200/20 dark:hover:bg-zinc-800/30">
+                                  <span>OTP:</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(parsed.otp)
+                                      toast.success("OTP copied!")
+                                    }}
+                                    className="font-mono hover:text-amber-500 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
+                                  >
+                                    <span>{parsed.otp}</span>
+                                    <Copy className="w-2.5 h-2.5 text-zinc-400" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )
+                        } catch(e) { return null }
+                      })()}
+                    </div>
+                  )}
                 </div>
+              </div>
 
                 {/* Footer details & delete button */}
                 <div className="flex items-center justify-between mt-6 pt-3 border-t border-zinc-200/60 dark:border-zinc-900">

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/ttomsin/paye/internal/features/providers"
 )
@@ -21,6 +23,19 @@ func New(secretKey string) *Flutterwave {
 func (f *Flutterwave) getBaseURL() string {
 	if f.BaseURL != "" {
 		return f.BaseURL
+	}
+	isTest := strings.HasPrefix(f.secretKey, "FLWSECK_T-")
+	if isTest {
+		if envSandbox := os.Getenv("FLUTTERWAVE_SANDBOX_BASE_URL"); envSandbox != "" {
+			return envSandbox
+		}
+	} else {
+		if envLive := os.Getenv("FLUTTERWAVE_LIVE_BASE_URL"); envLive != "" {
+			return envLive
+		}
+	}
+	if envBase := os.Getenv("FLUTTERWAVE_BASE_URL"); envBase != "" {
+		return envBase
 	}
 	return "https://api.flutterwave.com/v3"
 }

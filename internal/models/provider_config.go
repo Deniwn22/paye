@@ -8,11 +8,13 @@ type ProviderConfig struct {
 	ProviderName  string // (e.g "paystack", "flutterwave")
 	SecretKey     string // stored encrypted via crypto.Encrypt (Legacy / fallback)
 	PublicKey     string // (Legacy / fallback)
-	TestSecretKey string // stored encrypted
-	TestPublicKey string
-	LiveSecretKey string // stored encrypted
-	LivePublicKey string
-	IsActive      bool
+	TestSecretKey     string // stored encrypted
+	TestPublicKey     string
+	LiveSecretKey     string // stored encrypted
+	LivePublicKey     string
+	TestWebhookSecret string // stored encrypted
+	LiveWebhookSecret string // stored encrypted
+	IsActive          bool
 
 	// Foreign keys
 	ProjectID uuid.UUID // (foreign key -> Project)

@@ -18,6 +18,7 @@ import SidebarNav from "@/components/sidebar-nav"
 import ProjectSwitcher, { Project } from "@/components/project-switcher"
 import { LogOut, ChevronRight } from "lucide-react"
 import { BACKEND_URL } from "@/lib/config"
+import NotificationListener from "@/components/notification-listener"
 
 export default async function DashboardLayout({
   children,
@@ -68,6 +69,7 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
+      <NotificationListener token={token} />
       <div className="flex min-h-screen w-full bg-background font-sans text-foreground transition-colors duration-300 selection:bg-[#2563eb]/20 selection:text-[#2563eb]">
         {/* Sidebar Container */}
         <Sidebar className="border-r border-border bg-background">

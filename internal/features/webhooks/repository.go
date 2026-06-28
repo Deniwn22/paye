@@ -70,7 +70,7 @@ func (r *WebhookRepo) Update(ctx context.Context, wc *models.WebhookConfig) erro
 }
 
 func (r *WebhookRepo) Delete(ctx context.Context, id string, projectID string) error {
-	return r.db.WithContext(ctx).Where("id = ? AND project_id = ?", id, projectID).Delete(&models.WebhookConfig{}).Error
+	return r.db.WithContext(ctx).Unscoped().Where("id = ? AND project_id = ?", id, projectID).Delete(&models.WebhookConfig{}).Error
 }
 
 func (r *WebhookRepo) CreateLog(ctx context.Context, wl *models.WebhookLog) error {

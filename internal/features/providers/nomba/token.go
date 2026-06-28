@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 )
@@ -18,6 +19,7 @@ type TokenManager struct {
 	clientSecret string
 	accountID    string
 	BaseURL      string
+	isLive       bool
 
 	mu           sync.Mutex
 	accessToken  string
@@ -25,11 +27,12 @@ type TokenManager struct {
 	expiresAt    time.Time
 }
 
-func NewTokenManager(clientID, clientSecret, accountID string) *TokenManager {
+func NewTokenManager(clientID, clientSecret, accountID string, isLive bool) *TokenManager {
 	return &TokenManager{
 		clientID:     clientID,
 		clientSecret: clientSecret,
 		accountID:    accountID,
+		isLive:       isLive,
 	}
 }
 
@@ -37,7 +40,17 @@ func (t *TokenManager) getBaseURL() string {
 	if t.BaseURL != "" {
 		return t.BaseURL
 	}
-	return baseURL
+	if t.isLive {
+		if envLive := os.Getenv("NOMBA_LIVE_BASE_URL"); envLive != "" {
+			return envLive
+		}
+		// Default to sandbox for now per user request
+		return "https://sandbox.nomba.com/v1"
+	}
+	if envSandbox := os.Getenv("NOMBA_SANDBOX_BASE_URL"); envSandbox != "" {
+		return envSandbox
+	}
+	return "https://sandbox.nomba.com/v1"
 }
 
 type issueTokenRequest struct {

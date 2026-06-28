@@ -71,7 +71,7 @@ func setupTestEnvironment(t *testing.T) (*gorm.DB, *gin.Engine, string, *models.
 	txRepo := transactions.NewTransactionRepo(db)
 
 	authService := auth.NewAuthService(userRepo, projectRepo, "test_jwt_secret_key_32_bytes_long_xxxx")
-	txService := transactions.NewTransactionService(txRepo, providerRepo, webhookRepo, encryptionKey)
+	txService := transactions.NewTransactionService(txRepo, providerRepo, webhookRepo, encryptionKey, nil)
 	txHandler := transactions.NewTransactionHandler(txService)
 
 	gin.SetMode(gin.TestMode)

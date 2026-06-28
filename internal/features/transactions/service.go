@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/dto"
+	"github.com/ttomsin/paye/internal/features/notifications"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/providers/flutterwave"
 	"github.com/ttomsin/paye/internal/features/providers/nomba"
@@ -29,14 +30,16 @@ type TransactionService struct {
 	webhookRepo     *webhooks.WebhookRepo
 	encryptionKey   string
 	paystackBaseURL string
+	notifier        *notifications.NotificationService
 }
 
-func NewTransactionService(repo *TransactionRepo, providerRepo *providers.ProviderRepo, webhookRepo *webhooks.WebhookRepo, encryptionKey string) *TransactionService {
+func NewTransactionService(repo *TransactionRepo, providerRepo *providers.ProviderRepo, webhookRepo *webhooks.WebhookRepo, encryptionKey string, notifier *notifications.NotificationService) *TransactionService {
 	return &TransactionService{
 		repo:          repo,
 		providerRepo:  providerRepo,
 		webhookRepo:   webhookRepo,
 		encryptionKey: encryptionKey,
+		notifier:      notifier,
 	}
 }
 
@@ -92,7 +95,7 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 			decryptedPublic, _ = crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
 		}
 		accountID := pc.Metadata["account_id"]
-		nClient := nomba.New(decryptedPublic, decryptedSecret, accountID)
+		nClient := nomba.New(decryptedPublic, decryptedSecret, accountID, isLive)
 		if s.paystackBaseURL != "" {
 			nClient.SetBaseURL(s.paystackBaseURL)
 		}
@@ -213,7 +216,7 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 			decryptedPublic, _ = crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
 		}
 		accountID := pc.Metadata["account_id"]
-		nClient := nomba.New(decryptedPublic, decryptedSecret, accountID)
+		nClient := nomba.New(decryptedPublic, decryptedSecret, accountID, tx.IsLive)
 		if s.paystackBaseURL != "" {
 			nClient.SetBaseURL(s.paystackBaseURL)
 		}
@@ -264,7 +267,21 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 		return nil, fmt.Errorf("failed to update transaction status: %w", err)
 	}
 
-	return dto.ToVerifyTransactionResponse(tx, resp.Message), nil
+	verifyResp := dto.ToVerifyTransactionResponse(tx, resp.Message)
+	if s.notifier != nil {
+		title := "Transaction Pending"
+		message := fmt.Sprintf("Transaction reference %s of %s %.2f is pending via %s.", tx.Reference, tx.Currency, tx.Amount, tx.Provider)
+		if tx.Status == "success" {
+			title = "Transaction Successful"
+			message = fmt.Sprintf("Transaction reference %s of %s %.2f was successful via %s.", tx.Reference, tx.Currency, tx.Amount, tx.Provider)
+		} else if tx.Status == "failed" {
+			title = "Transaction Failed"
+			message = fmt.Sprintf("Transaction reference %s of %s %.2f failed via %s.", tx.Reference, tx.Currency, tx.Amount, tx.Provider)
+		}
+		_ = s.notifier.CreateAndNotify(ctx, tx.ProjectID.String(), title, message, tx.Status, verifyResp)
+	}
+
+	return verifyResp, nil
 }
 
 // ListTransactions retrieves a list of transaction DTOs for a project

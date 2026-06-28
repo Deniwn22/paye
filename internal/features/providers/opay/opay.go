@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/ttomsin/paye/internal/crypto"
@@ -34,6 +35,15 @@ func New(publicKey, secretKey, merchantID string, sandbox bool) *Provider {
 	base := productionBaseURL
 	if sandbox {
 		base = stagingBaseURL
+	}
+	if sandbox {
+		if envSandbox := os.Getenv("OPAY_SANDBOX_BASE_URL"); envSandbox != "" {
+			base = envSandbox
+		}
+	} else {
+		if envLive := os.Getenv("OPAY_LIVE_BASE_URL"); envLive != "" {
+			base = envLive
+		}
 	}
 	return &Provider{
 		publicKey:  publicKey,
