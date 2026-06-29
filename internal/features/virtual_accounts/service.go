@@ -148,3 +148,46 @@ func (s *VAService) SuspendVirtualAccount(ctx context.Context, projectID string,
 func (s *VAService) ListTransactions(ctx context.Context, projectID string, pvcID string) ([]*models.VirtualAccountTransaction, error) {
 	return s.repo.ListTransactions(ctx, pvcID, projectID)
 }
+
+func (s *VAService) UpdateVirtualAccount(ctx context.Context, projectID string, pvcID string, dto dto.UpdateVADTO) error {
+	va, err := s.repo.FindByPvcID(ctx, pvcID, projectID)
+	if err != nil {
+		return fmt.Errorf("virtual account not found: %w", err)
+	}
+
+	provider, _, err := s.getVAProvider(ctx, projectID)
+	if err != nil {
+		return err
+	}
+
+	if err := provider.UpdateVirtualAccount(ctx, va.AccountRef, providers.UpdateVARequest{
+		AccountName: dto.AccountName,
+	}); err != nil {
+		return fmt.Errorf("failed to update on provider: %w", err)
+	}
+
+	if dto.AccountName != "" {
+		va.AccountName = dto.AccountName
+	}
+
+	return s.repo.UpdateVirtualAccount(ctx, va)
+}
+
+func (s *VAService) ExpireVirtualAccount(ctx context.Context, projectID string, pvcID string) error {
+	va, err := s.repo.FindByPvcID(ctx, pvcID, projectID)
+	if err != nil {
+		return fmt.Errorf("virtual account not found: %w", err)
+	}
+
+	provider, _, err := s.getVAProvider(ctx, projectID)
+	if err != nil {
+		return err
+	}
+
+	if err := provider.ExpireVirtualAccount(ctx, va.AccountRef); err != nil {
+		return fmt.Errorf("failed to expire on provider: %w", err)
+	}
+
+	va.Status = "expired"
+	return s.repo.UpdateVirtualAccount(ctx, va)
+}

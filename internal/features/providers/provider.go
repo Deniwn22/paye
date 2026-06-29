@@ -195,4 +195,11 @@ type VirtualAccountProvider interface {
 	CreateVirtualAccount(ctx context.Context, req CreateVARequest) (*VirtualAccount, error)
 	GetVirtualAccount(ctx context.Context, accountRef string) (*VirtualAccount, error)
 	SuspendVirtualAccount(ctx context.Context, accountRef string) error
+	UpdateVirtualAccount(ctx context.Context, accountRef string, req UpdateVARequest) error
+	ExpireVirtualAccount(ctx context.Context, accountRef string) error
+}
+
+type UpdateVARequest struct {
+	AccountName string
+	CallbackURL string
 }

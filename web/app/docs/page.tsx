@@ -86,6 +86,26 @@ fetch("https://api.paye.ng/v1/virtual-accounts", {
   })
 });`
 
+  const virtualAccountUpdateSnippet = `// Update Virtual Account
+fetch("https://api.paye.ng/v1/virtual-accounts/PVC_abc123", {
+  method: "PUT",
+  headers: {
+    "X-Paye-API-Key": "sk_test_xxxxx",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    accountName: "John Doe - Tech Subs"
+  })
+});`
+
+  const virtualAccountExpireSnippet = `// Expire Virtual Account
+fetch("https://api.paye.ng/v1/virtual-accounts/PVC_abc123", {
+  method: "DELETE",
+  headers: {
+    "X-Paye-API-Key": "sk_test_xxxxx"
+  }
+});`
+
   const projectsSnippet = `// Create a new staging environment
 fetch("https://api.paye.ng/v1/projects", {
   method: "POST",
@@ -328,7 +348,19 @@ evtSource.onmessage = function(event) {
                       <p className="text-zinc-600 dark:text-zinc-400">
                         To provision an account, send a <code>POST</code> request with your customer's ID and BVN. We will return the provisioned account number and bank name (e.g., Providus Bank, Wema Bank).
                       </p>
-                      <CodeBlock code={virtualAccountSnippet} language="JavaScript" id="va-api" />
+                      <CodeBlock code={virtualAccountSnippet} language="JavaScript" id="va-api-create" />
+                      
+                      <h3 className="text-xl font-bold text-zinc-900 dark:text-white mt-8 mb-4">Updating an Account</h3>
+                      <p className="text-zinc-600 dark:text-zinc-400">
+                        You can update the account's details such as the <code>accountName</code> by sending a <code>PUT</code> request to the account's ID.
+                      </p>
+                      <CodeBlock code={virtualAccountUpdateSnippet} language="JavaScript" id="va-api-update" />
+
+                      <h3 className="text-xl font-bold text-zinc-900 dark:text-white mt-8 mb-4">Expiring an Account</h3>
+                      <p className="text-zinc-600 dark:text-zinc-400">
+                        To permanently deactivate a virtual account, send a <code>DELETE</code> request. Any funds sent to an expired account will bounce back to the sender.
+                      </p>
+                      <CodeBlock code={virtualAccountExpireSnippet} language="JavaScript" id="va-api-expire" />
                     </section>
                   )}
 

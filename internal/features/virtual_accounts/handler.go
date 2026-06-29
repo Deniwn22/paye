@@ -174,13 +174,90 @@ func (h *VAHandler) ListTransactionsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, api.Success("Transactions retrieved successfully", txs))
 }
 
+// UpdateVirtualAccountHandler godoc
+// @Summary Update a virtual account
+// @Description Update virtual account details (e.g. Account Name)
+// @Tags Virtual Accounts
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param pvc_id path string true "Virtual Account ID (PVC ID)"
+// @Param request body dto.UpdateVADTO true "Update payload"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /virtual-accounts/{pvc_id} [put]
+func (h *VAHandler) UpdateVirtualAccountHandler(c *gin.Context) {
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		return
+	}
+
+	pvcID := c.Param("pvc_id")
+	if pvcID == "" {
+		c.JSON(http.StatusBadRequest, api.Error("pvc_id is required"))
+		return
+	}
+
+	var dto dto.UpdateVADTO
+	if err := c.ShouldBindJSON(&dto); err != nil {
+		c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+		return
+	}
+
+	if err := h.service.UpdateVirtualAccount(c.Request.Context(), projectID.(string), pvcID, dto); err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success[any]("Virtual account updated successfully", nil))
+}
+
+// ExpireVirtualAccountHandler godoc
+// @Summary Expire a virtual account
+// @Description Expire (delete/deactivate) a virtual account on the provider
+// @Tags Virtual Accounts
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param pvc_id path string true "Virtual Account ID (PVC ID)"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /virtual-accounts/{pvc_id} [delete]
+func (h *VAHandler) ExpireVirtualAccountHandler(c *gin.Context) {
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		return
+	}
+
+	pvcID := c.Param("pvc_id")
+	if pvcID == "" {
+		c.JSON(http.StatusBadRequest, api.Error("pvc_id is required"))
+		return
+	}
+
+	if err := h.service.ExpireVirtualAccount(c.Request.Context(), projectID.(string), pvcID); err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success[any]("Virtual account expired successfully", nil))
+}
+
 func RegisterRoutes(rg *gin.RouterGroup, h *VAHandler) {
 	va := rg.Group("/virtual-accounts")
 	{
 		va.POST("", h.CreateVirtualAccountHandler)
 		va.GET("", h.ListVirtualAccountsHandler)
 		va.GET("/:pvc_id", h.GetVirtualAccountHandler)
+		va.PUT("/:pvc_id", h.UpdateVirtualAccountHandler)
 		va.PATCH("/:pvc_id/suspend", h.SuspendVirtualAccountHandler)
+		va.DELETE("/:pvc_id", h.ExpireVirtualAccountHandler)
 		va.GET("/:pvc_id/transactions", h.ListTransactionsHandler)
 	}
 }

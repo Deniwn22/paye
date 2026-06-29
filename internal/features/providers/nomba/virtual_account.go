@@ -22,12 +22,13 @@ type nombaCreateVARequest struct {
 }
 
 type nombaVAData struct {
-	AccountRef    string `json:"accountRef"`
-	AccountNumber string `json:"accountNumber"`
-	AccountName   string `json:"accountName"`
-	BankName      string `json:"bankName"`
-	Currency      string `json:"currency"`
-	Status        string `json:"status"`
+	AccountRef        string `json:"accountRef"`
+	BankAccountNumber string `json:"bankAccountNumber"`
+	BankAccountName   string `json:"bankAccountName"`
+	AccountName       string `json:"accountName"`
+	BankName          string `json:"bankName"`
+	Currency          string `json:"currency"`
+	Status            string `json:"status"`
 }
 
 type nombaVAResponse struct {
@@ -75,8 +76,8 @@ func (n *Nomba) CreateVirtualAccount(ctx context.Context, req providers.CreateVA
 
 	return &providers.VirtualAccount{
 		AccountRef:    result.Data.AccountRef,
-		AccountNumber: result.Data.AccountNumber,
-		AccountName:   result.Data.AccountName,
+		AccountNumber: result.Data.BankAccountNumber,
+		AccountName:   result.Data.BankAccountName,
 		BankName:      result.Data.BankName,
 		Currency:      result.Data.Currency,
 		Status:        result.Data.Status,
@@ -109,11 +110,12 @@ func (n *Nomba) GetVirtualAccount(ctx context.Context, accountRef string) (*prov
 
 	return &providers.VirtualAccount{
 		AccountRef:    result.Data.AccountRef,
-		AccountNumber: result.Data.AccountNumber,
-		AccountName:   result.Data.AccountName,
+		AccountNumber: result.Data.BankAccountNumber,
+		AccountName:   result.Data.BankAccountName,
 		BankName:      result.Data.BankName,
 		Currency:      result.Data.Currency,
 		Status:        result.Data.Status,
+		CreatedAt:     time.Now(),
 	}, nil
 }
 
@@ -129,6 +131,53 @@ func (n *Nomba) SuspendVirtualAccount(ctx context.Context, accountRef string) er
 		var errResult map[string]any
 		json.NewDecoder(resp.Body).Decode(&errResult)
 		return fmt.Errorf("nomba: suspend VA error: %v", errResult)
+	}
+
+	return nil
+}
+
+type nombaUpdateVARequest struct {
+	AccountName string `json:"accountName,omitempty"`
+	CallbackURL string `json:"callbackUrl,omitempty"`
+}
+
+func (n *Nomba) UpdateVirtualAccount(ctx context.Context, accountRef string, req providers.UpdateVARequest) error {
+	nombaReq := nombaUpdateVARequest{
+		AccountName: req.AccountName,
+		CallbackURL: req.CallbackURL,
+	}
+
+	body, err := json.Marshal(nombaReq)
+	if err != nil {
+		return fmt.Errorf("nomba: failed to marshal update VA request: %w", err)
+	}
+
+	resp, err := n.makeRequest("PUT", n.getBaseURL()+"/accounts/virtual/"+accountRef, body)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var errResult map[string]any
+		json.NewDecoder(resp.Body).Decode(&errResult)
+		return fmt.Errorf("nomba: update VA error: %v", errResult)
+	}
+
+	return nil
+}
+
+func (n *Nomba) ExpireVirtualAccount(ctx context.Context, accountRef string) error {
+	resp, err := n.makeRequest("DELETE", n.getBaseURL()+"/accounts/virtual/"+accountRef, nil)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var errResult map[string]any
+		json.NewDecoder(resp.Body).Decode(&errResult)
+		return fmt.Errorf("nomba: expire VA error: %v", errResult)
 	}
 
 	return nil

@@ -9,3 +9,7 @@ type CreateVirtualAccountDTO struct {
 	ExpectedAmount    float64 `json:"expected_amount"` // dynamic only
 	ExpiryDate        string  `json:"expiry_date"`     // dynamic only
 }
+
+type UpdateVADTO struct {
+	AccountName string `json:"account_name"`
+}

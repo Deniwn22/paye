@@ -288,6 +288,11 @@ definitions:
       test_credentials:
         type: string
     type: object
+  dto.UpdateVADTO:
+    properties:
+      account_name:
+        type: string
+    type: object
   dto.VerifyTransactionResponse:
     properties:
       amount:
@@ -1266,6 +1271,40 @@ paths:
       tags:
       - Virtual Accounts
   /virtual-accounts/{pvc_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Expire (delete/deactivate) a virtual account on the provider
+      parameters:
+      - description: Virtual Account ID (PVC ID)
+        in: path
+        name: pvc_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Expire a virtual account
+      tags:
+      - Virtual Accounts
     get:
       description: Retrieve details of a specific virtual account by its PVC ID
       parameters:
@@ -1296,6 +1335,46 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get a virtual account
+      tags:
+      - Virtual Accounts
+    put:
+      consumes:
+      - application/json
+      description: Update virtual account details (e.g. Account Name)
+      parameters:
+      - description: Virtual Account ID (PVC ID)
+        in: path
+        name: pvc_id
+        required: true
+        type: string
+      - description: Update payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateVADTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a virtual account
       tags:
       - Virtual Accounts
   /virtual-accounts/{pvc_id}/suspend:
