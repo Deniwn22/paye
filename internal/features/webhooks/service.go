@@ -245,8 +245,23 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 		}
 
 		// Branch based on webhook type
-		if wc.Type == models.VA {
-			return s.processVAWebhook(ctx, wc, webhookEvent, payload, isLive)
+		switch wc.Type {
+		case models.VA:
+			return s.processVAWebhook(ctx, wc, payload, isLive)
+		case models.ALL:
+			var eventPayload struct {
+				EventType string `json:"event_type"`
+				Data      struct {
+					Transaction struct {
+						Type string `json:"type"`
+					} `json:"transaction"`
+				} `json:"data"`
+			}
+			json.Unmarshal(payload, &eventPayload)
+			if eventPayload.Data.Transaction.Type == "vact_transfer" {
+				return s.processVAWebhook(ctx, wc, payload, isLive)
+			}
+			// else fall through to payment flow
 		}
 
 		// Create a failed WebhookLog record in the database for debugging
@@ -393,45 +408,62 @@ func (s *WebhookService) ListAllLogs(ctx context.Context, projectID string, limi
 	return s.repo.ListAllLogs(ctx, projectID, limit, offset)
 }
 
-func (s *WebhookService) processVAWebhook(ctx context.Context, wc *models.WebhookConfig, webhookEvent *providers.WebhookEvent, payload []byte, isLive bool) error {
-	// Parse the accountRef from the payload — Nomba sends this as the identifier
+func (s *WebhookService) processVAWebhook(ctx context.Context, wc *models.WebhookConfig, payload []byte, isLive bool) error {
 	var nombaPayload struct {
 		Data struct {
-			AccountRef string  `json:"accountRef"`
-			Amount     float64 `json:"transactionAmount"`
-			Currency   string  `json:"currency"`
-			SenderName string  `json:"originatorName"`
-			SenderAcct string  `json:"originatorAccountNumber"`
-			SenderBank string  `json:"originatorBankName"`
-			Reference  string  `json:"transactionReference"`
+			Transaction struct {
+				TransactionID string  `json:"transactionId"`
+				Type          string  `json:"type"`
+				Amount        float64 `json:"transactionAmount"`
+				Reference     string  `json:"sessionId"`
+			} `json:"transaction"`
+			Customer struct {
+				SenderName    string `json:"senderName"`
+				BankName      string `json:"bankName"`
+				AccountNumber string `json:"accountNumber"`
+			} `json:"customer"`
+			Merchant struct {
+				WalletID string `json:"walletId"`
+			} `json:"merchant"`
 		} `json:"data"`
 	}
+
 	if err := json.Unmarshal(payload, &nombaPayload); err != nil {
 		return fmt.Errorf("va webhook: failed to parse payload: %w", err)
 	}
 
-	accountRef := nombaPayload.Data.AccountRef
-	if accountRef == "" {
-		return fmt.Errorf("va webhook: accountRef missing from payload")
+	// aliasAccountNumber is the VA account number — use it to look up the VA
+	// we look up by accountRef stored in DB, but we need to find VA by bank account number
+	var aliasPayload struct {
+		Data struct {
+			Transaction struct {
+				AliasAccountNumber string `json:"aliasAccountNumber"`
+			} `json:"transaction"`
+		} `json:"data"`
+	}
+	json.Unmarshal(payload, &aliasPayload)
+	bankAccountNumber := aliasPayload.Data.Transaction.AliasAccountNumber
+
+	if bankAccountNumber == "" {
+		return fmt.Errorf("va webhook: aliasAccountNumber missing from payload")
 	}
 
-	// Look up the VA by accountRef scoped to the project
-	va, err := s.vaRepo.FindByAccountRef(ctx, accountRef, wc.ProjectID.String())
+	// Look up VA by bank account number scoped to project
+	va, err := s.vaRepo.FindByBankAccountNumber(ctx, bankAccountNumber, wc.ProjectID.String())
 	if err != nil {
-		return fmt.Errorf("va webhook: virtual account not found for accountRef %s: %w", accountRef, err)
+		return fmt.Errorf("va webhook: virtual account not found for account number %s: %w", bankAccountNumber, err)
 	}
 
-	// Create VirtualAccountTransaction record
 	vatx := &models.VirtualAccountTransaction{
 		VirtualAccountID: va.Base.ID,
 		ProjectID:        wc.ProjectID,
 		PvcID:            va.PvcID,
-		Amount:           nombaPayload.Data.Amount,
-		Currency:         nombaPayload.Data.Currency,
-		SenderName:       nombaPayload.Data.SenderName,
-		SenderAccount:    nombaPayload.Data.SenderAcct,
-		SenderBank:       nombaPayload.Data.SenderBank,
-		Reference:        nombaPayload.Data.Reference,
+		Amount:           nombaPayload.Data.Transaction.Amount,
+		Currency:         "NGN",
+		SenderName:       nombaPayload.Data.Customer.SenderName,
+		SenderAccount:    nombaPayload.Data.Customer.AccountNumber,
+		SenderBank:       nombaPayload.Data.Customer.BankName,
+		Reference:        nombaPayload.Data.Transaction.TransactionID,
 		Status:           "success",
 		Provider:         "nomba",
 		IsLive:           isLive,
@@ -441,26 +473,24 @@ func (s *WebhookService) processVAWebhook(ctx context.Context, wc *models.Webhoo
 		return fmt.Errorf("va webhook: failed to persist transaction: %w", err)
 	}
 
-	// Build merchant-facing payload — provider-agnostic
 	merchantPayload, _ := json.Marshal(map[string]any{
 		"event":              "virtual_account.credit",
 		"pvc_id":             va.PvcID,
 		"customer_reference": va.CustomerReference,
-		"amount":             nombaPayload.Data.Amount,
-		"currency":           nombaPayload.Data.Currency,
-		"sender_name":        nombaPayload.Data.SenderName,
-		"sender_account":     nombaPayload.Data.SenderAcct,
-		"sender_bank":        nombaPayload.Data.SenderBank,
-		"reference":          nombaPayload.Data.Reference,
+		"amount":             nombaPayload.Data.Transaction.Amount,
+		"currency":           "NGN",
+		"sender_name":        nombaPayload.Data.Customer.SenderName,
+		"sender_account":     nombaPayload.Data.Customer.AccountNumber,
+		"sender_bank":        nombaPayload.Data.Customer.BankName,
+		"reference":          nombaPayload.Data.Transaction.TransactionID,
 	})
 
-	// Log it
 	wl := &models.WebhookLog{
 		ProjectID:       wc.ProjectID,
 		WebhookConfigID: &wc.Base.ID,
 		Event:           "virtual_account.credit",
-		Reference:       nombaPayload.Data.Reference,
-		Amount:          nombaPayload.Data.Amount,
+		Reference:       nombaPayload.Data.Transaction.TransactionID,
+		Amount:          nombaPayload.Data.Transaction.Amount,
 		Status:          "success",
 		ForwardedStatus: 0,
 		Payload:         string(payload),
@@ -474,7 +504,6 @@ func (s *WebhookService) processVAWebhook(ctx context.Context, wc *models.Webhoo
 
 	_ = s.repo.CreateLog(ctx, wl)
 
-	// Forward to merchant with clean Paye payload
 	if wc.TargetURL != "" {
 		apiKey := wc.Project.ApiKey
 		if !isLive {

@@ -65,3 +65,9 @@ func (r *VARepository) FindByAccountRef(ctx context.Context, accountRef string, 
 	err := r.db.WithContext(ctx).Where("account_ref = ? AND project_id = ?", accountRef, projectID).First(&va).Error
 	return &va, err
 }
+
+func (r *VARepository) FindByBankAccountNumber(ctx context.Context, bankAccountNumber string, projectID string) (*models.VirtualAccount, error) {
+	var va models.VirtualAccount
+	err := r.db.WithContext(ctx).Where("bank_account_number = ? AND project_id = ?", bankAccountNumber, projectID).First(&va).Error
+	return &va, err
+}
