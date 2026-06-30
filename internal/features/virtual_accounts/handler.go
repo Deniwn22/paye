@@ -2,6 +2,7 @@ package virtual_accounts
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ttomsin/paye/internal/api"
@@ -46,6 +47,10 @@ func (h *VAHandler) CreateVirtualAccountHandler(c *gin.Context) {
 
 	va, err := h.service.CreateVirtualAccount(c.Request.Context(), projectID.(string), req)
 	if err != nil {
+		if strings.Contains(err.Error(), "no active VA provider found") {
+			c.JSON(http.StatusBadRequest, api.Error("No active provider found for your project that supports virtual accounts. Please configure one first."))
+			return
+		}
 		slog.Error("internal server error", "error", err)
 		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
