@@ -46,8 +46,7 @@ CREATE TABLE IF NOT EXISTS provider_configs (
     live_secret_key VARCHAR(255),
     live_public_key VARCHAR(255),
     is_active BOOLEAN,
-    project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    metadata JSONB
+    project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_provider_configs_deleted_at ON provider_configs(deleted_at);
 

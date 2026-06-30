@@ -46,8 +46,7 @@ CREATE TABLE IF NOT EXISTS provider_configs (
     live_secret_key TEXT,
     live_public_key TEXT,
     is_active INTEGER,
-    project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    metadata TEXT
+    project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_provider_configs_deleted_at ON provider_configs(deleted_at);
 
