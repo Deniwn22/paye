@@ -14,7 +14,7 @@ import (
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "github.com/ttomsin/paye/docs" // generated docs
+	"github.com/ttomsin/paye/docs" // generated docs
 	"github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/features/auth"
 	"github.com/ttomsin/paye/internal/features/dashboard"
@@ -180,6 +180,15 @@ func main() {
 	transactionHandler := transactions.NewTransactionHandler(transactionService)
 	sdkHandler := sdk.NewSDKHandler(userRepo, projectRepo, providerRepo, transactionService, derivedEncryptionKey, database.DB, subscriptionService)
 	vaHandler := virtual_accounts.NewVAHandler(vaService)
+
+	// Dynamic Swagger Host Configuration
+	if os.Getenv("GIN_MODE") == "release" {
+		docs.SwaggerInfo.Host = "paye.africa"
+		docs.SwaggerInfo.Schemes = []string{"https"}
+	} else {
+		docs.SwaggerInfo.Host = "localhost:8080"
+		docs.SwaggerInfo.Schemes = []string{"http"}
+	}
 
 	// Gin config
 	r := gin.Default()
