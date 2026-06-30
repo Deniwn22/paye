@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	payeDb "github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/crypto"
+	payeDb "github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/features/auth"
 	"github.com/ttomsin/paye/internal/features/projects"
 	"github.com/ttomsin/paye/internal/features/providers"

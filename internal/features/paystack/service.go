@@ -311,4 +311,3 @@ func (s *PaystackService) ListPlans(ctx context.Context, projectID string) ([]*m
 func (s *PaystackService) ListSubscriptions(ctx context.Context, projectID string) ([]*models.Subscription, error) {
 	return s.repo.ListSubscriptions(ctx, projectID)
 }
-

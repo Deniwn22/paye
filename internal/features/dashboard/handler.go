@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ttomsin/paye/internal/api"
 	"github.com/ttomsin/paye/internal/middleware"
+
+	"log/slog"
 )
 
 type DashboardHandler struct {
@@ -36,7 +38,8 @@ func (h *DashboardHandler) GetStatsHandler(c *gin.Context) {
 
 	resp, err := h.service.GetStats(c.Request.Context(), projectID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -76,7 +79,8 @@ func (h *DashboardHandler) GetLogsHandler(c *gin.Context) {
 
 	resp, err := h.service.GetLogs(c.Request.Context(), projectID.(string), limit, offset)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 

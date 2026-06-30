@@ -7,6 +7,8 @@ import (
 	"github.com/ttomsin/paye/internal/api"
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/middleware"
+
+	"log/slog"
 )
 
 type ProviderHandler struct {
@@ -45,7 +47,8 @@ func (h *ProviderHandler) AddProviderHandler(c *gin.Context) {
 
 	resp, err := h.service.AddProvider(c.Request.Context(), &req, projectID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -71,7 +74,8 @@ func (h *ProviderHandler) ListProvidersHandler(c *gin.Context) {
 
 	resp, err := h.service.ListProviders(c.Request.Context(), projectID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -114,7 +118,8 @@ func (h *ProviderHandler) UpdateProviderHandler(c *gin.Context) {
 
 	resp, err := h.service.UpdateProvider(c.Request.Context(), &req, projectID.(string), providerID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -155,7 +160,8 @@ func (h *ProviderHandler) DeleteProviderHandler(c *gin.Context) {
 
 	err = h.service.DeleteProvider(c.Request.Context(), providerID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -196,7 +202,8 @@ func (h *ProviderHandler) ToggleProviderHandler(c *gin.Context) {
 
 	err = h.service.ToggleProviderStatus(c.Request.Context(), providerID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -247,7 +254,8 @@ func (h *ProviderHandler) RefundHandler(c *gin.Context) {
 
 	resp, err := h.service.RefundTransaction(c.Request.Context(), projectID.(string), "paystack", req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -263,7 +271,8 @@ func (h *ProviderHandler) ListRefundsHandler(c *gin.Context) {
 
 	resp, err := h.service.ListRefunds(c.Request.Context(), projectID.(string), "paystack")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -285,7 +294,8 @@ func (h *ProviderHandler) CreatePlanHandler(c *gin.Context) {
 
 	resp, err := h.service.CreatePlan(c.Request.Context(), projectID.(string), "paystack", req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -301,7 +311,8 @@ func (h *ProviderHandler) ListPlansHandler(c *gin.Context) {
 
 	resp, err := h.service.ListPlans(c.Request.Context(), projectID.(string), "paystack")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -323,7 +334,8 @@ func (h *ProviderHandler) CreateSubscriptionHandler(c *gin.Context) {
 
 	resp, err := h.service.CreateSubscription(c.Request.Context(), projectID.(string), "paystack", req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -339,7 +351,8 @@ func (h *ProviderHandler) ListSubscriptionsHandler(c *gin.Context) {
 
 	resp, err := h.service.ListSubscriptions(c.Request.Context(), projectID.(string), "paystack")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -372,7 +385,8 @@ func (h *ProviderHandler) CancelSubscriptionHandler(c *gin.Context) {
 
 	err := h.service.CancelSubscription(c.Request.Context(), projectID.(string), "paystack", code, token)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -394,7 +408,8 @@ func (h *ProviderHandler) CreateRecipientHandler(c *gin.Context) {
 
 	resp, err := h.service.CreateTransferRecipient(c.Request.Context(), projectID.(string), "paystack", req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -410,7 +425,8 @@ func (h *ProviderHandler) ListRecipientsHandler(c *gin.Context) {
 
 	resp, err := h.service.ListTransferRecipients(c.Request.Context(), projectID.(string), "paystack")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -432,7 +448,8 @@ func (h *ProviderHandler) CreateTransferHandler(c *gin.Context) {
 
 	resp, err := h.service.InitiateTransfer(c.Request.Context(), projectID.(string), req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -448,7 +465,8 @@ func (h *ProviderHandler) ListTransfersHandler(c *gin.Context) {
 
 	resp, err := h.service.ListTransfers(c.Request.Context(), projectID.(string), "paystack")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -466,7 +484,8 @@ func (h *ProviderHandler) ListTransfersHandler(c *gin.Context) {
 func (h *ProviderHandler) ListPaymentProvidersHandler(c *gin.Context) {
 	resp, err := h.service.ListPaymentProviders(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -495,7 +514,8 @@ func (h *ProviderHandler) TogglePaymentProviderSupportHandler(c *gin.Context) {
 
 	provider, err := h.service.TogglePaymentProviderSupport(c.Request.Context(), name)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -532,7 +552,8 @@ func (h *ProviderHandler) UpdatePaymentProviderHandler(c *gin.Context) {
 
 	provider, err := h.service.UpdatePaymentProvider(c.Request.Context(), name, &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 

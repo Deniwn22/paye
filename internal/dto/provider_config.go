@@ -39,7 +39,6 @@ type ProviderConfigResponse struct {
 	Metadata          map[string]string `json:"metadata"`
 }
 
-
 func ToProviderConfigResponse(config *models.ProviderConfig) *ProviderConfigResponse {
 	return &ProviderConfigResponse{
 		ID:                config.Base.ID.String(),

@@ -319,5 +319,3 @@ func (s *TransactionService) PollPendingTransactions(ctx context.Context) error 
 
 	return nil
 }
-
-

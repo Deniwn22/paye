@@ -3,11 +3,14 @@ package webhooks
 import (
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ttomsin/paye/internal/api"
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/middleware"
+
+	"log/slog"
 )
 
 type WebhookHandler struct {
@@ -46,7 +49,12 @@ func (h *WebhookHandler) CreateWebhookHandler(c *gin.Context) {
 
 	resp, err := h.service.CreateWebhook(c.Request.Context(), &req, projectID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		if strings.Contains(err.Error(), "already exists") {
+			c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+			return
+		}
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -72,7 +80,8 @@ func (h *WebhookHandler) ListWebhooksHandler(c *gin.Context) {
 
 	resp, err := h.service.ListWebhooks(c.Request.Context(), projectID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -115,7 +124,8 @@ func (h *WebhookHandler) UpdateWebhookHandler(c *gin.Context) {
 
 	resp, err := h.service.UpdateWebhook(c.Request.Context(), &req, projectID.(string), id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -149,7 +159,8 @@ func (h *WebhookHandler) DeleteWebhookHandler(c *gin.Context) {
 
 	err := h.service.DeleteWebhook(c.Request.Context(), id, projectID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -252,7 +263,8 @@ func (h *WebhookHandler) ListWebhookLogsHandler(c *gin.Context) {
 	// Remove isLive filter — show all logs regardless of mode
 	logs, err := h.service.ListAllLogs(c.Request.Context(), projectID.(string), query.Limit, query.Offset)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 

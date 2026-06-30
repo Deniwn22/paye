@@ -122,35 +122,51 @@ func (s *ProviderService) AddProvider(ctx context.Context, pcreq *dto.ProviderCo
 	var err error
 	if pcreq.SecretKey != "" {
 		pcreq.SecretKey, err = crypto.Encrypt(pcreq.SecretKey, s.encryptionKey)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 	}
 	if pcreq.PublicKey != "" {
 		pcreq.PublicKey, err = crypto.Encrypt(pcreq.PublicKey, s.encryptionKey)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 	}
 	if pcreq.TestSecretKey != "" {
 		pcreq.TestSecretKey, err = crypto.Encrypt(pcreq.TestSecretKey, s.encryptionKey)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 	}
 	if pcreq.TestPublicKey != "" {
 		pcreq.TestPublicKey, err = crypto.Encrypt(pcreq.TestPublicKey, s.encryptionKey)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 	}
 	if pcreq.LiveSecretKey != "" {
 		pcreq.LiveSecretKey, err = crypto.Encrypt(pcreq.LiveSecretKey, s.encryptionKey)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 	}
 	if pcreq.LivePublicKey != "" {
 		pcreq.LivePublicKey, err = crypto.Encrypt(pcreq.LivePublicKey, s.encryptionKey)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 	}
 	if pcreq.TestWebhookSecret != "" {
 		pcreq.TestWebhookSecret, err = crypto.Encrypt(pcreq.TestWebhookSecret, s.encryptionKey)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 	}
 	if pcreq.LiveWebhookSecret != "" {
 		pcreq.LiveWebhookSecret, err = crypto.Encrypt(pcreq.LiveWebhookSecret, s.encryptionKey)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	pc := dto.ToProviderConfig(pcreq)
@@ -201,32 +217,46 @@ func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.Provide
 	// Encrypt keys
 	if pcreq.SecretKey != "" {
 		pcreq.SecretKey, err = crypto.Encrypt(pcreq.SecretKey, s.encryptionKey)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 	}
 	if pcreq.PublicKey != "" {
 		pcreq.PublicKey, err = crypto.Encrypt(pcreq.PublicKey, s.encryptionKey)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 	}
 	if pcreq.TestSecretKey != "" {
 		pcreq.TestSecretKey, err = crypto.Encrypt(pcreq.TestSecretKey, s.encryptionKey)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 	}
 	if pcreq.TestPublicKey != "" {
 		pcreq.TestPublicKey, err = crypto.Encrypt(pcreq.TestPublicKey, s.encryptionKey)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 	}
 	if pcreq.LiveSecretKey != "" {
 		pcreq.LiveSecretKey, err = crypto.Encrypt(pcreq.LiveSecretKey, s.encryptionKey)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 	}
 	if pcreq.LivePublicKey != "" {
 		pcreq.LivePublicKey, err = crypto.Encrypt(pcreq.LivePublicKey, s.encryptionKey)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 	}
 	if pcreq.TestWebhookSecret != "" {
 		if !strings.Contains(pcreq.TestWebhookSecret, "*") {
 			pcreq.TestWebhookSecret, err = crypto.Encrypt(pcreq.TestWebhookSecret, s.encryptionKey)
-			if err != nil { return nil, err }
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			pcreq.TestWebhookSecret = provider.TestWebhookSecret
 		}
@@ -234,7 +264,9 @@ func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.Provide
 	if pcreq.LiveWebhookSecret != "" {
 		if !strings.Contains(pcreq.LiveWebhookSecret, "*") {
 			pcreq.LiveWebhookSecret, err = crypto.Encrypt(pcreq.LiveWebhookSecret, s.encryptionKey)
-			if err != nil { return nil, err }
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			pcreq.LiveWebhookSecret = provider.LiveWebhookSecret
 		}
@@ -652,6 +684,3 @@ func (s *ProviderService) UpdatePaymentProvider(ctx context.Context, name string
 	}
 	return provider, nil
 }
-
-
-

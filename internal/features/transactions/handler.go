@@ -8,6 +8,8 @@ import (
 	"github.com/ttomsin/paye/internal/api"
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/middleware"
+
+	"log/slog"
 )
 
 type TransactionHandler struct {
@@ -46,7 +48,8 @@ func (h *TransactionHandler) InitializeTransactionHandler(c *gin.Context) {
 
 	resp, err := h.service.InitializeTransaction(c.Request.Context(), projectID.(string), &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -81,7 +84,8 @@ func (h *TransactionHandler) VerifyTransactionHandler(c *gin.Context) {
 
 	resp, err := h.service.VerifyTransaction(c.Request.Context(), projectID.(string), reference)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -113,7 +117,8 @@ func (h *TransactionHandler) ListTransactionsHandler(c *gin.Context) {
 
 	resp, err := h.service.ListTransactions(c.Request.Context(), projectID.(string), limit, offset)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 

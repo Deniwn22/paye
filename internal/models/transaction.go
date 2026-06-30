@@ -13,7 +13,7 @@ type Transaction struct {
 	Amount            float64        `gorm:"not null"`
 	Currency          string         `gorm:"not null"`
 	Email             string         `gorm:"not null"`
-	Status            string         `gorm:"default:pending"` // pending, success, failed
+	Status            string         `gorm:"default:pending"`           // pending, success, failed
 	TransactionStatus string         `gorm:"column:transaction_status"` // raw provider status
 	AuthURL           string         // redirect URL for payment
 	AuthorizationCode string         // authorization code for recurring billing

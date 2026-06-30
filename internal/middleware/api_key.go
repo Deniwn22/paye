@@ -61,4 +61,3 @@ func (m *ApiKeyMiddleware) Handle(c *gin.Context) {
 	c.Set(ProjectIDContextKey, project.ID.String())
 	c.Next()
 }
-

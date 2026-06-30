@@ -133,4 +133,3 @@ func (s *NotificationService) MarkAllAsRead(ctx context.Context, projectID strin
 func (s *NotificationService) DeleteNotification(ctx context.Context, projectID string, id string) error {
 	return s.repo.Delete(ctx, projectID, id)
 }
-

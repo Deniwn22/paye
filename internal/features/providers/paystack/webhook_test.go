@@ -39,5 +39,3 @@ func TestVerifySignature_Invalid(t *testing.T) {
 		t.Errorf("verifySignature returned true, expected false")
 	}
 }
-
-

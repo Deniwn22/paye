@@ -63,7 +63,7 @@ func TestTokenManager_GetToken(t *testing.T) {
 func TestNomba_AllFlows(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		
+
 		switch r.URL.Path {
 		case "/auth/token/issue":
 			w.WriteHeader(http.StatusOK)

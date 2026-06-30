@@ -7,6 +7,8 @@ import (
 	"github.com/ttomsin/paye/internal/api"
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/middleware"
+
+	"log/slog"
 )
 
 type VAHandler struct {
@@ -44,7 +46,8 @@ func (h *VAHandler) CreateVirtualAccountHandler(c *gin.Context) {
 
 	va, err := h.service.CreateVirtualAccount(c.Request.Context(), projectID.(string), req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -102,7 +105,8 @@ func (h *VAHandler) ListVirtualAccountsHandler(c *gin.Context) {
 
 	vas, err := h.service.ListVirtualAccounts(c.Request.Context(), projectID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -134,7 +138,8 @@ func (h *VAHandler) SuspendVirtualAccountHandler(c *gin.Context) {
 	}
 
 	if err := h.service.SuspendVirtualAccount(c.Request.Context(), projectID.(string), pvcID); err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -167,7 +172,8 @@ func (h *VAHandler) ListTransactionsHandler(c *gin.Context) {
 
 	txs, err := h.service.ListTransactions(c.Request.Context(), projectID.(string), pvcID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -208,7 +214,8 @@ func (h *VAHandler) UpdateVirtualAccountHandler(c *gin.Context) {
 	}
 
 	if err := h.service.UpdateVirtualAccount(c.Request.Context(), projectID.(string), pvcID, dto); err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -242,7 +249,8 @@ func (h *VAHandler) ExpireVirtualAccountHandler(c *gin.Context) {
 	}
 
 	if err := h.service.ExpireVirtualAccount(c.Request.Context(), projectID.(string), pvcID); err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 

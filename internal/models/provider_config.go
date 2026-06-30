@@ -4,10 +4,10 @@ import "github.com/google/uuid"
 
 type ProviderConfig struct {
 	Base
-	Label         string `gorm:"not null"` // e.g "paystack-test", "paystack-live", "flutterwave-main"
-	ProviderName  string // (e.g "paystack", "flutterwave")
-	SecretKey     string // stored encrypted via crypto.Encrypt (Legacy / fallback)
-	PublicKey     string // (Legacy / fallback)
+	Label             string `gorm:"not null"` // e.g "paystack-test", "paystack-live", "flutterwave-main"
+	ProviderName      string // (e.g "paystack", "flutterwave")
+	SecretKey         string // stored encrypted via crypto.Encrypt (Legacy / fallback)
+	PublicKey         string // (Legacy / fallback)
 	TestSecretKey     string // stored encrypted
 	TestPublicKey     string
 	LiveSecretKey     string // stored encrypted

@@ -20,6 +20,8 @@ import (
 	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
 	"gorm.io/gorm"
+
+	"log/slog"
 )
 
 //go:embed paye.js
@@ -192,7 +194,8 @@ func (h *SDKHandler) InitializeSDKTransaction(c *gin.Context) {
 
 	resp, err := h.transactionService.InitializeTransaction(c.Request.Context(), project.Base.ID.String(), initReq)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -316,7 +319,8 @@ func (h *SDKHandler) CreateSDKSubscription(c *gin.Context) {
 	)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -350,7 +354,8 @@ func (h *SDKHandler) VerifySDKTransaction(c *gin.Context) {
 	// Call the transaction service to verify the transaction
 	resp, err := h.transactionService.VerifyTransaction(c.Request.Context(), tx.ProjectID.String(), reference)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 

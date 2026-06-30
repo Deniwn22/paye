@@ -5,6 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/ttomsin/paye/internal/api"
+
+	"log/slog"
 )
 
 const userIDContextKey = "user_id"
@@ -44,7 +46,8 @@ func (h *ProjectHandler) CreateProjectHandler(c *gin.Context) {
 
 	project, err := h.service.CreateProject(c.Request.Context(), userID.(string), req.Name)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -78,7 +81,8 @@ func (h *ProjectHandler) ListProjectsHandler(c *gin.Context) {
 
 	projects, err := h.service.ListProjects(c.Request.Context(), userID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -169,7 +173,8 @@ func (h *ProjectHandler) DeleteProjectHandler(c *gin.Context) {
 
 	err := h.service.DeleteProject(c.Request.Context(), id, userID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 

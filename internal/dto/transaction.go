@@ -14,14 +14,14 @@ type InitializeTransactionRequest struct {
 }
 
 type InitializeTransactionResponse struct {
-	Reference  string                 `json:"reference"`
-	AuthURL    string                 `json:"authorization_url,omitempty"`
-	Metadata   map[string]interface{} `json:"metadata,omitempty"`
-	Status     string                 `json:"status"` // pending, success, failed
-	Amount     float64                `json:"amount"`
-	Currency   string                 `json:"currency"`
-	Provider   string                 `json:"provider"`
-	Message    string                 `json:"message,omitempty"`
+	Reference string                 `json:"reference"`
+	AuthURL   string                 `json:"authorization_url,omitempty"`
+	Metadata  map[string]interface{} `json:"metadata,omitempty"`
+	Status    string                 `json:"status"` // pending, success, failed
+	Amount    float64                `json:"amount"`
+	Currency  string                 `json:"currency"`
+	Provider  string                 `json:"provider"`
+	Message   string                 `json:"message,omitempty"`
 }
 
 type VerifyTransactionResponse struct {

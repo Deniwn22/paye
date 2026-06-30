@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	payeDb "github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/crypto"
+	payeDb "github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/features/paystack"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/models"

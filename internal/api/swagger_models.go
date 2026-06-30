@@ -61,15 +61,15 @@ type SwaggerTransactionInitializeResponse struct {
 
 // SwaggerTransactionVerifyResponse represents the transaction verify success response
 type SwaggerTransactionVerifyResponse struct {
-	Status  bool                           `json:"status"`
-	Message string                         `json:"message"`
+	Status  bool                          `json:"status"`
+	Message string                        `json:"message"`
 	Data    dto.VerifyTransactionResponse `json:"data"`
 }
 
 // SwaggerTransactionListResponse represents the list of transactions success response
 type SwaggerTransactionListResponse struct {
-	Status  bool                             `json:"status"`
-	Message string                           `json:"message"`
+	Status  bool                            `json:"status"`
+	Message string                          `json:"message"`
 	Data    []dto.VerifyTransactionResponse `json:"data"`
 }
 
@@ -79,4 +79,3 @@ type SwaggerPaymentProviderListResponse struct {
 	Message string                        `json:"message"`
 	Data    []dto.PaymentProviderResponse `json:"data"`
 }
-

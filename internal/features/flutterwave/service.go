@@ -14,9 +14,9 @@ import (
 )
 
 type FlutterwaveService struct {
-	repo            *FlutterwaveRepository
-	providerRepo    *providers.ProviderRepo
-	encryptionKey   string
+	repo               *FlutterwaveRepository
+	providerRepo       *providers.ProviderRepo
+	encryptionKey      string
 	flutterwaveBaseURL string
 }
 
@@ -311,4 +311,3 @@ func (s *FlutterwaveService) ListPlans(ctx context.Context, projectID string) ([
 func (s *FlutterwaveService) ListSubscriptions(ctx context.Context, projectID string) ([]*models.Subscription, error) {
 	return s.repo.ListSubscriptions(ctx, projectID)
 }
-

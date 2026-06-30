@@ -114,4 +114,3 @@ func HmacSHA3_512Hex(data, key string) string {
 	mac.Write([]byte(data))
 	return hex.EncodeToString(mac.Sum(nil))
 }
-

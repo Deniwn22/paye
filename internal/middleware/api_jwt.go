@@ -18,6 +18,7 @@ const IsLiveContextKey = "is_live"
 const UserRoleContextKey = "user_role"
 
 type ContextKey string
+
 const IsLiveCtxKey ContextKey = "is_live"
 
 func GetIsLiveFromContext(ctx context.Context) bool {
@@ -72,7 +73,7 @@ func (m *ApiJwtMiddleware) Handle(c *gin.Context) {
 	liveHeader := c.GetHeader("X-Live-Mode")
 	isLive := liveHeader == "true"
 	c.Set(IsLiveContextKey, isLive)
-	
+
 	// Propagate to Go context.Context
 	reqCtx := context.WithValue(c.Request.Context(), IsLiveCtxKey, isLive)
 	c.Request = c.Request.WithContext(reqCtx)

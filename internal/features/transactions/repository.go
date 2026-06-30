@@ -54,4 +54,3 @@ func (r *TransactionRepo) FindOlderPendingTransactions(ctx context.Context, star
 		Find(&txs).Error
 	return txs, err
 }
-

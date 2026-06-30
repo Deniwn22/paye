@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	payeDb "github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/crypto"
+	payeDb "github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/features/auth"
 	"github.com/ttomsin/paye/internal/features/projects"
@@ -421,4 +421,3 @@ func TestPendingTransactionPolling(t *testing.T) {
 		t.Errorf("Expected status to be updated to 'success', got '%s'", updatedTx.Status)
 	}
 }
-

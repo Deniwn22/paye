@@ -121,11 +121,11 @@ type fwCard struct {
 }
 
 type fwVerifyData struct {
-	Status    string  `json:"status"`
-	TxRef     string  `json:"tx_ref"`
-	Amount    float64 `json:"amount"`
-	Currency  string  `json:"currency"`
-	Card      fwCard  `json:"card"`
+	Status   string  `json:"status"`
+	TxRef    string  `json:"tx_ref"`
+	Amount   float64 `json:"amount"`
+	Currency string  `json:"currency"`
+	Card     fwCard  `json:"card"`
 }
 
 type fwVerifyResponse struct {

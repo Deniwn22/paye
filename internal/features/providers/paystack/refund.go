@@ -17,9 +17,9 @@ type paystackRefundRequest struct {
 }
 
 type paystackRefundData struct {
-	Transaction  string `json:"transaction"`
-	Amount       int    `json:"amount"`
-	Currency     string `json:"currency"`
+	Transaction string `json:"transaction"`
+	Amount      int    `json:"amount"`
+	Currency    string `json:"currency"`
 }
 
 type paystackRefundResponse struct {

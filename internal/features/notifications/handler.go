@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ttomsin/paye/internal/api"
 	"github.com/ttomsin/paye/internal/middleware"
+
+	"log/slog"
 )
 
 type NotificationHandler struct {
@@ -76,7 +78,8 @@ func (h *NotificationHandler) ListNotificationsHandler(c *gin.Context) {
 
 	list, err := h.service.ListNotifications(c.Request.Context(), projectID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -109,7 +112,8 @@ func (h *NotificationHandler) MarkAsReadHandler(c *gin.Context) {
 
 	err := h.service.MarkAsRead(c.Request.Context(), projectID.(string), id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -134,7 +138,8 @@ func (h *NotificationHandler) MarkAllAsReadHandler(c *gin.Context) {
 
 	err := h.service.MarkAllAsRead(c.Request.Context(), projectID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
@@ -167,7 +172,8 @@ func (h *NotificationHandler) DeleteNotificationHandler(c *gin.Context) {
 
 	err := h.service.DeleteNotification(c.Request.Context(), projectID.(string), id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 

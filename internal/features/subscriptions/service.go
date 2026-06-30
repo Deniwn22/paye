@@ -95,7 +95,7 @@ func (s *SubscriptionService) ProcessDueSubscriptions(ctx context.Context) error
 		// Update next billing date
 		var plan models.Plan
 		s.db.WithContext(ctx).Where("plan_code = ?", sub.PlanCode).First(&plan)
-		
+
 		now := time.Now()
 		switch plan.Interval {
 		case "daily":
@@ -109,7 +109,7 @@ func (s *SubscriptionService) ProcessDueSubscriptions(ctx context.Context) error
 		default:
 			sub.NextBillingDate = now.AddDate(0, 1, 0)
 		}
-		
+
 		sub.Status = "active"
 		s.db.WithContext(ctx).Save(&sub)
 	}

@@ -46,15 +46,15 @@ func (f *Flutterwave) ChargeToken(req providers.ChargeTokenRequest) (*providers.
 		return nil, fmt.Errorf("flutterwave charge token error: %s", msg)
 	}
 
-type fwTokenizedChargeData struct {
-	TxRef string `json:"tx_ref"`
-}
+	type fwTokenizedChargeData struct {
+		TxRef string `json:"tx_ref"`
+	}
 
-type fwTokenizedChargeResponse struct {
-	Status  string                `json:"status"`
-	Message string                `json:"message"`
-	Data    fwTokenizedChargeData `json:"data"`
-}
+	type fwTokenizedChargeResponse struct {
+		Status  string                `json:"status"`
+		Message string                `json:"message"`
+		Data    fwTokenizedChargeData `json:"data"`
+	}
 
 	var result fwTokenizedChargeResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {

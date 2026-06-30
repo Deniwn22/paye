@@ -15,8 +15,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	payeDb "github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/crypto"
+	payeDb "github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/features/auth"
 	"github.com/ttomsin/paye/internal/features/dashboard"
@@ -273,8 +273,8 @@ func TestWebhookConfigDuplicate(t *testing.T) {
 	w2 := httptest.NewRecorder()
 	r.ServeHTTP(w2, req2)
 
-	if w2.Code != http.StatusInternalServerError {
-		t.Fatalf("Expected duplicate create webhook config status 500, got %d. Body: %s", w2.Code, w2.Body.String())
+	if w2.Code != http.StatusBadRequest {
+		t.Fatalf("Expected duplicate create webhook config status 400, got %d. Body: %s", w2.Code, w2.Body.String())
 	}
 
 	var respBody map[string]any
@@ -601,4 +601,3 @@ func TestNombaWebhookProxyForwarding(t *testing.T) {
 		t.Errorf("Proxy signature header mismatch: got %s, want %s", lastReceivedSignature, expectedPayeSignature)
 	}
 }
-
