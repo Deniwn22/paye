@@ -6,14 +6,29 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - **Dual Environments:** Full support for `test` and `live` environments separated by API keys (`paye_test_...` vs `paye_live_...`).
-- **Webhook Environments:** Webhook configurations are now environment-aware. You can specify a separate Target URL for test webhooks and live webhooks, preventing accidental data mixing.
-- **Provider Parity:** Added support for Nomba and OPay as new payment providers.
-- **Virtual Accounts:** Introduced virtual account creation and webhook processing.
+- **Webhook Environments:** Webhook configurations are now environment-aware. You can specify a separate Target URL for test webhooks and live webhooks.
+- **Provider Parity:** Added support for Nomba and OPay alongside Paystack and Flutterwave.
+- **Virtual Accounts (VA):** Introduced API and webhook integrations for provisioning and processing Virtual Accounts.
+- **Misdirected Payments:** Safe handling and idempotent processing for webhooks regarding misdirected transfers.
+- **Structured Logging:** Switched logging engine to `slog` for structured JSON logs.
+- **Background Polling:** Added scheduled background jobs for polling transaction statuses on pending checkouts.
+- **Swagger Documentation Sandbox:** Overhauled docs UI to include an interactive Swagger Sandbox playground.
+- **JS SDK & Inline Checkout:** Introduced dropping a `<script>` tag for instant checkouts with dynamic layout scaling.
 
 ### Changed
-- **Automatic Provider Resolution:** The `provider` field is no longer required or accepted when initializing a transaction. Paye now automatically resolves the single active provider for the project based on the environment (test/live) making the API request.
-- **Single Active Provider Constraint:** Enforced a constraint that only one provider can be active per environment (test/live) at any given time. Toggling a new provider to "active" automatically deactivates the previously active one.
-- **Webhook Logs:** Dashboard logs now display the `environment` and `provider_name` for full transparency, making it easy to identify where a log originated.
+- **Unified Webhook Format:** Changed architecture to use unified routing for webhooks via Paye proxy slugs, validating signatures before forwarding.
+- **Provider Registry:** Switched from static configs to a dynamic registry of payment providers with database persistence and goose SQL migrations.
+- **Automatic Provider Resolution:** Removed `provider` requirement from transactions. Transactions now dynamically fetch the active provider based on environment mode.
+- **Active Provider Constraint:** Enforced single-active-provider constraint per environment. Toggling one provider deactivates the previously active one.
 
-### Removed
-- Removed the `provider` field from the `/api/v1/transactions/initialize` endpoint request payload.
+### Fixed
+- **Signature Verification:** Skipped legacy key verification for live mode on webhooks.
+- **Dashboard Alignment:** Fixed `test`/`live` mode isolation correctly mapping across the JS SDK and the merchant dashboard.
+
+---
+
+## [Initial Release]
+- **Core Architecture:** Paystack initial implementation, Database connection, Gin Web Server, AES-256-GCM crypto utility.
+- **Auth Layer:** JWT middleware, password hashing, API key generation.
+- **Transaction Layer:** Initialize, verify, and status tracking for payments.
+- **Dashboard Analytics:** Webhook delivery logs and payment volume tracking.
