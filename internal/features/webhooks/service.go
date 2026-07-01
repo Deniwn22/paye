@@ -106,11 +106,17 @@ func (s *WebhookService) UpdateWebhook(ctx context.Context, req *dto.WebhookConf
 
 	wc.ProviderName = req.ProviderName
 	wc.TargetURL = req.TargetURL
-	if req.PayeWebhookSlug != "" {
-		wc.PayeWebhookSlug = req.PayeWebhookSlug
-	}
+	env := wc.Environment
 	if req.Environment != "" {
+		env = req.Environment
 		wc.Environment = req.Environment
+	}
+	if req.PayeWebhookSlug != "" {
+		slug := req.PayeWebhookSlug
+		if !strings.HasPrefix(slug, env+"_") {
+			slug = env + "_" + slug
+		}
+		wc.PayeWebhookSlug = slug
 	}
 
 	if err := s.repo.Update(ctx, wc); err != nil {

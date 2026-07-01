@@ -49,8 +49,8 @@ func (h *WebhookHandler) CreateWebhookHandler(c *gin.Context) {
 
 	resp, err := h.service.CreateWebhook(c.Request.Context(), &req, projectID.(string))
 	if err != nil {
-		if strings.Contains(err.Error(), "already exists") {
-			c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+		if strings.Contains(err.Error(), "already exists") || strings.Contains(err.Error(), "uni_webhook_configs_paye_webhook_slug") || strings.Contains(err.Error(), "duplicate key value") {
+			c.JSON(http.StatusBadRequest, api.Error("A webhook configuration with this slug or provider environment already exists"))
 			return
 		}
 		slog.Error("internal server error", "error", err)
@@ -127,6 +127,10 @@ func (h *WebhookHandler) UpdateWebhookHandler(c *gin.Context) {
 
 	resp, err := h.service.UpdateWebhook(c.Request.Context(), &req, projectID.(string), id)
 	if err != nil {
+		if strings.Contains(err.Error(), "already exists") || strings.Contains(err.Error(), "uni_webhook_configs_paye_webhook_slug") || strings.Contains(err.Error(), "duplicate key value") {
+			c.JSON(http.StatusBadRequest, api.Error("A webhook configuration with this slug already exists"))
+			return
+		}
 		slog.Error("internal server error", "error", err)
 		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
