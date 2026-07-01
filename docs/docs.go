@@ -2664,7 +2664,7 @@ const docTemplate = `{
                     "description": "Required for Nomba",
                     "type": "string"
                 },
-                "opay_merchant_id": {
+                "opay_account_id": {
                     "description": "Required for Opay",
                     "type": "string"
                 }

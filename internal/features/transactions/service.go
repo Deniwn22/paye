@@ -104,7 +104,7 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 		providerClient = nClient
 	case "opay":
 		decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
-		merchantID := pc.Metadata.OpayMerchantID
+		merchantID := pc.Metadata.OpayAccountID
 		oClient := opay.New(decryptedPublic, decryptedSecret, merchantID, !isLive)
 		providerClient = oClient
 	default:
@@ -224,7 +224,7 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 		providerClient = nClient
 	case "opay":
 		decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
-		merchantID := pc.Metadata.OpayMerchantID
+		merchantID := pc.Metadata.OpayAccountID
 		oClient := opay.New(decryptedPublic, decryptedSecret, merchantID, !tx.IsLive)
 		providerClient = oClient
 	default:

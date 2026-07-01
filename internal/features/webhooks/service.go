@@ -157,7 +157,7 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 					providerClient = nomba.New(decryptedPublic, decryptedSecret, accountID, isLiveEnv)
 				case "opay":
 					decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
-					merchantID := pc.Metadata.OpayMerchantID
+					merchantID := pc.Metadata.OpayAccountID
 					providerClient = opay.New(decryptedPublic, decryptedSecret, merchantID, isLiveEnv)
 				}
 				if providerClient != nil {

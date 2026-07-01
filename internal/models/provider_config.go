@@ -4,7 +4,7 @@ import "github.com/google/uuid"
 
 type ProviderMetadata struct {
 	NombaAccountID string `json:"nomba_account_id,omitempty"` // Required for Nomba
-	OpayMerchantID string `json:"opay_merchant_id,omitempty"` // Required for Opay
+	OpayAccountID  string `json:"opay_account_id,omitempty"`  // Required for Opay
 	// Add other provider-specific fields here safely
 }
 
