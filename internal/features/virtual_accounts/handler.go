@@ -262,6 +262,65 @@ func (h *VAHandler) ExpireVirtualAccountHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, api.Success[any]("Virtual account expired successfully", nil))
 }
 
+// ListMisdirectedPaymentsHandler godoc
+// @Summary List misdirected payments
+// @Description Retrieve a list of misdirected payments (e.g. transfers to expired or non-existent virtual accounts)
+// @Tags Virtual Accounts
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /virtual-accounts/misdirected [get]
+func (h *VAHandler) ListMisdirectedPaymentsHandler(c *gin.Context) {
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		return
+	}
+
+	mps, err := h.service.ListMisdirectedPayments(c.Request.Context(), projectID.(string))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success("Misdirected payments retrieved successfully", mps))
+}
+
+// ResolveMisdirectedPaymentHandler godoc
+// @Summary Resolve a misdirected payment
+// @Description Mark a misdirected payment as resolved
+// @Tags Virtual Accounts
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Misdirected Payment ID"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /virtual-accounts/misdirected/{id}/resolve [patch]
+func (h *VAHandler) ResolveMisdirectedPaymentHandler(c *gin.Context) {
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		return
+	}
+
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, api.Error("id is required"))
+		return
+	}
+
+	if err := h.service.ResolveMisdirectedPayment(c.Request.Context(), projectID.(string), id); err != nil {
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success[any]("Misdirected payment resolved successfully", nil))
+}
+
 func RegisterRoutes(rg *gin.RouterGroup, h *VAHandler) {
 	va := rg.Group("/virtual-accounts")
 	{
@@ -272,5 +331,7 @@ func RegisterRoutes(rg *gin.RouterGroup, h *VAHandler) {
 		va.PATCH("/:pvc_id/suspend", h.SuspendVirtualAccountHandler)
 		va.DELETE("/:pvc_id", h.ExpireVirtualAccountHandler)
 		va.GET("/:pvc_id/transactions", h.ListTransactionsHandler)
+		va.GET("/misdirected", h.ListMisdirectedPaymentsHandler)
+		va.PATCH("/misdirected/:id/resolve", h.ResolveMisdirectedPaymentHandler)
 	}
 }

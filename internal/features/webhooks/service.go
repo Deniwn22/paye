@@ -1,6 +1,5 @@
 package webhooks
 
-
 import (
 	"bytes"
 	"context"
@@ -452,9 +451,53 @@ func (s *WebhookService) processVAWebhook(ctx context.Context, wc *models.Webhoo
 	// Look up VA by bank account number scoped to project
 	va, err := s.vaRepo.FindByBankAccountNumber(ctx, bankAccountNumber, wc.ProjectID.String())
 	if err != nil {
-		return fmt.Errorf("va webhook: virtual account not found for account number %s: %w", bankAccountNumber, err)
+		mp := &models.MisdirectedPayment{
+			ProjectID:         &wc.ProjectID,
+			BankAccountNumber: bankAccountNumber,
+			Amount:            nombaPayload.Data.Transaction.Amount,
+			Currency:          "NGN",
+			SenderName:        nombaPayload.Data.Customer.SenderName,
+			SenderAccount:     nombaPayload.Data.Customer.AccountNumber,
+			SenderBank:        nombaPayload.Data.Customer.BankName,
+			Reference:         nombaPayload.Data.Transaction.TransactionID,
+			Reason:            "va_not_found",
+			Status:            "unresolved",
+			Provider:          "nomba",
+			IsLive:            isLive,
+		}
+		s.vaRepo.CreateMisdirectedPayment(ctx, mp)
+		s.notifyMisdirected(ctx, wc, mp, payload, isLive)
+		return nil
 	}
 
+	// VA found but not active
+	if va.Status != "active" {
+		mp := &models.MisdirectedPayment{
+			ProjectID:         &wc.ProjectID,
+			BankAccountNumber: bankAccountNumber,
+			Amount:            nombaPayload.Data.Transaction.Amount,
+			Currency:          "NGN",
+			SenderName:        nombaPayload.Data.Customer.SenderName,
+			SenderAccount:     nombaPayload.Data.Customer.AccountNumber,
+			SenderBank:        nombaPayload.Data.Customer.BankName,
+			Reference:         nombaPayload.Data.Transaction.TransactionID,
+			Reason:            "va_" + va.Status,
+			Status:            "unresolved",
+			Provider:          "nomba",
+			IsLive:            isLive,
+		}
+		s.vaRepo.CreateMisdirectedPayment(ctx, mp)
+		s.notifyMisdirected(ctx, wc, mp, payload, isLive)
+		return nil
+	}
+
+	// Idempotency check we must not process same transaction twice
+	if _, err := s.vaRepo.FindTransactionByReference(ctx, nombaPayload.Data.Transaction.TransactionID); err == nil {
+		// already processed
+		return nil
+	}
+
+	// VA is active — process normally
 	vatx := &models.VirtualAccountTransaction{
 		VirtualAccountID: va.Base.ID,
 		ProjectID:        wc.ProjectID,
@@ -469,7 +512,7 @@ func (s *WebhookService) processVAWebhook(ctx context.Context, wc *models.Webhoo
 		Provider:         "nomba",
 		IsLive:           isLive,
 	}
-
+	
 	if _, err := s.vaRepo.CreateTransaction(ctx, vatx); err != nil {
 		return fmt.Errorf("va webhook: failed to persist transaction: %w", err)
 	}
@@ -502,7 +545,6 @@ func (s *WebhookService) processVAWebhook(ctx context.Context, wc *models.Webhoo
 		wl.ForwardedStatus = 200
 		wl.ErrorMessage = "Locally stored; no forwarding target URL configured"
 	}
-
 	_ = s.repo.CreateLog(ctx, wl)
 
 	if wc.TargetURL != "" {
@@ -514,6 +556,47 @@ func (s *WebhookService) processVAWebhook(ctx context.Context, wc *models.Webhoo
 		}
 		go s.forwardWebhook(wl, wc.TargetURL, apiKey, merchantPayload)
 	}
-
 	return nil
+}
+
+func (s *WebhookService) notifyMisdirected(ctx context.Context, wc *models.WebhookConfig, mp *models.MisdirectedPayment, payload []byte, isLive bool) {
+	wl := &models.WebhookLog{
+		ProjectID:       wc.ProjectID,
+		WebhookConfigID: &wc.Base.ID,
+		Event:           "virtual_account.misdirected",
+		Reference:       mp.Reference,
+		Amount:          mp.Amount,
+		Status:          "misdirected",
+		ForwardedStatus: 0,
+		Payload:         string(payload),
+		IsLive:          isLive,
+		ErrorMessage:    mp.Reason,
+	}
+
+	if wc.TargetURL == "" {
+		wl.ForwardedStatus = 200
+		wl.ErrorMessage = mp.Reason + "; locally stored"
+	}
+	_ = s.repo.CreateLog(ctx, wl)
+
+	if wc.TargetURL != "" {
+		merchantPayload, _ := json.Marshal(map[string]any{
+			"event":               "virtual_account.misdirected",
+			"bank_account_number": mp.BankAccountNumber,
+			"amount":              mp.Amount,
+			"currency":            mp.Currency,
+			"sender_name":         mp.SenderName,
+			"sender_account":      mp.SenderAccount,
+			"sender_bank":         mp.SenderBank,
+			"reference":           mp.Reference,
+			"reason":              mp.Reason,
+		})
+		apiKey := wc.Project.ApiKey
+		if !isLive {
+			if wc.Project.TestApiKey != "" {
+				apiKey = wc.Project.TestApiKey
+			}
+		}
+		go s.forwardWebhook(wl, wc.TargetURL, apiKey, merchantPayload)
+	}
 }

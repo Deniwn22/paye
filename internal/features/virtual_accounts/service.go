@@ -191,3 +191,19 @@ func (s *VAService) ExpireVirtualAccount(ctx context.Context, projectID string, 
 	va.Status = "expired"
 	return s.repo.UpdateVirtualAccount(ctx, va)
 }
+
+func (s *VAService) ListMisdirectedPayments(ctx context.Context, projectID string) ([]*models.MisdirectedPayment, error) {
+	return s.repo.ListMisdirectedPayments(ctx, projectID)
+}
+
+func (s *VAService) ResolveMisdirectedPayment(ctx context.Context, projectID string, id string) error {
+	mp, err := s.repo.FindMisdirectedByID(ctx, id, projectID)
+	if err != nil {
+		return fmt.Errorf("misdirected payment not found: %w", err)
+	}
+	if mp.Status == "resolved" {
+		return fmt.Errorf("payment already resolved")
+	}
+	mp.Status = "resolved"
+	return s.repo.UpdateMisdirectedPayment(ctx, mp)
+}

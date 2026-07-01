@@ -71,3 +71,33 @@ func (r *VARepository) FindByBankAccountNumber(ctx context.Context, bankAccountN
 	err := r.db.WithContext(ctx).Where("bank_account_number = ? AND project_id = ?", bankAccountNumber, projectID).First(&va).Error
 	return &va, err
 }
+
+func (r *VARepository) CreateMisdirectedPayment(ctx context.Context, mp *models.MisdirectedPayment) (*models.MisdirectedPayment, error) {
+	if err := r.db.WithContext(ctx).Create(mp).Error; err != nil {
+		return nil, err
+	}
+	return mp, nil
+}
+
+func (r *VARepository) ListMisdirectedPayments(ctx context.Context, projectID string) ([]*models.MisdirectedPayment, error) {
+	var mps []*models.MisdirectedPayment
+	isLive := middleware.GetIsLiveFromContext(ctx)
+	err := r.db.WithContext(ctx).Where("project_id = ? AND is_live = ?", projectID, isLive).Order("created_at DESC").Find(&mps).Error
+	return mps, err
+}
+
+func (r *VARepository) FindMisdirectedByID(ctx context.Context, id string, projectID string) (*models.MisdirectedPayment, error) {
+	var mp models.MisdirectedPayment
+	err := r.db.WithContext(ctx).Where("id = ? AND project_id = ?", id, projectID).First(&mp).Error
+	return &mp, err
+}
+
+func (r *VARepository) UpdateMisdirectedPayment(ctx context.Context, mp *models.MisdirectedPayment) error {
+	return r.db.WithContext(ctx).Save(mp).Error
+}
+
+func (r *VARepository) FindTransactionByReference(ctx context.Context, reference string) (*models.VirtualAccountTransaction, error) {
+	var tx models.VirtualAccountTransaction
+	err := r.db.WithContext(ctx).Where("reference = ?", reference).First(&tx).Error
+	return &tx, err
+}

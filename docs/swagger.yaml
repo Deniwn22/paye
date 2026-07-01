@@ -1,137 +1,148 @@
 basePath: /api/v1
 definitions:
-  api.SwaggerDashboardStatsResponse:
+  github_com_ttomsin_paye_internal_api.SwaggerDashboardStatsResponse:
     properties:
       data:
-        $ref: '#/definitions/dto.DashboardStatsResponse'
+        $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.DashboardStatsResponse'
       message:
         type: string
       status:
         type: boolean
     type: object
-  api.SwaggerPaymentProviderListResponse:
+  github_com_ttomsin_paye_internal_api.SwaggerPaymentProviderListResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/dto.PaymentProviderResponse'
+          $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.PaymentProviderResponse'
         type: array
       message:
         type: string
       status:
         type: boolean
     type: object
-  api.SwaggerProviderConfigListResponse:
+  github_com_ttomsin_paye_internal_api.SwaggerProviderConfigListResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/dto.ProviderConfigResponse'
+          $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.ProviderConfigResponse'
         type: array
       message:
         type: string
       status:
         type: boolean
     type: object
-  api.SwaggerProviderConfigResponse:
+  github_com_ttomsin_paye_internal_api.SwaggerProviderConfigResponse:
     properties:
       data:
-        $ref: '#/definitions/dto.ProviderConfigResponse'
+        $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.ProviderConfigResponse'
       message:
         type: string
       status:
         type: boolean
     type: object
-  api.SwaggerSimpleResponse:
+  github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse:
     properties:
       message:
         type: string
       status:
         type: boolean
     type: object
-  api.SwaggerTransactionInitializeResponse:
+  github_com_ttomsin_paye_internal_api.SwaggerTransactionInitializeResponse:
     properties:
       data:
-        $ref: '#/definitions/dto.InitializeTransactionResponse'
+        $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.InitializeTransactionResponse'
       message:
         type: string
       status:
         type: boolean
     type: object
-  api.SwaggerTransactionListResponse:
+  github_com_ttomsin_paye_internal_api.SwaggerTransactionListResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/dto.VerifyTransactionResponse'
+          $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.VerifyTransactionResponse'
         type: array
       message:
         type: string
       status:
         type: boolean
     type: object
-  api.SwaggerTransactionVerifyResponse:
+  github_com_ttomsin_paye_internal_api.SwaggerTransactionVerifyResponse:
     properties:
       data:
-        $ref: '#/definitions/dto.VerifyTransactionResponse'
+        $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.VerifyTransactionResponse'
       message:
         type: string
       status:
         type: boolean
     type: object
-  api.SwaggerWebhookConfigListResponse:
+  github_com_ttomsin_paye_internal_api.SwaggerWebhookConfigListResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/dto.WebhookConfigResponse'
+          $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.WebhookConfigResponse'
         type: array
       message:
         type: string
       status:
         type: boolean
     type: object
-  api.SwaggerWebhookConfigResponse:
+  github_com_ttomsin_paye_internal_api.SwaggerWebhookConfigResponse:
     properties:
       data:
-        $ref: '#/definitions/dto.WebhookConfigResponse'
+        $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.WebhookConfigResponse'
       message:
         type: string
       status:
         type: boolean
     type: object
-  api.SwaggerWebhookLogListResponse:
+  github_com_ttomsin_paye_internal_api.SwaggerWebhookLogListResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/dto.WebhookLogResponse'
+          $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.WebhookLogResponse'
         type: array
       message:
         type: string
       status:
         type: boolean
     type: object
-  dto.CreateVirtualAccountDTO:
+  github_com_ttomsin_paye_internal_dto.CreateVirtualAccountDTO:
     properties:
       account_name:
+        example: Thompson Oretan
         type: string
       bvn:
+        example: "22222222222"
         type: string
       currency:
+        enum:
+        - NGN
+        - USD
+        example: NGN
         type: string
       customer_reference:
+        example: cust_12345
         type: string
       expected_amount:
-        description: dynamic only
+        example: 15000
         type: number
       expiry_date:
-        description: dynamic only
+        example: "2026-12-31T23:59:59Z"
         type: string
       type:
-        description: '"static" | "dynamic", defaults to static'
+        default: static
+        enum:
+        - static
+        - dynamic
+        example: static
         type: string
     required:
     - account_name
     - currency
     - customer_reference
     type: object
-  dto.DashboardStatsResponse:
+  github_com_ttomsin_paye_internal_dto.DashboardStatsResponse:
     properties:
       active_providers_count:
         type: integer
@@ -146,19 +157,35 @@ definitions:
       total_volume:
         type: number
     type: object
-  dto.InitializeTransactionRequest:
+  github_com_ttomsin_paye_internal_dto.InitializeTransactionRequest:
     properties:
       amount:
+        example: 5000
         type: number
       callbackUrl:
+        example: https://your-app.com/webhook
         type: string
       currency:
+        enum:
+        - NGN
+        - USD
+        - GHS
+        - KES
+        example: NGN
         type: string
       email:
+        example: customer@example.com
         type: string
       provider:
+        enum:
+        - paystack
+        - flutterwave
+        - nomba
+        - opay
+        example: paystack
         type: string
       reference:
+        example: tx_ref_123456
         type: string
     required:
     - amount
@@ -166,28 +193,38 @@ definitions:
     - email
     - provider
     type: object
-  dto.InitializeTransactionResponse:
+  github_com_ttomsin_paye_internal_dto.InitializeTransactionResponse:
     properties:
       amount:
+        example: 5000
         type: number
       authorization_url:
+        example: https://checkout.paystack.com/...
         type: string
       currency:
+        example: NGN
         type: string
       message:
+        example: Transaction initialized
         type: string
       metadata:
         additionalProperties: true
         type: object
       provider:
+        example: paystack
         type: string
       reference:
+        example: tx_ref_123456
         type: string
       status:
-        description: pending, success, failed
+        enum:
+        - pending
+        - success
+        - failed
+        example: pending
         type: string
     type: object
-  dto.PaymentProviderResponse:
+  github_com_ttomsin_paye_internal_dto.PaymentProviderResponse:
     properties:
       description:
         type: string
@@ -204,15 +241,19 @@ definitions:
       test_credentials:
         type: string
     type: object
-  dto.ProviderConfigRequest:
+  github_com_ttomsin_paye_internal_dto.ProviderConfigRequest:
     properties:
       is_active:
+        example: true
         type: boolean
       label:
+        example: My Paystack Account
         type: string
       live_public_key:
+        example: pk_live_123
         type: string
       live_secret_key:
+        example: sk_live_123
         type: string
       live_webhook_secret:
         type: string
@@ -221,16 +262,23 @@ definitions:
           type: string
         type: object
       provider_name:
-        $ref: '#/definitions/dto.ProviderType'
+        allOf:
+        - $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.ProviderType'
+        enum:
+        - paystack
+        - flutterwave
+        - nomba
+        - opay
+        example: paystack
       public_key:
-        description: legacy
         type: string
       secret_key:
-        description: legacy
         type: string
       test_public_key:
+        example: pk_test_123
         type: string
       test_secret_key:
+        example: sk_test_123
         type: string
       test_webhook_secret:
         type: string
@@ -238,13 +286,16 @@ definitions:
     - label
     - provider_name
     type: object
-  dto.ProviderConfigResponse:
+  github_com_ttomsin_paye_internal_dto.ProviderConfigResponse:
     properties:
       id:
+        example: uuid
         type: string
       is_active:
+        example: true
         type: boolean
       label:
+        example: My Paystack Account
         type: string
       live_public_key:
         type: string
@@ -257,6 +308,12 @@ definitions:
           type: string
         type: object
       provider_name:
+        enum:
+        - paystack
+        - flutterwave
+        - nomba
+        - opay
+        example: paystack
         type: string
       public_key:
         description: legacy
@@ -271,13 +328,13 @@ definitions:
       test_webhook_secret:
         type: string
     type: object
-  dto.ProviderType:
+  github_com_ttomsin_paye_internal_dto.ProviderType:
     enum:
     - paystack
     type: string
     x-enum-varnames:
     - Paystack
-  dto.UpdatePaymentProviderRequest:
+  github_com_ttomsin_paye_internal_dto.UpdatePaymentProviderRequest:
     properties:
       description:
         type: string
@@ -288,28 +345,38 @@ definitions:
       test_credentials:
         type: string
     type: object
-  dto.UpdateVADTO:
+  github_com_ttomsin_paye_internal_dto.UpdateVADTO:
     properties:
       account_name:
+        example: Thompson Oretan Updated
         type: string
     type: object
-  dto.VerifyTransactionResponse:
+  github_com_ttomsin_paye_internal_dto.VerifyTransactionResponse:
     properties:
       amount:
+        example: 5000
         type: number
       currency:
+        example: NGN
         type: string
       message:
+        example: Transaction verified successfully
         type: string
       provider:
+        example: paystack
         type: string
       reference:
+        example: tx_ref_123456
         type: string
       status:
-        description: pending, success, failed
+        enum:
+        - pending
+        - success
+        - failed
+        example: success
         type: string
     type: object
-  dto.WebhookConfigRequest:
+  github_com_ttomsin_paye_internal_dto.WebhookConfigRequest:
     properties:
       paye_webhook_slug:
         type: string
@@ -319,12 +386,12 @@ definitions:
         type: string
       type:
         allOf:
-        - $ref: '#/definitions/models.WbhookType'
+        - $ref: '#/definitions/github_com_ttomsin_paye_internal_models.WbhookType'
         description: '"payment" | "va" | "all", defaults to "payment"'
     required:
     - provider_name
     type: object
-  dto.WebhookConfigResponse:
+  github_com_ttomsin_paye_internal_dto.WebhookConfigResponse:
     properties:
       id:
         type: string
@@ -335,9 +402,9 @@ definitions:
       target_url:
         type: string
       type:
-        $ref: '#/definitions/models.WbhookType'
+        $ref: '#/definitions/github_com_ttomsin_paye_internal_models.WbhookType'
     type: object
-  dto.WebhookLogResponse:
+  github_com_ttomsin_paye_internal_dto.WebhookLogResponse:
     properties:
       amount:
         type: number
@@ -360,7 +427,7 @@ definitions:
       webhook_config_id:
         type: string
     type: object
-  models.WbhookType:
+  github_com_ttomsin_paye_internal_models.WbhookType:
     enum:
     - va
     - payment
@@ -370,14 +437,14 @@ definitions:
     - VA
     - PAYMENT
     - ALL
-  projects.CreateProjectRequest:
+  internal_features_projects.CreateProjectRequest:
     properties:
       name:
         type: string
     required:
     - name
     type: object
-  sdk.CreateSDKSubscriptionRequest:
+  internal_features_sdk.CreateSDKSubscriptionRequest:
     properties:
       customerEmail:
         type: string
@@ -393,7 +460,7 @@ definitions:
     - publicId
     - reference
     type: object
-  sdk.InitializeSDKTransactionRequest:
+  internal_features_sdk.InitializeSDKTransactionRequest:
     properties:
       amount:
         type: number
@@ -423,9 +490,16 @@ info:
     Production Server: https://paye.africa
     Local Server: http://localhost:8080
 
+    ---
+    **Testing Guide:**
+    - **Safe to Test**: Endpoints under the Dashboard and Providers tags are safe to use for CRUD operations. Virtual accounts can be created with `type: static` safely.
+    - **Use Caution**: Live Transaction initializations will redirect to actual payment gateways and may deduct funds if real card details are entered. Ensure you are using Test API Keys (`X-Paye-API-Key: paye_test_...`) when exploring transaction flows.
+    - **Misdirected Payments**: These are auto-generated when webhooks fail to find a matching VA. You can list them and mark them as resolved safely.
+    ---
+
     Authentication Modes:
     1. Bearer JWT Token: Passed as "Authorization: Bearer <token>". Scoped to Dashboard CRUD resources (projects, provider credentials, webhook routes, logs).
-    2. API Key Header: Passed as "X-Paye-API-Key: paye_live_...". Scoped to server-to-server transaction initializations, refunds, and payouts.
+    2. API Key Header: Passed as "X-Paye-API-Key: paye_live_..." or "paye_test_...". Scoped to server-to-server transaction initializations, refunds, and payouts.
   title: Paye API
   version: "1.0"
 paths:
@@ -447,15 +521,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerWebhookLogListResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerWebhookLogListResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - BearerAuth: []
       summary: List dashboard proxy webhook logs
@@ -471,15 +545,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerDashboardStatsResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerDashboardStatsResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - BearerAuth: []
       summary: Get dashboard statistics
@@ -494,15 +568,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: List notifications
@@ -523,19 +597,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: Delete a notification
@@ -556,19 +630,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: Mark notification as read
@@ -583,15 +657,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: Mark all notifications as read
@@ -610,7 +684,7 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: Stream notifications (SSE)
@@ -625,11 +699,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerPaymentProviderListResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerPaymentProviderListResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       summary: List supported payment providers
       tags:
       - Providers
@@ -650,30 +724,30 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dto.UpdatePaymentProviderRequest'
+          $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.UpdatePaymentProviderRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "455":
           description: ""
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - BearerAuth: []
       summary: Update payment provider details
@@ -694,23 +768,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - BearerAuth: []
       summary: Toggle payment provider support status
@@ -725,15 +799,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: List user projects
@@ -749,26 +823,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/projects.CreateProjectRequest'
+          $ref: '#/definitions/internal_features_projects.CreateProjectRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: Create a new project
@@ -789,19 +863,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: Delete a project
@@ -821,23 +895,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: Get project details
@@ -852,15 +926,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerProviderConfigListResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerProviderConfigListResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - BearerAuth: []
       summary: List provider configurations
@@ -876,26 +950,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dto.ProviderConfigRequest'
+          $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.ProviderConfigRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerProviderConfigResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerProviderConfigResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - BearerAuth: []
       summary: Register provider configuration
@@ -916,19 +990,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - BearerAuth: []
       summary: Delete provider configuration
@@ -949,30 +1023,30 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dto.ProviderConfigRequest'
+          $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.ProviderConfigRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerProviderConfigResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerProviderConfigResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - BearerAuth: []
       summary: Update provider configuration
@@ -993,19 +1067,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - BearerAuth: []
       summary: Toggle provider active status
@@ -1051,26 +1125,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/sdk.CreateSDKSubscriptionRequest'
+          $ref: '#/definitions/internal_features_sdk.CreateSDKSubscriptionRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       summary: Create public subscription
       tags:
       - SDK
@@ -1086,26 +1160,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/sdk.InitializeSDKTransactionRequest'
+          $ref: '#/definitions/internal_features_sdk.InitializeSDKTransactionRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       summary: Initialize public transaction
       tags:
       - SDK
@@ -1124,15 +1198,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerTransactionListResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerTransactionListResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       summary: List payment transactions
       tags:
       - transactions
@@ -1153,26 +1227,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dto.InitializeTransactionRequest'
+          $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.InitializeTransactionRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerTransactionInitializeResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerTransactionInitializeResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       summary: Initialize payment transaction
       tags:
       - transactions
@@ -1196,19 +1270,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerTransactionVerifyResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerTransactionVerifyResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       summary: Verify transaction status
       tags:
       - transactions
@@ -1221,15 +1295,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: List virtual accounts
@@ -1245,26 +1319,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dto.CreateVirtualAccountDTO'
+          $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.CreateVirtualAccountDTO'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: Create a virtual account
@@ -1287,19 +1361,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: Expire a virtual account
@@ -1319,19 +1393,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: Get a virtual account
@@ -1352,26 +1426,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dto.UpdateVADTO'
+          $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.UpdateVADTO'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: Update a virtual account
@@ -1392,19 +1466,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: Suspend a virtual account
@@ -1425,22 +1499,79 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - ApiKeyAuth: []
       summary: List transactions for a virtual account
+      tags:
+      - Virtual Accounts
+  /virtual-accounts/misdirected:
+    get:
+      description: Retrieve a list of misdirected payments (e.g. transfers to expired
+        or non-existent virtual accounts)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: List misdirected payments
+      tags:
+      - Virtual Accounts
+  /virtual-accounts/misdirected/{id}/resolve:
+    patch:
+      description: Mark a misdirected payment as resolved
+      parameters:
+      - description: Misdirected Payment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Resolve a misdirected payment
       tags:
       - Virtual Accounts
   /webhooks/configs:
@@ -1452,15 +1583,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerWebhookConfigListResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerWebhookConfigListResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - BearerAuth: []
       summary: List webhook configurations
@@ -1476,26 +1607,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dto.WebhookConfigRequest'
+          $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.WebhookConfigRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerWebhookConfigResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerWebhookConfigResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - BearerAuth: []
       summary: Create webhook configuration
@@ -1516,19 +1647,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - BearerAuth: []
       summary: Delete webhook configuration
@@ -1549,30 +1680,30 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dto.WebhookConfigRequest'
+          $ref: '#/definitions/github_com_ttomsin_paye_internal_dto.WebhookConfigRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerWebhookConfigResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerWebhookConfigResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - BearerAuth: []
       summary: Update webhook configuration
@@ -1597,15 +1728,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       security:
       - BearerAuth: []
       summary: List webhook logs
@@ -1641,11 +1772,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse'
       summary: Receive payment provider webhook
       tags:
       - Webhooks Public

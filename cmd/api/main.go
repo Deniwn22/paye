@@ -38,9 +38,16 @@ import (
 // @description Production Server: https://paye.africa
 // @description Local Server: http://localhost:8080
 // @description
+// @description ---
+// @description **Testing Guide:**
+// @description - **Safe to Test**: Endpoints under the Dashboard and Providers tags are safe to use for CRUD operations. Virtual accounts can be created with `type: static` safely.
+// @description - **Use Caution**: Live Transaction initializations will redirect to actual payment gateways and may deduct funds if real card details are entered. Ensure you are using Test API Keys (`X-Paye-API-Key: paye_test_...`) when exploring transaction flows.
+// @description - **Misdirected Payments**: These are auto-generated when webhooks fail to find a matching VA. You can list them and mark them as resolved safely.
+// @description ---
+// @description
 // @description Authentication Modes:
 // @description 1. Bearer JWT Token: Passed as "Authorization: Bearer <token>". Scoped to Dashboard CRUD resources (projects, provider credentials, webhook routes, logs).
-// @description 2. API Key Header: Passed as "X-Paye-API-Key: paye_live_...". Scoped to server-to-server transaction initializations, refunds, and payouts.
+// @description 2. API Key Header: Passed as "X-Paye-API-Key: paye_live_..." or "paye_test_...". Scoped to server-to-server transaction initializations, refunds, and payouts.
 // @host localhost:8080
 // @BasePath /api/v1
 
