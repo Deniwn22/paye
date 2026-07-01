@@ -60,7 +60,7 @@ func (s *VAService) getVAProvider(ctx context.Context, projectID string) (provid
 	subAccountID := pc.Metadata.NombaSubAccountID
 
 	webhookSecret, _ := crypto.Decrypt(pc.WebhookSecret, s.encryptionKey)
-	client := nomba.New(clientID, clientSecret, webhookSecret, accountID, isLive)
+	client := nomba.New(clientID, clientSecret, webhookSecret, accountID, subAccountID, isLive)
 	return client, "nomba", subAccountID, nil
 }
 

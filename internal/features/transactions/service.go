@@ -98,7 +98,8 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 		decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
 		decryptedWebhookSecret, _ := crypto.Decrypt(pc.WebhookSecret, s.encryptionKey)
 		accountID := pc.Metadata.NombaAccountID
-		nClient := nomba.New(decryptedPublic, decryptedSecret, decryptedWebhookSecret, accountID, isLive)
+		subAccountID := pc.Metadata.NombaSubAccountID
+		nClient := nomba.New(decryptedPublic, decryptedSecret, decryptedWebhookSecret, accountID, subAccountID, isLive)
 		if s.paystackBaseURL != "" {
 			nClient.SetBaseURL(s.paystackBaseURL)
 		}
@@ -219,7 +220,8 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 		decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
 		decryptedWebhookSecret, _ := crypto.Decrypt(pc.WebhookSecret, s.encryptionKey)
 		accountID := pc.Metadata.NombaAccountID
-		nClient := nomba.New(decryptedPublic, decryptedSecret, decryptedWebhookSecret, accountID, tx.IsLive)
+		subAccountID := pc.Metadata.NombaSubAccountID
+		nClient := nomba.New(decryptedPublic, decryptedSecret, decryptedWebhookSecret, accountID, subAccountID, tx.IsLive)
 		if s.paystackBaseURL != "" {
 			nClient.SetBaseURL(s.paystackBaseURL)
 		}

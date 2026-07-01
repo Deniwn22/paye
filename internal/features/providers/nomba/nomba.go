@@ -19,13 +19,15 @@ type Nomba struct {
 	tokenManager  *TokenManager
 	BaseURL       string
 	webhookSecret string
+	subAccountID  string
 	isLive        bool
 }
 
-func New(clientID, clientSecret, webhookSecret, accountID string, isLive bool) *Nomba {
+func New(clientID, clientSecret, webhookSecret, accountID, subAccountID string, isLive bool) *Nomba {
 	return &Nomba{
 		tokenManager:  NewTokenManager(clientID, clientSecret, accountID, isLive),
 		webhookSecret: webhookSecret,
+		subAccountID:  subAccountID,
 		isLive:        isLive,
 	}
 }
@@ -110,6 +112,11 @@ func (n *Nomba) InitializeTransaction(req providers.TransactionRequest) (*provid
 		callbackURL = "https://paye.africa/webhooks/nomba/callback"
 	}
 
+	checkoutAccountID := n.tokenManager.accountID
+	if n.subAccountID != "" {
+		checkoutAccountID = n.subAccountID
+	}
+
 	checkoutReq := nombaCheckoutRequest{
 		Order: nombaOrder{
 			CallbackURL:           callbackURL,
@@ -117,7 +124,7 @@ func (n *Nomba) InitializeTransaction(req providers.TransactionRequest) (*provid
 			Amount:                fmt.Sprintf("%.2f", req.Amount),
 			Currency:              req.Currency,
 			OrderReference:        req.Reference,
-			AccountID:             n.tokenManager.accountID,
+			AccountID:             checkoutAccountID,
 			AllowedPaymentMethods: []string{"Card", "Transfer"},
 		},
 		TokenizeCard: "true",
