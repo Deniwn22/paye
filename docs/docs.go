@@ -2262,10 +2262,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2026-12-31T23:59:59Z"
                 },
-                "sub_account_id": {
-                    "type": "string",
-                    "example": "sub_12345"
-                },
                 "type": {
                     "type": "string",
                     "default": "static",
@@ -2662,6 +2658,10 @@ const docTemplate = `{
             "properties": {
                 "nomba_account_id": {
                     "description": "Required for Nomba",
+                    "type": "string"
+                },
+                "nomba_subaccount_id": {
+                    "description": "Optional for Nomba",
                     "type": "string"
                 },
                 "opay_account_id": {

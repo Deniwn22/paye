@@ -3,8 +3,9 @@ package models
 import "github.com/google/uuid"
 
 type ProviderMetadata struct {
-	NombaAccountID string `json:"nomba_account_id,omitempty"` // Required for Nomba
-	OpayAccountID  string `json:"opay_account_id,omitempty"`  // Required for Opay
+	NombaAccountID    string `json:"nomba_account_id,omitempty"`    // Required for Nomba
+	NombaSubAccountID string `json:"nomba_subaccount_id,omitempty"` // Optional for Nomba
+	OpayAccountID     string `json:"opay_account_id,omitempty"`     // Required for Opay
 	// Add other provider-specific fields here safely
 }
 

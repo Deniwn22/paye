@@ -8,7 +8,6 @@ type CreateVirtualAccountDTO struct {
 	Type              string  `json:"type" example:"static" enums:"static,dynamic" default:"static" description:"Optional. Type of virtual account. Static accounts do not expire and can accept multiple payments. Dynamic accounts expire after a set time or payment."`
 	ExpectedAmount    float64 `json:"expected_amount,omitempty" example:"15000.00" description:"Optional (Required for Dynamic). The exact amount expected for this account"`
 	ExpiryDate        string  `json:"expiry_date,omitempty" example:"2026-12-31T23:59:59Z" description:"Optional (Required for Dynamic). ISO-8601 date string when the account expires"`
-	SubAccountID      string  `json:"sub_account_id,omitempty" example:"sub_12345" description:"Optional. A subaccount ID to route payments directly to a specific pocket of money."`
 }
 
 type UpdateVADTO struct {

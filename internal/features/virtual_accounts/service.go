@@ -27,7 +27,7 @@ func NewVAService(repo *VARepository, providerRepo *providers.ProviderRepo, encr
 	}
 }
 
-func (s *VAService) getVAProvider(ctx context.Context, projectID string) (providers.VirtualAccountProvider, string, error) {
+func (s *VAService) getVAProvider(ctx context.Context, projectID string) (providers.VirtualAccountProvider, string, string, error) {
 	isLive := middleware.GetIsLiveFromContext(ctx)
 	env := "test"
 	if isLive {
@@ -37,7 +37,7 @@ func (s *VAService) getVAProvider(ctx context.Context, projectID string) (provid
 	// try nomba for now — extend this when other providers support VAs
 	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, "nomba", env)
 	if err != nil {
-		return nil, "", fmt.Errorf("no active VA provider found for project: %w", err)
+		return nil, "", "", fmt.Errorf("no active VA provider found for project: %w", err)
 	}
 
 	encSecret := pc.SecretKey
@@ -45,20 +45,19 @@ func (s *VAService) getVAProvider(ctx context.Context, projectID string) (provid
 
 	clientSecret, err := crypto.Decrypt(encSecret, s.encryptionKey)
 	if err != nil {
-		return nil, "", fmt.Errorf("failed to decrypt client secret: %w", err)
+		return nil, "", "", fmt.Errorf("failed to decrypt client secret: %w", err)
 	}
 
 	clientID, err := crypto.Decrypt(encClientID, s.encryptionKey)
 	if err != nil {
-		return nil, "", fmt.Errorf("failed to decrypt client id: %w", err)
+		return nil, "", "", fmt.Errorf("failed to decrypt client id: %w", err)
 	}
 
 	accountID := pc.Metadata.NombaAccountID
-	subAccountID := "" // Add to ProviderMetadata if needed later
-	_ = subAccountID   // available if needed later
+	subAccountID := pc.Metadata.NombaSubAccountID
 
 	client := nomba.New(clientID, clientSecret, accountID, isLive)
-	return client, "nomba", nil
+	return client, "nomba", subAccountID, nil
 }
 
 func (s *VAService) CreateVirtualAccount(ctx context.Context, projectID string, dto dto.CreateVirtualAccountDTO) (*models.VirtualAccount, error) {
@@ -68,7 +67,7 @@ func (s *VAService) CreateVirtualAccount(ctx context.Context, projectID string, 
 		return nil, fmt.Errorf("virtual account already exists for customer reference: %s", dto.CustomerReference)
 	}
 
-	provider, providerName, err := s.getVAProvider(ctx, projectID)
+	provider, providerName, subAccountID, err := s.getVAProvider(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +85,7 @@ func (s *VAService) CreateVirtualAccount(ctx context.Context, projectID string, 
 		AccountName:    dto.AccountName,
 		Currency:       dto.Currency,
 		BVN:            dto.BVN,
-		SubAccountID:   dto.SubAccountID,
+		SubAccountID:   subAccountID,
 		ExpectedAmount: dto.ExpectedAmount,
 		ExpiryDate:     dto.ExpiryDate,
 	}
@@ -139,7 +138,7 @@ func (s *VAService) SuspendVirtualAccount(ctx context.Context, projectID string,
 		return fmt.Errorf("virtual account not found: %w", err)
 	}
 
-	provider, _, err := s.getVAProvider(ctx, projectID)
+	provider, _, _, err := s.getVAProvider(ctx, projectID)
 	if err != nil {
 		return err
 	}
@@ -162,7 +161,7 @@ func (s *VAService) UpdateVirtualAccount(ctx context.Context, projectID string, 
 		return fmt.Errorf("virtual account not found: %w", err)
 	}
 
-	provider, _, err := s.getVAProvider(ctx, projectID)
+	provider, _, _, err := s.getVAProvider(ctx, projectID)
 	if err != nil {
 		return err
 	}
@@ -186,7 +185,7 @@ func (s *VAService) ExpireVirtualAccount(ctx context.Context, projectID string, 
 		return fmt.Errorf("virtual account not found: %w", err)
 	}
 
-	provider, _, err := s.getVAProvider(ctx, projectID)
+	provider, _, _, err := s.getVAProvider(ctx, projectID)
 	if err != nil {
 		return err
 	}

@@ -130,9 +130,6 @@ definitions:
       expiry_date:
         example: "2026-12-31T23:59:59Z"
         type: string
-      sub_account_id:
-        example: sub_12345
-        type: string
       type:
         default: static
         enum:
@@ -413,6 +410,9 @@ definitions:
     properties:
       nomba_account_id:
         description: Required for Nomba
+        type: string
+      nomba_subaccount_id:
+        description: Optional for Nomba
         type: string
       opay_account_id:
         description: Required for Opay
