@@ -44,8 +44,7 @@ func (t *TokenManager) getBaseURL() string {
 		if envLive := os.Getenv("NOMBA_LIVE_BASE_URL"); envLive != "" {
 			return envLive
 		}
-		// Default to sandbox for now per user request
-		return "https://sandbox.nomba.com/v1"
+		return "https://api.nomba.com/v1"
 	}
 	if envSandbox := os.Getenv("NOMBA_SANDBOX_BASE_URL"); envSandbox != "" {
 		return envSandbox
