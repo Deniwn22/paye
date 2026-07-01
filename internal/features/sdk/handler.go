@@ -192,6 +192,15 @@ func (h *SDKHandler) InitializeSDKTransaction(c *gin.Context) {
 
 	resp, err := h.transactionService.InitializeTransaction(c.Request.Context(), project.Base.ID.String(), initReq)
 	if err != nil {
+		if strings.Contains(err.Error(), "active provider config not found") {
+			envStr := "test"
+			if isLive {
+				envStr = "live"
+			}
+			msg := fmt.Sprintf("No active payment provider is configured for the %s environment. Please configure a %s provider in your Paye dashboard.", envStr, envStr)
+			c.JSON(http.StatusBadRequest, api.Error(msg))
+			return
+		}
 		slog.Error("internal server error", "error", err)
 		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
