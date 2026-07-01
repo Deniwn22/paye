@@ -34,13 +34,17 @@ func (s *PaystackService) SetPaystackBaseURL(url string) {
 }
 
 func (s *PaystackService) getPaystackClient(ctx context.Context, projectID string) (*paystack.Paystack, error) {
-	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, "paystack")
+	isLive := middleware.GetIsLiveFromContext(ctx)
+	env := "test"
+	if isLive {
+		env = "live"
+	}
+	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, "paystack", env)
 	if err != nil {
 		return nil, fmt.Errorf("active paystack provider config not found: %w", err)
 	}
 
-	isLive := middleware.GetIsLiveFromContext(ctx)
-	encSecret, _ := pc.GetKeysForMode(isLive)
+	encSecret := pc.SecretKey
 
 	decryptedSecret, err := crypto.Decrypt(encSecret, s.encryptionKey)
 	if err != nil {

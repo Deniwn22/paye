@@ -28,14 +28,20 @@ func NewVAService(repo *VARepository, providerRepo *providers.ProviderRepo, encr
 }
 
 func (s *VAService) getVAProvider(ctx context.Context, projectID string) (providers.VirtualAccountProvider, string, error) {
+	isLive := middleware.GetIsLiveFromContext(ctx)
+	env := "test"
+	if isLive {
+		env = "live"
+	}
+
 	// try nomba for now — extend this when other providers support VAs
-	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, "nomba")
+	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, "nomba", env)
 	if err != nil {
 		return nil, "", fmt.Errorf("no active VA provider found for project: %w", err)
 	}
 
-	isLive := middleware.GetIsLiveFromContext(ctx)
-	encSecret, encClientID := pc.GetKeysForMode(isLive)
+	encSecret := pc.SecretKey
+	encClientID := pc.PublicKey
 
 	clientSecret, err := crypto.Decrypt(encSecret, s.encryptionKey)
 	if err != nil {
@@ -47,9 +53,9 @@ func (s *VAService) getVAProvider(ctx context.Context, projectID string) (provid
 		return nil, "", fmt.Errorf("failed to decrypt client id: %w", err)
 	}
 
-	accountID := pc.Metadata["account_id"]
-	subAccountID := pc.Metadata["sub_account_id"]
-	_ = subAccountID // available if needed later
+	accountID := pc.Metadata.NombaAccountID
+	subAccountID := "" // Add to ProviderMetadata if needed later
+	_ = subAccountID   // available if needed later
 
 	client := nomba.New(clientID, clientSecret, accountID, isLive)
 	return client, "nomba", nil

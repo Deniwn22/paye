@@ -34,13 +34,18 @@ func (s *FlutterwaveService) SetFlutterwaveBaseURL(url string) {
 }
 
 func (s *FlutterwaveService) getFlutterwaveClient(ctx context.Context, projectID string) (*flutterwave.Flutterwave, error) {
-	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, "flutterwave")
-	if err != nil {
-		return nil, fmt.Errorf("active flutterwave provider config not found: %w", err)
+	isLive := middleware.GetIsLiveFromContext(ctx)
+	env := "test"
+	if isLive {
+		env = "live"
 	}
 
-	isLive := middleware.GetIsLiveFromContext(ctx)
-	encSecret, _ := pc.GetKeysForMode(isLive)
+	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, "flutterwave", env)
+	if err != nil {
+		return nil, fmt.Errorf("flutterwave provider configuration not found or inactive")
+	}
+
+	encSecret := pc.SecretKey
 
 	decryptedSecret, err := crypto.Decrypt(encSecret, s.encryptionKey)
 	if err != nil {

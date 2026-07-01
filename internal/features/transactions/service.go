@@ -60,13 +60,18 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 		reference = "paye_ref_" + uuid.New().String()
 	}
 
-	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, req.Provider)
+	isLive := middleware.GetIsLiveFromContext(ctx)
+	env := "test"
+	if isLive {
+		env = "live"
+	}
+
+	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, req.Provider, env)
 	if err != nil {
 		return nil, fmt.Errorf("active provider config not found: %w", err)
 	}
 
-	isLive := middleware.GetIsLiveFromContext(ctx)
-	encSecret, _ := pc.GetKeysForMode(isLive)
+	encSecret := pc.SecretKey
 
 	decryptedSecret, err := crypto.Decrypt(encSecret, s.encryptionKey)
 	if err != nil {
@@ -90,22 +95,16 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 		}
 		providerClient = fClient
 	case "nomba":
-		decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
-		if !isLive {
-			decryptedPublic, _ = crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
-		}
-		accountID := pc.Metadata["account_id"]
+		decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
+		accountID := pc.Metadata.NombaAccountID
 		nClient := nomba.New(decryptedPublic, decryptedSecret, accountID, isLive)
 		if s.paystackBaseURL != "" {
 			nClient.SetBaseURL(s.paystackBaseURL)
 		}
 		providerClient = nClient
 	case "opay":
-		decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
-		if !isLive {
-			decryptedPublic, _ = crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
-		}
-		merchantID := pc.Metadata["merchant_id"]
+		decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
+		merchantID := pc.Metadata.OpayMerchantID
 		oClient := opay.New(decryptedPublic, decryptedSecret, merchantID, !isLive)
 		providerClient = oClient
 	default:
@@ -182,12 +181,17 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 		return nil, fmt.Errorf("transaction not found: %w", err)
 	}
 
-	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, tx.Provider)
+	env := "test"
+	if tx.IsLive {
+		env = "live"
+	}
+
+	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, tx.Provider, env)
 	if err != nil {
 		return nil, fmt.Errorf("active provider config not found: %w", err)
 	}
 
-	encSecret, _ := pc.GetKeysForMode(tx.IsLive)
+	encSecret := pc.SecretKey
 
 	decryptedSecret, err := crypto.Decrypt(encSecret, s.encryptionKey)
 	if err != nil {
@@ -211,22 +215,16 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 		}
 		providerClient = fClient
 	case "nomba":
-		decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
-		if !tx.IsLive {
-			decryptedPublic, _ = crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
-		}
-		accountID := pc.Metadata["account_id"]
+		decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
+		accountID := pc.Metadata.NombaAccountID
 		nClient := nomba.New(decryptedPublic, decryptedSecret, accountID, tx.IsLive)
 		if s.paystackBaseURL != "" {
 			nClient.SetBaseURL(s.paystackBaseURL)
 		}
 		providerClient = nClient
 	case "opay":
-		decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
-		if !tx.IsLive {
-			decryptedPublic, _ = crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
-		}
-		merchantID := pc.Metadata["merchant_id"]
+		decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
+		merchantID := pc.Metadata.OpayMerchantID
 		oClient := opay.New(decryptedPublic, decryptedSecret, merchantID, !tx.IsLive)
 		providerClient = oClient
 	default:

@@ -258,7 +258,7 @@ func TestOPayTransactionWebhookInjection(t *testing.T) {
 		PublicKey:    encPublicKey,
 		IsActive:     true,
 		ProjectID:    testProject.Base.ID,
-		Metadata:     map[string]string{"merchant_id": "12345"},
+		Metadata:     models.ProviderMetadata{OpayMerchantID: "12345"},
 	}
 	db.Create(provConfig)
 

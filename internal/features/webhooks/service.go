@@ -126,84 +126,51 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 		return fmt.Errorf("webhook config not found for slug %s: %w", slug, err)
 	}
 
-	// Fetch active provider config scoped to project
-	pc, err := s.providerRepo.FindActiveProvider(ctx, wc.ProjectID.String(), wc.ProviderName)
-	if err != nil {
+	// Fetch active provider configs scoped to project
+	pcs, err := s.providerRepo.FindAllActiveProvidersByName(ctx, wc.ProjectID.String(), wc.ProviderName)
+	if err != nil || len(pcs) == 0 {
 		return fmt.Errorf("active provider config not found for provider %s: %w", wc.ProviderName, err)
 	}
 
-	// Try verifying with Live keys first, then Test keys
 	var webhookEvent *providers.WebhookEvent
 	var isLive bool
 	var verifyErr error
 
-	// Try Live key — only if explicitly configured, no legacy fallback
-	liveSecret := pc.LiveWebhookSecret
-	if liveSecret == "" {
-		liveSecret = pc.LiveSecretKey
-	}
-	if liveSecret != "" {
-		decryptedSecret, err := crypto.Decrypt(liveSecret, s.encryptionKey)
-		if err == nil {
-			var providerClient providers.Provider
-			switch wc.ProviderName {
-			case "paystack":
-				providerClient = paystack.New(decryptedSecret)
-			case "flutterwave":
-				providerClient = flutterwave.New(decryptedSecret)
-			case "nomba":
-				decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
-				accountID := pc.Metadata["account_id"]
-				providerClient = nomba.New(decryptedPublic, decryptedSecret, accountID, true)
-			case "opay":
-				decryptedPublic, _ := crypto.Decrypt(pc.LivePublicKey, s.encryptionKey)
-				merchantID := pc.Metadata["merchant_id"]
-				providerClient = opay.New(decryptedPublic, decryptedSecret, merchantID, false)
-			}
-			if providerClient != nil {
-				webhookEvent, verifyErr = providerClient.HandleWebhook(signature, payload)
-				if verifyErr == nil {
-					isLive = true
-				}
-			}
-
+	for _, pc := range pcs {
+		secret := pc.WebhookSecret
+		if secret == "" {
+			secret = pc.SecretKey
 		}
-	}
-
-	// Try Test key — with legacy fallback
-	if webhookEvent == nil {
-		testSecret := pc.TestWebhookSecret
-		if testSecret == "" {
-			testSecret = pc.TestSecretKey
-			if testSecret == "" {
-				testSecret = pc.SecretKey // legacy fallback
-			}
-		}
-		if testSecret != "" {
-			decryptedSecret, err := crypto.Decrypt(testSecret, s.encryptionKey)
+		if secret != "" {
+			decryptedSecret, err := crypto.Decrypt(secret, s.encryptionKey)
 			if err == nil {
 				var providerClient providers.Provider
+				isLiveEnv := pc.Environment == "live"
 				switch wc.ProviderName {
 				case "paystack":
 					providerClient = paystack.New(decryptedSecret)
 				case "flutterwave":
 					providerClient = flutterwave.New(decryptedSecret)
 				case "nomba":
-					decryptedPublic, _ := crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
-					accountID := pc.Metadata["account_id"]
-					providerClient = nomba.New(decryptedPublic, decryptedSecret, accountID, false)
+					decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
+					accountID := pc.Metadata.NombaAccountID
+					providerClient = nomba.New(decryptedPublic, decryptedSecret, accountID, isLiveEnv)
 				case "opay":
-					decryptedPublic, _ := crypto.Decrypt(pc.TestPublicKey, s.encryptionKey)
-					merchantID := pc.Metadata["merchant_id"]
-					providerClient = opay.New(decryptedPublic, decryptedSecret, merchantID, true)
+					decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
+					merchantID := pc.Metadata.OpayMerchantID
+					providerClient = opay.New(decryptedPublic, decryptedSecret, merchantID, isLiveEnv)
 				}
 				if providerClient != nil {
-					webhookEvent, verifyErr = providerClient.HandleWebhook(signature, payload)
-					if verifyErr == nil {
-						isLive = false
+					we, verr := providerClient.HandleWebhook(signature, payload)
+					if verr == nil {
+						webhookEvent = we
+						isLive = isLiveEnv
+						verifyErr = nil
+						break // successful verification!
+					} else {
+						verifyErr = verr // save last error
 					}
 				}
-
 			}
 		}
 	}

@@ -123,13 +123,18 @@ func (s *SubscriptionService) chargeSubscription(ctx context.Context, sub *model
 		return err
 	}
 
-	pc, err := s.providerRepo.FindActiveProvider(ctx, sub.ProjectID.String(), sub.Provider)
+	isLive := sub.IsLive || middleware.GetIsLiveFromContext(ctx)
+	env := "test"
+	if isLive {
+		env = "live"
+	}
+
+	pc, err := s.providerRepo.FindActiveProvider(ctx, sub.ProjectID.String(), sub.Provider, env)
 	if err != nil {
 		return fmt.Errorf("active provider config not found: %w", err)
 	}
 
-	isLive := sub.IsLive || middleware.GetIsLiveFromContext(ctx)
-	encSecret, _ := pc.GetKeysForMode(isLive)
+	encSecret := pc.SecretKey
 
 	decryptedSecret, err := crypto.Decrypt(encSecret, s.encryptionKey)
 	if err != nil {

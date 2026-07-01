@@ -76,6 +76,17 @@ func main() {
 	if err != nil {
 		slog.Info("Note: .env file not found, using environment variables")
 	}
+
+	if os.Getenv("GIN_MODE") == "release" {
+		docs.SwaggerInfo.Host = "paye.africa"
+		docs.SwaggerInfo.Schemes = []string{"https"}
+	} else {
+		docs.SwaggerInfo.Host = "localhost:8080"
+		docs.SwaggerInfo.Schemes = []string{"http"}
+	}
+	if host := os.Getenv("SWAGGER_HOST"); host != "" {
+		docs.SwaggerInfo.Host = host
+	}
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if jwtSecret == "" {
 		slog.Error("JWT_SECRET is not set")

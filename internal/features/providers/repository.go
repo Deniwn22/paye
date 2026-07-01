@@ -67,11 +67,18 @@ func (p *ProviderRepo) FindProviderById(ctx context.Context, id string, projectI
 	return &provider, p.db.WithContext(ctx).First(&provider, "id = ? AND project_id = ?", id, projectID).Error
 }
 
-// FindActiveProvider returns an active provider config by provider name and projectID
-func (p *ProviderRepo) FindActiveProvider(ctx context.Context, projectID string, providerName string) (*models.ProviderConfig, error) {
+// FindActiveProvider returns an active provider config by provider name, projectID, and environment
+func (p *ProviderRepo) FindActiveProvider(ctx context.Context, projectID string, providerName string, env string) (*models.ProviderConfig, error) {
 	var provider models.ProviderConfig
-	err := p.db.WithContext(ctx).First(&provider, "project_id = ? AND provider_name = ? AND is_active = ?", projectID, providerName, true).Error
+	err := p.db.WithContext(ctx).First(&provider, "project_id = ? AND provider_name = ? AND is_active = ? AND environment = ?", projectID, providerName, true, env).Error
 	return &provider, err
+}
+
+// FindAllActiveProvidersByName returns all active provider configs for a given provider name and projectID
+func (p *ProviderRepo) FindAllActiveProvidersByName(ctx context.Context, projectID string, providerName string) ([]*models.ProviderConfig, error) {
+	var providers []*models.ProviderConfig
+	err := p.db.WithContext(ctx).Where("project_id = ? AND provider_name = ? AND is_active = ?", projectID, providerName, true).Find(&providers).Error
+	return providers, err
 }
 
 // ListPaymentProviders returns a list of all payment providers

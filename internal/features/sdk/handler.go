@@ -106,11 +106,16 @@ func (h *SDKHandler) ServeSDK(c *gin.Context) {
 	var activeProviders []string
 	var activePublicKey string
 
+	env := "test"
+	if isLive {
+		env = "live"
+	}
+
 	for _, pc := range configs {
-		if pc.IsActive {
+		if pc.IsActive && pc.Environment == env {
 			activeProviders = append(activeProviders, pc.ProviderName)
 
-			_, pubKeyEncrypted := pc.GetKeysForMode(isLive)
+			pubKeyEncrypted := pc.PublicKey
 			if pubKeyEncrypted != "" {
 				decryptedPublic, err := crypto.Decrypt(pubKeyEncrypted, h.encryptionKey)
 				if err == nil && activePublicKey == "" {

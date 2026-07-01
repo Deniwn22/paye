@@ -19,9 +19,9 @@ func NewProviderHandler(service *ProviderService) *ProviderHandler {
 	return &ProviderHandler{service: service}
 }
 
-// AddProviderHandler godoc
-// @Summary Register provider configuration
-// @Description Create a provider configuration for the authenticated user
+// AddTestProviderHandler godoc
+// @Summary Register a Test provider configuration
+// @Description Create a provider configuration for the test environment
 // @Tags Providers
 // @Security BearerAuth
 // @Accept json
@@ -31,8 +31,29 @@ func NewProviderHandler(service *ProviderService) *ProviderHandler {
 // @Failure 400 {object} api.SwaggerSimpleResponse
 // @Failure 401 {object} api.SwaggerSimpleResponse
 // @Failure 500 {object} api.SwaggerSimpleResponse
-// @Router /providers [post]
-func (h *ProviderHandler) AddProviderHandler(c *gin.Context) {
+// @Router /providers/test [post]
+func (h *ProviderHandler) AddTestProviderHandler(c *gin.Context) {
+	h.addProviderWithEnv(c, "test")
+}
+
+// AddLiveProviderHandler godoc
+// @Summary Register a Live provider configuration
+// @Description Create a provider configuration for the live environment
+// @Tags Providers
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param request body dto.ProviderConfigRequest true "Provider Configuration Payload"
+// @Success 200 {object} api.SwaggerProviderConfigResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /providers/live [post]
+func (h *ProviderHandler) AddLiveProviderHandler(c *gin.Context) {
+	h.addProviderWithEnv(c, "live")
+}
+
+func (h *ProviderHandler) addProviderWithEnv(c *gin.Context, env string) {
 	projectID, exists := c.Get(middleware.ProjectIDContextKey)
 	if !exists {
 		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
@@ -45,8 +66,12 @@ func (h *ProviderHandler) AddProviderHandler(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.service.AddProvider(c.Request.Context(), &req, projectID.(string))
+	resp, err := h.service.AddProvider(c.Request.Context(), &req, projectID.(string), env)
 	if err != nil {
+		if err.Error() == "nomba requires metadata.nomba_account_id" {
+			c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+			return
+		}
 		slog.Error("internal server error", "error", err)
 		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
@@ -213,7 +238,8 @@ func (h *ProviderHandler) ToggleProviderHandler(c *gin.Context) {
 func RegisterRoutes(rg *gin.RouterGroup, h *ProviderHandler) {
 	providers := rg.Group("/providers")
 	{
-		providers.POST("", h.AddProviderHandler)
+		providers.POST("/test", h.AddTestProviderHandler)
+		providers.POST("/live", h.AddLiveProviderHandler)
 		providers.GET("", h.ListProvidersHandler)
 		providers.PUT("/:id", h.UpdateProviderHandler)
 		providers.DELETE("/:id", h.DeleteProviderHandler)

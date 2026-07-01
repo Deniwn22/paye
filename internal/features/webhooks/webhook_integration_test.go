@@ -110,12 +110,12 @@ func TestProviderCRUD(t *testing.T) {
 	pReq := dto.ProviderConfigRequest{
 		Label:        "paystack-test",
 		ProviderName: dto.Paystack,
-		SecretKey:    "psk_secret_key_val",
-		PublicKey:    "psk_public_key_val",
+		SecretKey:    "sk_test_secret_key_val",
+		PublicKey:    "pk_test_public_key_val",
 		IsActive:     true,
 	}
 	body, _ := json.Marshal(pReq)
-	req := httptest.NewRequest("POST", "/api/v1/providers", bytes.NewBuffer(body))
+	req := httptest.NewRequest("POST", "/api/v1/providers/test", bytes.NewBuffer(body))
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
@@ -382,12 +382,13 @@ func TestDashboardStatsAndLogs(t *testing.T) {
 	encPublicKey, _ := crypto.Encrypt("pk_test_val", encryptionKey)
 
 	provConfig := &models.ProviderConfig{
-		Label:         "paystack-main",
-		ProviderName:  "paystack",
-		TestSecretKey: encSecretKey,
-		TestPublicKey: encPublicKey,
-		IsActive:      true,
-		ProjectID:     testProject.Base.ID,
+		Label:        "paystack-main",
+		ProviderName: "paystack",
+		Environment:  "test",
+		SecretKey:    encSecretKey,
+		PublicKey:    encPublicKey,
+		IsActive:     true,
+		ProjectID:    testProject.Base.ID,
 	}
 	db.Create(provConfig)
 
@@ -496,13 +497,14 @@ func TestNombaWebhookProxyForwarding(t *testing.T) {
 	encPublicKey, _ := crypto.Encrypt(rawPublicKey, encryptionKey)
 
 	provConfig := &models.ProviderConfig{
-		Label:         "nomba-main",
-		ProviderName:  "nomba",
-		LiveSecretKey: encSecretKey,
-		LivePublicKey: encPublicKey,
-		IsActive:      true,
-		ProjectID:     testProject.Base.ID,
-		Metadata:      map[string]string{"account_id": "account_id_val_123"},
+		Label:        "nomba-main",
+		ProviderName: "nomba",
+		Environment:  "live",
+		SecretKey:    encSecretKey,
+		PublicKey:    encPublicKey,
+		IsActive:     true,
+		ProjectID:    testProject.Base.ID,
+		Metadata:     models.ProviderMetadata{NombaAccountID: "account_id_val_123"},
 	}
 	db.Create(provConfig)
 
