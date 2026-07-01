@@ -66,7 +66,7 @@ func (s *WebhookService) CreateWebhook(ctx context.Context, req *dto.WebhookConf
 
 	slug := req.PayeWebhookSlug
 	if slug == "" {
-		slug = uuid.New().String()
+		slug = env + "_" + uuid.New().String()
 	}
 
 	wc := dto.ToWebhookConfig(req)
