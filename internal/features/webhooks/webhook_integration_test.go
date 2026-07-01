@@ -322,7 +322,7 @@ func TestWebhookProxyForwarding(t *testing.T) {
 	wReq := dto.WebhookConfigRequest{
 		ProviderName:    "paystack",
 		TargetURL:       mockTargetServer.URL,
-		PayeWebhookSlug: "test-slug-123",
+		PayeWebhookSlug: "test_slug-123",
 	}
 	body, _ := json.Marshal(wReq)
 	req := httptest.NewRequest("POST", "/api/v1/webhooks/configs", bytes.NewBuffer(body))
@@ -341,7 +341,7 @@ func TestWebhookProxyForwarding(t *testing.T) {
 	hash.Write(payload)
 	paystackSignature := hex.EncodeToString(hash.Sum(nil))
 
-	req = httptest.NewRequest("POST", "/api/v1/webhooks/receive/test-slug-123", bytes.NewBuffer(payload))
+	req = httptest.NewRequest("POST", "/api/v1/webhooks/receive/test_slug-123", bytes.NewBuffer(payload))
 	req.Header.Set("X-Paystack-Signature", paystackSignature)
 	req.Header.Set("Content-Type", "application/json")
 	w = httptest.NewRecorder()
@@ -527,7 +527,7 @@ func TestNombaWebhookProxyForwarding(t *testing.T) {
 	wReq := dto.WebhookConfigRequest{
 		ProviderName:    "nomba",
 		TargetURL:       mockTargetServer.URL,
-		PayeWebhookSlug: "nomba-slug-123",
+		PayeWebhookSlug: "test_nomba-slug-123",
 	}
 	body, _ := json.Marshal(wReq)
 	req := httptest.NewRequest("POST", "/api/v1/webhooks/configs", bytes.NewBuffer(body))
@@ -567,7 +567,7 @@ func TestNombaWebhookProxyForwarding(t *testing.T) {
 	hash.Write([]byte(hashingPayload))
 	nombaSignature := base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
-	req = httptest.NewRequest("POST", "/api/v1/webhooks/receive/nomba-slug-123", bytes.NewBuffer(payload))
+	req = httptest.NewRequest("POST", "/api/v1/webhooks/receive/test_nomba-slug-123", bytes.NewBuffer(payload))
 	req.Header.Set("nomba-signature", nombaSignature)
 	req.Header.Set("nomba-timestamp", "1718524800")
 	req.Header.Set("Content-Type", "application/json")
