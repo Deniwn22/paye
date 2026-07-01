@@ -9,7 +9,6 @@ type InitializeTransactionRequest struct {
 	Email       string  `json:"email" binding:"required,email" example:"customer@example.com" description:"Email address of the customer"`
 	Currency    string  `json:"currency" binding:"required" example:"NGN" enums:"NGN,USD,GHS,KES" description:"Currency to charge in"`
 	Reference   string  `json:"reference" example:"tx_ref_123456" description:"Your internal unique transaction reference"`
-	Provider    string  `json:"provider" binding:"required" example:"paystack" enums:"paystack,flutterwave,nomba,opay" description:"Payment provider to route this transaction to"`
 	CallbackURL string  `json:"callbackUrl" example:"https://your-app.com/webhook" description:"Optional callback URL for webhook notification"`
 }
 

@@ -129,9 +129,9 @@ func (s *SubscriptionService) chargeSubscription(ctx context.Context, sub *model
 		env = "live"
 	}
 
-	pc, err := s.providerRepo.FindActiveProvider(ctx, sub.ProjectID.String(), sub.Provider, env)
+	pc, err := s.providerRepo.GetProviderByNameAndEnv(ctx, sub.ProjectID.String(), sub.Provider, env)
 	if err != nil {
-		return fmt.Errorf("active provider config not found: %w", err)
+		return fmt.Errorf("provider config not found: %w", err)
 	}
 
 	encSecret := pc.SecretKey

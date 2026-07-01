@@ -40,9 +40,9 @@ func (s *FlutterwaveService) getFlutterwaveClient(ctx context.Context, projectID
 		env = "live"
 	}
 
-	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, "flutterwave", env)
+	pc, err := s.providerRepo.GetProviderByNameAndEnv(ctx, projectID, "flutterwave", env)
 	if err != nil {
-		return nil, fmt.Errorf("flutterwave provider configuration not found or inactive")
+		return nil, fmt.Errorf("flutterwave provider configuration not found")
 	}
 
 	encSecret := pc.SecretKey

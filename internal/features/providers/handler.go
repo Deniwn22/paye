@@ -225,7 +225,7 @@ func (h *ProviderHandler) ToggleProviderHandler(c *gin.Context) {
 		return
 	}
 
-	err = h.service.ToggleProviderStatus(c.Request.Context(), providerID)
+	err = h.service.ToggleProviderStatus(c.Request.Context(), providerID, projectID.(string))
 	if err != nil {
 		slog.Error("internal server error", "error", err)
 		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))

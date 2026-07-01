@@ -67,6 +67,7 @@ func (h *WebhookHandler) CreateWebhookHandler(c *gin.Context) {
 // @Tags Webhooks
 // @Security BearerAuth
 // @Produce json
+// @Param environment query string false "Environment (test or live)"
 // @Success 200 {object} api.SwaggerWebhookConfigListResponse
 // @Failure 401 {object} api.SwaggerSimpleResponse
 // @Failure 500 {object} api.SwaggerSimpleResponse
@@ -78,7 +79,9 @@ func (h *WebhookHandler) ListWebhooksHandler(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.service.ListWebhooks(c.Request.Context(), projectID.(string))
+	env := c.Query("environment")
+
+	resp, err := h.service.ListWebhooks(c.Request.Context(), projectID.(string), env)
 	if err != nil {
 		slog.Error("internal server error", "error", err)
 		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
@@ -240,6 +243,7 @@ func (h *WebhookHandler) ReceiveWebhookHandler(c *gin.Context) {
 // @Produce json
 // @Param limit query int false "Pagination limit"
 // @Param offset query int false "Pagination offset"
+// @Param environment query string false "Environment (test or live)"
 // @Success 200 {object} api.SwaggerSimpleResponse
 // @Failure 401 {object} api.SwaggerSimpleResponse
 // @Failure 500 {object} api.SwaggerSimpleResponse
@@ -252,16 +256,17 @@ func (h *WebhookHandler) ListWebhookLogsHandler(c *gin.Context) {
 	}
 
 	var query struct {
-		Limit  int `form:"limit,default=50"`
-		Offset int `form:"offset,default=0"`
+		Limit       int    `form:"limit,default=50"`
+		Offset      int    `form:"offset,default=0"`
+		Environment string `form:"environment"`
 	}
 	if err := c.ShouldBindQuery(&query); err != nil {
 		c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 		return
 	}
 
-	// Remove isLive filter — show all logs regardless of mode
-	logs, err := h.service.ListAllLogs(c.Request.Context(), projectID.(string), query.Limit, query.Offset)
+	isLive := query.Environment == "live"
+	logs, err := h.service.ListLogs(c.Request.Context(), projectID.(string), isLive, query.Limit, query.Offset)
 	if err != nil {
 		slog.Error("internal server error", "error", err)
 		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))

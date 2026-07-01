@@ -135,6 +135,10 @@ func (s *ProviderService) AddProvider(ctx context.Context, pcreq *dto.ProviderCo
 		return nil, err
 	}
 
+	if provider.IsActive {
+		_ = s.repo.DeactivateOtherProviders(ctx, projectID, env, provider.ID.String())
+	}
+
 	decrypted, err := s.decryptConfigKeys(provider)
 	if err != nil {
 		return nil, err
@@ -198,6 +202,10 @@ func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.Provide
 		return nil, err
 	}
 
+	if provider.IsActive {
+		_ = s.repo.DeactivateOtherProviders(ctx, projectID, provider.Environment, provider.ID.String())
+	}
+
 	decrypted, err := s.decryptConfigKeys(provider)
 	if err != nil {
 		return nil, err
@@ -206,10 +214,20 @@ func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.Provide
 }
 
 // ToggleProviderStatus toggles the active status of a provider for the given user.
-func (s *ProviderService) ToggleProviderStatus(ctx context.Context, providerId string) error {
-	err := s.repo.ToggleProviderStatus(ctx, providerId)
+func (s *ProviderService) ToggleProviderStatus(ctx context.Context, providerId string, projectID string) error {
+	provider, err := s.repo.FindProviderById(ctx, providerId, projectID)
+	if err != nil {
+		return err
+	}
+
+	err = s.repo.ToggleProviderStatus(ctx, providerId)
 	if err != nil {
 		return fmt.Errorf("Failed to toggle provider status : %w", err)
+	}
+
+	// If it was inactive before, it is now active, so deactivate others
+	if !provider.IsActive {
+		_ = s.repo.DeactivateOtherProviders(ctx, projectID, provider.Environment, providerId)
 	}
 	return nil
 }

@@ -29,9 +29,13 @@ func (r *WebhookRepo) Create(ctx context.Context, wc *models.WebhookConfig, proj
 	return wc, nil
 }
 
-func (r *WebhookRepo) List(ctx context.Context, projectID string) ([]*models.WebhookConfig, error) {
+func (r *WebhookRepo) List(ctx context.Context, projectID string, env string) ([]*models.WebhookConfig, error) {
 	var configs []*models.WebhookConfig
-	if err := r.db.WithContext(ctx).Where("project_id = ?", projectID).Find(&configs).Error; err != nil {
+	query := r.db.WithContext(ctx).Where("project_id = ?", projectID)
+	if env != "" {
+		query = query.Where("environment = ?", env)
+	}
+	if err := query.Find(&configs).Error; err != nil {
 		return nil, err
 	}
 	return configs, nil
@@ -53,9 +57,9 @@ func (r *WebhookRepo) FindBySlug(ctx context.Context, slug string) (*models.Webh
 	return &config, nil
 }
 
-func (r *WebhookRepo) FindByProjectAndProvider(ctx context.Context, projectID string, providerName string) (*models.WebhookConfig, error) {
+func (r *WebhookRepo) FindByProjectProviderAndEnv(ctx context.Context, projectID string, providerName string, env string) (*models.WebhookConfig, error) {
 	var config models.WebhookConfig
-	err := r.db.WithContext(ctx).Where("project_id = ? AND provider_name = ?", projectID, providerName).First(&config).Error
+	err := r.db.WithContext(ctx).Where("project_id = ? AND provider_name = ? AND environment = ?", projectID, providerName, env).First(&config).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -100,6 +104,7 @@ func (r *WebhookRepo) UpdateTransactionStatusAndAuthCode(ctx context.Context, re
 func (r *WebhookRepo) ListLogs(ctx context.Context, projectID string, isLive bool, limit int, offset int) ([]*models.WebhookLog, error) {
 	var logs []*models.WebhookLog
 	err := r.db.WithContext(ctx).
+		Preload("WebhookConfig").
 		Where("project_id = ? AND is_live = ?", projectID, isLive).
 		Order("created_at DESC").
 		Limit(limit).

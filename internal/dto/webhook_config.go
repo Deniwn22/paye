@@ -7,6 +7,7 @@ type WebhookConfigRequest struct {
 	TargetURL       string            `json:"target_url" binding:"omitempty,url"`
 	PayeWebhookSlug string            `json:"paye_webhook_slug"`
 	Type            models.WbhookType `json:"type"` // "payment" | "va" | "all", defaults to "payment"
+	Environment     string            `json:"environment"`
 }
 
 type WebhookConfigResponse struct {
@@ -15,6 +16,7 @@ type WebhookConfigResponse struct {
 	TargetURL       string            `json:"target_url"`
 	PayeWebhookSlug string            `json:"paye_webhook_slug"`
 	Type            models.WbhookType `json:"type"`
+	Environment     string            `json:"environment"`
 }
 
 func ToWebhookConfigResponse(config *models.WebhookConfig) *WebhookConfigResponse {
@@ -24,6 +26,7 @@ func ToWebhookConfigResponse(config *models.WebhookConfig) *WebhookConfigRespons
 		TargetURL:       config.TargetURL,
 		PayeWebhookSlug: config.PayeWebhookSlug,
 		Type:            config.Type,
+		Environment:     config.Environment,
 	}
 }
 
@@ -32,10 +35,15 @@ func ToWebhookConfig(config *WebhookConfigRequest) *models.WebhookConfig {
 	if webhookType == "" {
 		webhookType = models.PAYMENT
 	}
+	env := config.Environment
+	if env == "" {
+		env = "test"
+	}
 	return &models.WebhookConfig{
 		ProviderName:    config.ProviderName,
 		TargetURL:       config.TargetURL,
 		PayeWebhookSlug: config.PayeWebhookSlug,
 		Type:            webhookType,
+		Environment:     env,
 	}
 }

@@ -67,10 +67,25 @@ func (p *ProviderRepo) FindProviderById(ctx context.Context, id string, projectI
 	return &provider, p.db.WithContext(ctx).First(&provider, "id = ? AND project_id = ?", id, projectID).Error
 }
 
-// FindActiveProvider returns an active provider config by provider name, projectID, and environment
-func (p *ProviderRepo) FindActiveProvider(ctx context.Context, projectID string, providerName string, env string) (*models.ProviderConfig, error) {
+// DeactivateOtherProviders sets is_active to false for all other providers in the same project and environment
+func (p *ProviderRepo) DeactivateOtherProviders(ctx context.Context, projectID string, env string, excludeProviderID string) error {
+	return p.db.WithContext(ctx).
+		Model(&models.ProviderConfig{}).
+		Where("project_id = ? AND environment = ? AND id != ?", projectID, env, excludeProviderID).
+		Update("is_active", false).Error
+}
+
+// GetActiveProvider returns the single active provider config for a projectID and environment
+func (p *ProviderRepo) GetActiveProvider(ctx context.Context, projectID string, env string) (*models.ProviderConfig, error) {
 	var provider models.ProviderConfig
-	err := p.db.WithContext(ctx).First(&provider, "project_id = ? AND provider_name = ? AND is_active = ? AND environment = ?", projectID, providerName, true, env).Error
+	err := p.db.WithContext(ctx).First(&provider, "project_id = ? AND is_active = ? AND environment = ?", projectID, true, env).Error
+	return &provider, err
+}
+
+// GetProviderByNameAndEnv returns the provider config by provider name, projectID, and environment, regardless of active status
+func (p *ProviderRepo) GetProviderByNameAndEnv(ctx context.Context, projectID string, providerName string, env string) (*models.ProviderConfig, error) {
+	var provider models.ProviderConfig
+	err := p.db.WithContext(ctx).Order("is_active DESC, created_at DESC").First(&provider, "project_id = ? AND provider_name = ? AND environment = ?", projectID, providerName, env).Error
 	return &provider, err
 }
 

@@ -52,12 +52,16 @@ func NewWebhookService(repo *WebhookRepo, vaRepo *virtual_accounts.VARepository,
 }
 
 func (s *WebhookService) CreateWebhook(ctx context.Context, req *dto.WebhookConfigRequest, projectID string) (*dto.WebhookConfigResponse, error) {
-	existing, err := s.repo.FindByProjectAndProvider(ctx, projectID, req.ProviderName)
+	env := req.Environment
+	if env == "" {
+		env = "test"
+	}
+	existing, err := s.repo.FindByProjectProviderAndEnv(ctx, projectID, req.ProviderName, env)
 	if err != nil {
 		return nil, err
 	}
 	if existing != nil {
-		return nil, errors.New("a webhook configuration for this provider already exists")
+		return nil, errors.New("a webhook configuration for this provider and environment already exists")
 	}
 
 	slug := req.PayeWebhookSlug
@@ -75,8 +79,8 @@ func (s *WebhookService) CreateWebhook(ctx context.Context, req *dto.WebhookConf
 	return dto.ToWebhookConfigResponse(config), nil
 }
 
-func (s *WebhookService) ListWebhooks(ctx context.Context, projectID string) ([]*dto.WebhookConfigResponse, error) {
-	configs, err := s.repo.List(ctx, projectID)
+func (s *WebhookService) ListWebhooks(ctx context.Context, projectID string, env string) ([]*dto.WebhookConfigResponse, error) {
+	configs, err := s.repo.List(ctx, projectID, env)
 	if err != nil {
 		return nil, err
 	}
@@ -100,6 +104,9 @@ func (s *WebhookService) UpdateWebhook(ctx context.Context, req *dto.WebhookConf
 	wc.TargetURL = req.TargetURL
 	if req.PayeWebhookSlug != "" {
 		wc.PayeWebhookSlug = req.PayeWebhookSlug
+	}
+	if req.Environment != "" {
+		wc.Environment = req.Environment
 	}
 
 	if err := s.repo.Update(ctx, wc); err != nil {

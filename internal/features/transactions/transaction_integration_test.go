@@ -157,7 +157,6 @@ func TestTransactionInitializeAndVerify(t *testing.T) {
 		Email:     "customer@example.com",
 		Currency:  "NGN",
 		Reference: "test_ref_123",
-		Provider:  "paystack",
 	}
 	body, _ := json.Marshal(initReq)
 	req := httptest.NewRequest("POST", "/api/v1/transactions/initialize", bytes.NewBuffer(body))
@@ -320,7 +319,6 @@ func TestOPayTransactionWebhookInjection(t *testing.T) {
 		Email:       "customer@example.com",
 		Currency:    "NGN",
 		Reference:   "opay_ref_123",
-		Provider:    "opay",
 		CallbackURL: "http://mymerchant.com/return",
 	}
 	body, _ := json.Marshal(initReq)

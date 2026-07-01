@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -279,8 +280,8 @@ func TestWebhookConfigDuplicate(t *testing.T) {
 
 	var respBody map[string]any
 	json.Unmarshal(w2.Body.Bytes(), &respBody)
-	if respBody["message"] != "a webhook configuration for this provider already exists" {
-		t.Errorf("Expected error 'a webhook configuration for this provider already exists', got '%v'", respBody["message"])
+	if msg, ok := respBody["message"].(string); !ok || !strings.Contains(msg, "a webhook configuration for this provider and environment already exists") {
+		t.Errorf("Expected error 'a webhook configuration for this provider and environment already exists', got '%v'", respBody["message"])
 	}
 }
 

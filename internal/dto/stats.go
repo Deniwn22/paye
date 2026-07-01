@@ -14,6 +14,8 @@ type DashboardStatsResponse struct {
 type WebhookLogResponse struct {
 	ID              string    `json:"id"`
 	WebhookConfigID string    `json:"webhook_config_id"`
+	ProviderName    string    `json:"provider_name"`
+	Environment     string    `json:"environment"`
 	Event           string    `json:"event"`
 	Reference       string    `json:"reference"`
 	Amount          float64   `json:"amount"`

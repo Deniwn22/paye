@@ -173,8 +173,7 @@ curl -X POST "http://localhost:8080/api/v1/transactions/initialize" \
   -d '{
     "amount": 5000,
     "email": "customer@example.com",
-    "currency": "NGN",
-    "provider": "paystack"
+    "currency": "NGN"
   }'
 ```
 
@@ -214,10 +213,9 @@ The frontend workspace provides:
 To transition Paye from a robust unified payment router into a production-grade fintech infrastructure platform, we plan to implement:
 
 1. **Smart Routing & Failover**: Dynamically switch gateway routes based on conversion rates, latency, or transaction costs, and enable automated backup failovers during provider downtime.
-2. **Dual Sandbox/Live Environments**: Support `paye_test_...` and `paye_live_...` API keys per project with separate test/live credential stores.
-3. **Advanced Webhook Delivery Engine**: Queue webhook proxy payloads with exponential backoff retries and manual log replay features (Dead Letter Queue).
-4. **Unified Subscription Engine**: Abstract recurring billing contracts and card tokenization across multiple underlying gateways.
-5. **Team Workspaces**: Support developer invitations and role-based permissions (Owner, Admin, Viewer) per project.
+2. **Advanced Webhook Delivery Engine**: Queue webhook proxy payloads with exponential backoff retries and manual log replay features (Dead Letter Queue).
+3. **Unified Subscription Engine**: Abstract recurring billing contracts and card tokenization across multiple underlying gateways.
+4. **Team Workspaces**: Support developer invitations and role-based permissions (Owner, Admin, Viewer) per project.
 
 ## License
 MIT

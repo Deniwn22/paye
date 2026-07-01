@@ -26,13 +26,22 @@ func (s *DashboardService) GetLogs(ctx context.Context, projectID string, limit 
 
 	res := make([]*dto.WebhookLogResponse, 0, len(logs))
 	for _, l := range logs {
-		var configID string
+		var configID, providerName string
 		if l.WebhookConfigID != nil {
 			configID = l.WebhookConfigID.String()
+			if l.WebhookConfig != nil {
+				providerName = l.WebhookConfig.ProviderName
+			}
+		}
+		env := "test"
+		if l.IsLive {
+			env = "live"
 		}
 		res = append(res, &dto.WebhookLogResponse{
 			ID:              l.Base.ID.String(),
 			WebhookConfigID: configID,
+			ProviderName:    providerName,
+			Environment:     env,
 			Event:           l.Event,
 			Reference:       l.Reference,
 			Amount:          l.Amount,

@@ -1755,6 +1755,14 @@ const docTemplate = `{
                     "Webhooks"
                 ],
                 "summary": "List webhook configurations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment (test or live)",
+                        "name": "environment",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1978,6 +1986,12 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Pagination offset",
                         "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment (test or live)",
+                        "name": "environment",
                         "in": "query"
                     }
                 ],
@@ -2301,8 +2315,7 @@ const docTemplate = `{
             "required": [
                 "amount",
                 "currency",
-                "email",
-                "provider"
+                "email"
             ],
             "properties": {
                 "amount": {
@@ -2326,16 +2339,6 @@ const docTemplate = `{
                 "email": {
                     "type": "string",
                     "example": "customer@example.com"
-                },
-                "provider": {
-                    "type": "string",
-                    "enum": [
-                        "paystack",
-                        "flutterwave",
-                        "nomba",
-                        "opay"
-                    ],
-                    "example": "paystack"
                 },
                 "reference": {
                     "type": "string",
@@ -2579,6 +2582,9 @@ const docTemplate = `{
                 "provider_name"
             ],
             "properties": {
+                "environment": {
+                    "type": "string"
+                },
                 "paye_webhook_slug": {
                     "type": "string"
                 },
@@ -2601,6 +2607,9 @@ const docTemplate = `{
         "dto.WebhookConfigResponse": {
             "type": "object",
             "properties": {
+                "environment": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -2627,6 +2636,9 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "environment": {
+                    "type": "string"
+                },
                 "error_message": {
                     "type": "string"
                 },
@@ -2640,6 +2652,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "payload": {
+                    "type": "string"
+                },
+                "provider_name": {
                     "type": "string"
                 },
                 "reference": {
@@ -2735,9 +2750,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "email": {
-                    "type": "string"
-                },
-                "provider": {
                     "type": "string"
                 },
                 "publicId": {

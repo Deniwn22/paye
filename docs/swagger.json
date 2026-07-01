@@ -1749,6 +1749,14 @@
                     "Webhooks"
                 ],
                 "summary": "List webhook configurations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment (test or live)",
+                        "name": "environment",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1972,6 +1980,12 @@
                         "type": "integer",
                         "description": "Pagination offset",
                         "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment (test or live)",
+                        "name": "environment",
                         "in": "query"
                     }
                 ],
@@ -2295,8 +2309,7 @@
             "required": [
                 "amount",
                 "currency",
-                "email",
-                "provider"
+                "email"
             ],
             "properties": {
                 "amount": {
@@ -2320,16 +2333,6 @@
                 "email": {
                     "type": "string",
                     "example": "customer@example.com"
-                },
-                "provider": {
-                    "type": "string",
-                    "enum": [
-                        "paystack",
-                        "flutterwave",
-                        "nomba",
-                        "opay"
-                    ],
-                    "example": "paystack"
                 },
                 "reference": {
                     "type": "string",
@@ -2573,6 +2576,9 @@
                 "provider_name"
             ],
             "properties": {
+                "environment": {
+                    "type": "string"
+                },
                 "paye_webhook_slug": {
                     "type": "string"
                 },
@@ -2595,6 +2601,9 @@
         "dto.WebhookConfigResponse": {
             "type": "object",
             "properties": {
+                "environment": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -2621,6 +2630,9 @@
                 "created_at": {
                     "type": "string"
                 },
+                "environment": {
+                    "type": "string"
+                },
                 "error_message": {
                     "type": "string"
                 },
@@ -2634,6 +2646,9 @@
                     "type": "string"
                 },
                 "payload": {
+                    "type": "string"
+                },
+                "provider_name": {
                     "type": "string"
                 },
                 "reference": {
@@ -2729,9 +2744,6 @@
                     "type": "string"
                 },
                 "email": {
-                    "type": "string"
-                },
-                "provider": {
                     "type": "string"
                 },
                 "publicId": {

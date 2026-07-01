@@ -34,10 +34,13 @@ func (s *VAService) getVAProvider(ctx context.Context, projectID string) (provid
 		env = "live"
 	}
 
-	// try nomba for now — extend this when other providers support VAs
-	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, "nomba", env)
+	pc, err := s.providerRepo.GetActiveProvider(ctx, projectID, env)
 	if err != nil {
-		return nil, "", "", fmt.Errorf("no active VA provider found for project: %w", err)
+		return nil, "", "", fmt.Errorf("no active provider found for project: %w", err)
+	}
+
+	if pc.ProviderName != "nomba" {
+		return nil, "", "", fmt.Errorf("The active provider does not support virtual accounts")
 	}
 
 	encSecret := pc.SecretKey

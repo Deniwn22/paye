@@ -66,7 +66,7 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 		env = "live"
 	}
 
-	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, req.Provider, env)
+	pc, err := s.providerRepo.GetActiveProvider(ctx, projectID, env)
 	if err != nil {
 		return nil, fmt.Errorf("active provider config not found: %w", err)
 	}
@@ -81,7 +81,7 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 	client := paye.NewClient()
 
 	var providerClient providers.Provider
-	switch req.Provider {
+	switch pc.ProviderName {
 	case "paystack":
 		pClient := paystack.New(decryptedSecret)
 		if s.paystackBaseURL != "" {
@@ -108,12 +108,12 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 		oClient := opay.New(decryptedPublic, decryptedSecret, merchantID, !isLive)
 		providerClient = oClient
 	default:
-		return nil, fmt.Errorf("unsupported provider: %s", req.Provider)
+		return nil, fmt.Errorf("unsupported provider: %s", pc.ProviderName)
 	}
 
 	client.RegisterProvider(providerClient)
 
-	p, ok := client.GiveMe(req.Provider)
+	p, ok := client.GiveMe(pc.ProviderName)
 	if !ok {
 		return nil, fmt.Errorf("provider failed to register in paye client")
 	}
@@ -126,8 +126,8 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 		CallbackURL: req.CallbackURL,
 	}
 
-	if req.Provider == "opay" {
-		webhookConfig, err := s.webhookRepo.FindByProjectAndProvider(ctx, projectID, "opay")
+	if pc.ProviderName == "opay" {
+		webhookConfig, err := s.webhookRepo.FindByProjectProviderAndEnv(ctx, projectID, "opay", env)
 		if err != nil {
 			slog.Warn("Failed to query OPay webhook config slug", "project_id", projectID, "error", err)
 		} else if webhookConfig != nil {
@@ -154,7 +154,7 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 
 	tx := &models.Transaction{
 		ProjectID:   pID,
-		Provider:    req.Provider,
+		Provider:    pc.ProviderName,
 		Reference:   reference,
 		Amount:      req.Amount,
 		Currency:    req.Currency,
@@ -186,9 +186,9 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 		env = "live"
 	}
 
-	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, tx.Provider, env)
+	pc, err := s.providerRepo.GetProviderByNameAndEnv(ctx, projectID, tx.Provider, env)
 	if err != nil {
-		return nil, fmt.Errorf("active provider config not found: %w", err)
+		return nil, fmt.Errorf("provider config not found: %w", err)
 	}
 
 	encSecret := pc.SecretKey

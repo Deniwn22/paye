@@ -39,9 +39,9 @@ func (s *PaystackService) getPaystackClient(ctx context.Context, projectID strin
 	if isLive {
 		env = "live"
 	}
-	pc, err := s.providerRepo.FindActiveProvider(ctx, projectID, "paystack", env)
+	pc, err := s.providerRepo.GetProviderByNameAndEnv(ctx, projectID, "paystack", env)
 	if err != nil {
-		return nil, fmt.Errorf("active paystack provider config not found: %w", err)
+		return nil, fmt.Errorf("paystack provider config not found: %w", err)
 	}
 
 	encSecret := pc.SecretKey

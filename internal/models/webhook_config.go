@@ -17,5 +17,6 @@ type WebhookConfig struct {
 	PayeWebhookSlug string     `gorm:"unique;not null"` // (e.g "paystack-webhook", "flutterwave-webhook")
 	ProjectID       uuid.UUID  // (foreign key -> Project)
 	Project         *Project   `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
-	Type            WbhookType // "payment" | "va" | "all"
+	Type            WbhookType `gorm:"uniqueIndex:uq_webhook_config_project_provider_env"` // "payment" | "va" | "all"
+	Environment     string     `gorm:"default:'test';uniqueIndex:uq_webhook_config_project_provider_env" json:"environment"`
 }
