@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -66,7 +67,10 @@ func (s *WebhookService) CreateWebhook(ctx context.Context, req *dto.WebhookConf
 
 	slug := req.PayeWebhookSlug
 	if slug == "" {
-		slug = env + "_" + uuid.New().String()
+		slug = uuid.New().String()
+	}
+	if !strings.HasPrefix(slug, env+"_") {
+		slug = env + "_" + slug
 	}
 
 	wc := dto.ToWebhookConfig(req)
