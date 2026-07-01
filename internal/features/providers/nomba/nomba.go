@@ -16,15 +16,17 @@ import (
 )
 
 type Nomba struct {
-	tokenManager *TokenManager
-	BaseURL      string
-	isLive       bool
+	tokenManager  *TokenManager
+	BaseURL       string
+	webhookSecret string
+	isLive        bool
 }
 
-func New(clientID, clientSecret, accountID string, isLive bool) *Nomba {
+func New(clientID, clientSecret, webhookSecret, accountID string, isLive bool) *Nomba {
 	return &Nomba{
-		tokenManager: NewTokenManager(clientID, clientSecret, accountID, isLive),
-		isLive:       isLive,
+		tokenManager:  NewTokenManager(clientID, clientSecret, accountID, isLive),
+		webhookSecret: webhookSecret,
+		isLive:        isLive,
 	}
 }
 
@@ -281,7 +283,12 @@ func (n *Nomba) generateSignature(payload nombaWebhookPayload, timestamp string)
 		timestamp,
 	)
 
-	h := hmac.New(sha256.New, []byte(n.tokenManager.clientSecret))
+	secret := n.webhookSecret
+	if secret == "" {
+		secret = n.tokenManager.clientSecret
+	}
+
+	h := hmac.New(sha256.New, []byte(secret))
 	h.Write([]byte(hashingPayload))
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }

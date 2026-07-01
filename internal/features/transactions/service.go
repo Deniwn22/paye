@@ -96,8 +96,9 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 		providerClient = fClient
 	case "nomba":
 		decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
+		decryptedWebhookSecret, _ := crypto.Decrypt(pc.WebhookSecret, s.encryptionKey)
 		accountID := pc.Metadata.NombaAccountID
-		nClient := nomba.New(decryptedPublic, decryptedSecret, accountID, isLive)
+		nClient := nomba.New(decryptedPublic, decryptedSecret, decryptedWebhookSecret, accountID, isLive)
 		if s.paystackBaseURL != "" {
 			nClient.SetBaseURL(s.paystackBaseURL)
 		}
@@ -216,8 +217,9 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 		providerClient = fClient
 	case "nomba":
 		decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
+		decryptedWebhookSecret, _ := crypto.Decrypt(pc.WebhookSecret, s.encryptionKey)
 		accountID := pc.Metadata.NombaAccountID
-		nClient := nomba.New(decryptedPublic, decryptedSecret, accountID, tx.IsLive)
+		nClient := nomba.New(decryptedPublic, decryptedSecret, decryptedWebhookSecret, accountID, tx.IsLive)
 		if s.paystackBaseURL != "" {
 			nClient.SetBaseURL(s.paystackBaseURL)
 		}

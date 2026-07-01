@@ -170,8 +170,9 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 					providerClient = flutterwave.New(decryptedSecret)
 				case "nomba":
 					decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
+					decryptedWebhookSecret, _ := crypto.Decrypt(pc.WebhookSecret, s.encryptionKey)
 					accountID := pc.Metadata.NombaAccountID
-					providerClient = nomba.New(decryptedPublic, decryptedSecret, accountID, isLiveEnv)
+					providerClient = nomba.New(decryptedPublic, decryptedSecret, decryptedWebhookSecret, accountID, isLiveEnv)
 				case "opay":
 					decryptedPublic, _ := crypto.Decrypt(pc.PublicKey, s.encryptionKey)
 					merchantID := pc.Metadata.OpayAccountID
