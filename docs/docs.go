@@ -2262,6 +2262,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2026-12-31T23:59:59Z"
                 },
+                "sub_account_id": {
+                    "type": "string",
+                    "example": "sub_12345"
+                },
                 "type": {
                     "type": "string",
                     "default": "static",

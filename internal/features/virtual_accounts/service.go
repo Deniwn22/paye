@@ -86,6 +86,7 @@ func (s *VAService) CreateVirtualAccount(ctx context.Context, projectID string, 
 		AccountName:    dto.AccountName,
 		Currency:       dto.Currency,
 		BVN:            dto.BVN,
+		SubAccountID:   dto.SubAccountID,
 		ExpectedAmount: dto.ExpectedAmount,
 		ExpiryDate:     dto.ExpiryDate,
 	}

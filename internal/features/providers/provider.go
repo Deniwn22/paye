@@ -176,6 +176,7 @@ type CreateVARequest struct {
 	AccountName    string
 	Currency       string
 	BVN            string
+	SubAccountID   string
 	ExpectedAmount float64
 	ExpiryDate     string
 }

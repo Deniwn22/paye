@@ -53,7 +53,12 @@ func (n *Nomba) CreateVirtualAccount(ctx context.Context, req providers.CreateVA
 		return nil, fmt.Errorf("nomba: failed to marshal create VA request: %w", err)
 	}
 
-	resp, err := n.makeRequest("POST", n.getBaseURL()+"/accounts/virtual", body)
+	endpoint := n.getBaseURL() + "/accounts/virtual"
+	if req.SubAccountID != "" {
+		endpoint = fmt.Sprintf("%s/%s", endpoint, req.SubAccountID)
+	}
+
+	resp, err := n.makeRequest("POST", endpoint, body)
 	if err != nil {
 		return nil, err
 	}

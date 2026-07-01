@@ -130,6 +130,9 @@ definitions:
       expiry_date:
         example: "2026-12-31T23:59:59Z"
         type: string
+      sub_account_id:
+        example: sub_12345
+        type: string
       type:
         default: static
         enum:
