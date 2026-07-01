@@ -407,6 +407,9 @@
           console.error("Paye SDK Checkout Error:", err);
           _paymentInProgress = false;
           var errMsg = err.message || err || "Checkout initialization failed";
+          if (options.customErrorMessage && errMsg.indexOf("No active payment provider is configured") !== -1) {
+            errMsg = options.customErrorMessage;
+          }
           if (options.onFailure)
             options.onFailure(errMsg, { status: "failed", message: errMsg });
         });
@@ -485,6 +488,7 @@
       var type = el.getAttribute("data-type") || "payment";
       var planId = el.getAttribute("data-plan-id");
       var reference = el.getAttribute("data-reference");
+      var customErrorMessage = el.getAttribute("data-error");
       var onSuccessCallbackName = el.getAttribute("data-on-success");
       var onFailureCallbackName = el.getAttribute("data-on-failure");
       var onCancelCallbackName = el.getAttribute("data-on-cancel");
@@ -570,6 +574,7 @@
             email: finalEmail,
             currency: currency,
             reference: reference,
+            customErrorMessage: customErrorMessage,
             onSuccess: function (ref, details) {
               btn.disabled = false;
               btn.innerText = origText;

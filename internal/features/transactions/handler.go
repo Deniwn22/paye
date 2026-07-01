@@ -3,6 +3,7 @@ package transactions
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ttomsin/paye/internal/api"
@@ -48,6 +49,15 @@ func (h *TransactionHandler) InitializeTransactionHandler(c *gin.Context) {
 
 	resp, err := h.service.InitializeTransaction(c.Request.Context(), projectID.(string), &req)
 	if err != nil {
+		if strings.Contains(err.Error(), "active provider config not found") {
+			envStr := "test"
+			if isLive, exists := c.Get(middleware.IsLiveContextKey); exists && isLive.(bool) {
+				envStr = "live"
+			}
+			msg := fmt.Sprintf("No active payment provider is configured for the %s environment. Please configure a %s provider in your Paye dashboard.", envStr, envStr)
+			c.JSON(http.StatusBadRequest, api.Error(msg))
+			return
+		}
 		slog.Error("internal server error", "error", err)
 		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
