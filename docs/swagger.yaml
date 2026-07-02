@@ -76,6 +76,26 @@ definitions:
       status:
         type: boolean
     type: object
+  api.SwaggerVirtualAccountListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.VirtualAccountResponse'
+        type: array
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  api.SwaggerVirtualAccountResponse:
+    properties:
+      data:
+        $ref: '#/definitions/dto.VirtualAccountResponse'
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
   api.SwaggerWebhookConfigListResponse:
     properties:
       data:
@@ -344,6 +364,63 @@ definitions:
         - success
         - failed
         example: success
+        type: string
+    type: object
+  dto.VirtualAccountResponse:
+    properties:
+      account_name:
+        example: Thompson Oretan
+        type: string
+      account_ref:
+        example: nomba_acc_123
+        type: string
+      bank_account_name:
+        example: Paye - Thompson Oretan
+        type: string
+      bank_account_number:
+        example: "1234567890"
+        type: string
+      bank_name:
+        example: Providus Bank
+        type: string
+      created_at:
+        example: "2026-07-01T12:00:00Z"
+        type: string
+      currency:
+        example: NGN
+        type: string
+      customer_reference:
+        example: cust_12345
+        type: string
+      expected_amount:
+        example: 0
+        type: number
+      expiry_date:
+        example: "2026-12-31T23:59:59Z"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      is_live:
+        example: true
+        type: boolean
+      project_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      provider:
+        example: nomba
+        type: string
+      pvc_id:
+        example: VA-123456789
+        type: string
+      status:
+        example: active
+        type: string
+      type:
+        example: static
+        type: string
+      updated_at:
+        example: "2026-07-01T12:00:00Z"
         type: string
     type: object
   dto.WebhookConfigRequest:
@@ -1320,7 +1397,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/api.SwaggerVirtualAccountListResponse'
         "401":
           description: Unauthorized
           schema:
@@ -1351,7 +1428,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/api.SwaggerVirtualAccountResponse'
         "400":
           description: Bad Request
           schema:
@@ -1418,7 +1495,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/api.SwaggerVirtualAccountResponse'
         "400":
           description: Bad Request
           schema:

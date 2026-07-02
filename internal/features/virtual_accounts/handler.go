@@ -27,7 +27,7 @@ func NewVAHandler(service *VAService) *VAHandler {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body dto.CreateVirtualAccountDTO true "Virtual Account details"
-// @Success 200 {object} api.SwaggerSimpleResponse
+// @Success 200 {object} api.SwaggerVirtualAccountResponse
 // @Failure 400 {object} api.SwaggerSimpleResponse
 // @Failure 401 {object} api.SwaggerSimpleResponse
 // @Failure 500 {object} api.SwaggerSimpleResponse
@@ -65,7 +65,7 @@ func (h *VAHandler) CreateVirtualAccountHandler(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param pvc_id path string true "PVC ID"
-// @Success 200 {object} api.SwaggerSimpleResponse
+// @Success 200 {object} api.SwaggerVirtualAccountResponse
 // @Failure 400 {object} api.SwaggerSimpleResponse
 // @Failure 401 {object} api.SwaggerSimpleResponse
 // @Failure 404 {object} api.SwaggerSimpleResponse
@@ -97,7 +97,7 @@ func (h *VAHandler) GetVirtualAccountHandler(c *gin.Context) {
 // @Tags Virtual Accounts
 // @Produce json
 // @Security ApiKeyAuth
-// @Success 200 {object} api.SwaggerSimpleResponse
+// @Success 200 {object} api.SwaggerVirtualAccountListResponse
 // @Failure 401 {object} api.SwaggerSimpleResponse
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /virtual-accounts [get]

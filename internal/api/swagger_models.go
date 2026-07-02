@@ -79,3 +79,17 @@ type SwaggerPaymentProviderListResponse struct {
 	Message string                        `json:"message"`
 	Data    []dto.PaymentProviderResponse `json:"data"`
 }
+
+// SwaggerVirtualAccountResponse represents a single virtual account response
+type SwaggerVirtualAccountResponse struct {
+	Status  bool                       `json:"status"`
+	Message string                     `json:"message"`
+	Data    dto.VirtualAccountResponse `json:"data"`
+}
+
+// SwaggerVirtualAccountListResponse represents a list of virtual accounts response
+type SwaggerVirtualAccountListResponse struct {
+	Status  bool                         `json:"status"`
+	Message string                       `json:"message"`
+	Data    []dto.VirtualAccountResponse `json:"data"`
+}

@@ -1307,7 +1307,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/api.SwaggerVirtualAccountListResponse"
                         }
                     },
                     "401": {
@@ -1356,7 +1356,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/api.SwaggerVirtualAccountResponse"
                         }
                     },
                     "400": {
@@ -1497,7 +1497,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/api.SwaggerVirtualAccountResponse"
                         }
                     },
                     "400": {
@@ -2192,6 +2192,37 @@ const docTemplate = `{
                 }
             }
         },
+        "api.SwaggerVirtualAccountListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.VirtualAccountResponse"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "api.SwaggerVirtualAccountResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dto.VirtualAccountResponse"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
         "api.SwaggerWebhookConfigListResponse": {
             "type": "object",
             "properties": {
@@ -2573,6 +2604,83 @@ const docTemplate = `{
                         "failed"
                     ],
                     "example": "success"
+                }
+            }
+        },
+        "dto.VirtualAccountResponse": {
+            "type": "object",
+            "properties": {
+                "account_name": {
+                    "type": "string",
+                    "example": "Thompson Oretan"
+                },
+                "account_ref": {
+                    "type": "string",
+                    "example": "nomba_acc_123"
+                },
+                "bank_account_name": {
+                    "type": "string",
+                    "example": "Paye - Thompson Oretan"
+                },
+                "bank_account_number": {
+                    "type": "string",
+                    "example": "1234567890"
+                },
+                "bank_name": {
+                    "type": "string",
+                    "example": "Providus Bank"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-07-01T12:00:00Z"
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "NGN"
+                },
+                "customer_reference": {
+                    "type": "string",
+                    "example": "cust_12345"
+                },
+                "expected_amount": {
+                    "type": "number",
+                    "example": 0
+                },
+                "expiry_date": {
+                    "type": "string",
+                    "example": "2026-12-31T23:59:59Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "is_live": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "project_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "provider": {
+                    "type": "string",
+                    "example": "nomba"
+                },
+                "pvc_id": {
+                    "type": "string",
+                    "example": "VA-123456789"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "static"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2026-07-01T12:00:00Z"
                 }
             }
         },

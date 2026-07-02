@@ -13,3 +13,24 @@ type CreateVirtualAccountDTO struct {
 type UpdateVADTO struct {
 	AccountName string `json:"account_name" example:"Thompson Oretan Updated" description:"The new name to display on the virtual account"`
 }
+
+type VirtualAccountResponse struct {
+	ID                string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	CreatedAt         string  `json:"created_at" example:"2026-07-01T12:00:00Z"`
+	UpdatedAt         string  `json:"updated_at" example:"2026-07-01T12:00:00Z"`
+	PvcID             string  `json:"pvc_id" example:"VA-123456789"`
+	ProjectID         string  `json:"project_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	CustomerReference string  `json:"customer_reference" example:"cust_12345"`
+	AccountRef        string  `json:"account_ref" example:"nomba_acc_123"`
+	AccountName       string  `json:"account_name" example:"Thompson Oretan"`
+	BankName          string  `json:"bank_name" example:"Providus Bank"`
+	BankAccountNumber string  `json:"bank_account_number" example:"1234567890"`
+	BankAccountName   string  `json:"bank_account_name" example:"Paye - Thompson Oretan"`
+	Currency          string  `json:"currency" example:"NGN"`
+	Provider          string  `json:"provider" example:"nomba"`
+	Type              string  `json:"type" example:"static"`
+	Status            string  `json:"status" example:"active"`
+	ExpectedAmount    float64 `json:"expected_amount" example:"0"`
+	ExpiryDate        string  `json:"expiry_date,omitempty" example:"2026-12-31T23:59:59Z"`
+	IsLive            bool    `json:"is_live" example:"true"`
+}
