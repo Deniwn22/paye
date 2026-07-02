@@ -59,6 +59,10 @@ func (n *Nomba) Name() string {
 
 // makeRequest handles all authenticated requests to Nomba's API
 func (n *Nomba) makeRequest(method, url string, body []byte) (*http.Response, error) {
+	return n.makeRequestWithAccount(method, url, body, n.tokenManager.accountID)
+}
+
+func (n *Nomba) makeRequestWithAccount(method, url string, body []byte, accountID string) (*http.Response, error) {
 	token, err := n.tokenManager.GetToken()
 	if err != nil {
 		return nil, fmt.Errorf("nomba: failed to get access token: %w", err)
@@ -71,12 +75,7 @@ func (n *Nomba) makeRequest(method, url string, body []byte) (*http.Response, er
 
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
-	
-	accID := n.tokenManager.accountID
-	if n.subAccountID != "" {
-		accID = n.subAccountID
-	}
-	req.Header.Set("accountId", accID)
+	req.Header.Set("accountId", accountID)
 
 	client := &http.Client{}
 	return client.Do(req)
@@ -206,7 +205,12 @@ func (n *Nomba) VerifyTransaction(reference string) (*providers.TransactionRespo
 		return nil, fmt.Errorf("nomba: failed to marshal verify request: %w", err)
 	}
 
-	resp, err := n.makeRequest("POST", n.getBaseURL()+"/transactions/accounts", body)
+	accID := n.tokenManager.accountID
+	if n.subAccountID != "" {
+		accID = n.subAccountID
+	}
+
+	resp, err := n.makeRequestWithAccount("POST", n.getBaseURL()+"/transactions/accounts", body, accID)
 	if err != nil {
 		return nil, err
 	}
