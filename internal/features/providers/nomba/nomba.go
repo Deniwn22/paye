@@ -321,11 +321,16 @@ func (n *Nomba) HandleWebhook(signature string, payload []byte) (*providers.Webh
 		return nil, fmt.Errorf("nomba: invalid webhook signature")
 	}
 
+	status := "failed"
+	if strings.Contains(strings.ToLower(webhookData.EventType), "success") {
+		status = "success"
+	}
+
 	return &providers.WebhookEvent{
 		Event:     webhookData.EventType,
 		Reference: webhookData.Data.Transaction.TransactionID,
 		Amount:    webhookData.Data.Transaction.Amount,
-		Status:    webhookData.EventType,
+		Status:    status,
 		Provider:  n.Name(),
 	}, nil
 }
