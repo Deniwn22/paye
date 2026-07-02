@@ -2,7 +2,7 @@
 
 🏆 **Currently competing in the DevCareer x Nomba Hackathon 2026**
 
-Unified payment routing engine and secure webhook proxies for African developers. 
+Unified payment routing engine and secure webhook proxies for African businesses and developers. 
 
 Paye acts as a unified middle-layer connecting your apps to payment providers like Nomba, Paystack, Flutterwave, and OPay. Build your integration once against the Paye REST API or drop in our JS SDK, manage API credentials dynamically via the dashboard, generate Static Virtual Accounts on the fly, and route webhook events securely through isolated proxy slugs.
 
