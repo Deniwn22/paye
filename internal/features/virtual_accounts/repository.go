@@ -31,6 +31,13 @@ func (r *VARepository) CreateVirtualAccount(ctx context.Context, va *models.Virt
 func (r *VARepository) FindByPvcID(ctx context.Context, pvcID string, projectID string) (*models.VirtualAccount, error) {
 	var va models.VirtualAccount
 	err := r.db.WithContext(ctx).Where("pvc_id = ? AND project_id = ?", pvcID, projectID).First(&va).Error
+	if err == nil {
+		var total float64
+		r.db.WithContext(ctx).Model(&models.VirtualAccountTransaction{}).
+			Where("pvc_id = ? AND status = ?", pvcID, "success").
+			Select("COALESCE(SUM(amount), 0)").Scan(&total)
+		va.TotalReceived = total
+	}
 	return &va, err
 }
 
@@ -44,6 +51,27 @@ func (r *VARepository) ListVirtualAccounts(ctx context.Context, projectID string
 	var vas []*models.VirtualAccount
 	isLive := middleware.GetIsLiveFromContext(ctx)
 	err := r.db.WithContext(ctx).Where("project_id = ? AND is_live = ?", projectID, isLive).Order("created_at DESC").Find(&vas).Error
+	
+	if err == nil && len(vas) > 0 {
+		var totals []struct {
+			PvcID string
+			Total float64
+		}
+		r.db.WithContext(ctx).Model(&models.VirtualAccountTransaction{}).
+			Select("pvc_id, COALESCE(SUM(amount), 0) as total").
+			Where("project_id = ? AND status = ?", projectID, "success").
+			Group("pvc_id").Scan(&totals)
+			
+		totalsMap := make(map[string]float64)
+		for _, t := range totals {
+			totalsMap[t.PvcID] = t.Total
+		}
+		
+		for _, va := range vas {
+			va.TotalReceived = totalsMap[va.PvcID]
+		}
+	}
+	
 	return vas, err
 }
 
