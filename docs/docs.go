@@ -989,6 +989,72 @@ const docTemplate = `{
                 }
             }
         },
+        "/reports/statement": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Generate a statement aggregating volumes across providers, optionally downloading as PDF.",
+                "produces": [
+                    "application/json",
+                    "application/pdf"
+                ],
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Generate aggregator statement",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start Date (2026-06-01T00:00:00Z)",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End Date (2026-06-30T23:59:59Z)",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma separated statuses (e.g. success,failed)",
+                        "name": "statuses",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Format: json or pdf",
+                        "name": "format",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AggregatorStatementResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/sdk/subscriptions": {
             "post": {
                 "description": "Initialize a subscription from the client SDK using a project's Public ID",
@@ -1623,6 +1689,79 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/virtual-accounts/{pvc_id}/statement": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Generate a statement of transactions for a specific virtual account, optionally downloading as PDF.",
+                "produces": [
+                    "application/json",
+                    "application/pdf"
+                ],
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Generate Virtual Account statement",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "PVC ID",
+                        "name": "pvc_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start Date (2026-06-01T00:00:00Z)",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End Date (2026-06-30T23:59:59Z)",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma separated statuses (e.g. success,failed)",
+                        "name": "statuses",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Format: json or pdf",
+                        "name": "format",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerVirtualAccountTransactionListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/api.SwaggerSimpleResponse"
                         }
@@ -2288,6 +2427,23 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.AggregatorStatementResponse": {
+            "type": "object",
+            "properties": {
+                "end_date": {
+                    "type": "string"
+                },
+                "providers": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/dto.ProviderSummary"
+                    }
+                },
+                "start_date": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateVirtualAccountDTO": {
             "type": "object",
             "required": [
@@ -2552,6 +2708,17 @@ const docTemplate = `{
                 },
                 "webhook_secret": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.ProviderSummary": {
+            "type": "object",
+            "properties": {
+                "total_volume": {
+                    "type": "number"
+                },
+                "transaction_count": {
+                    "type": "integer"
                 }
             }
         },
@@ -2978,7 +3145,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Paye API",
-	Description:      "Unified payment routing engine and secure webhook proxies for African developers.\n\nProduction Server: https://paye.africa\nLocal Server: http://localhost:8080\n\n---\n**Testing Guide:**\n- **Safe to Test**: Endpoints under the Dashboard and Providers tags are safe to use for CRUD operations. Virtual accounts can be created with `type: static` safely.\n- **Use Caution**: Live Transaction initializations will redirect to actual payment gateways and may deduct funds if real card details are entered. Ensure you are using Test API Keys (`X-Paye-API-Key: paye_test_...`) when exploring transaction flows.\n- **Misdirected Payments**: These are auto-generated when webhooks fail to find a matching VA. You can list them and mark them as resolved safely.\n---\n\nAuthentication Modes:\n1. Bearer JWT Token: Passed as \"Authorization: Bearer <token>\". Scoped to Dashboard CRUD resources (projects, provider credentials, webhook routes, logs).\n2. API Key Header: Passed as \"X-Paye-API-Key: paye_live_...\" or \"paye_test_...\". Scoped to server-to-server transaction initializations, refunds, and payouts.",
+	Description:      "Unified payment routing engine and secure webhook proxies for African developers.\n\n![Paye Logo](/favicon_io/android-chrome-192x192.png)\n\nProduction Server: https://paye.africa\nLocal Server: http://localhost:8080\n\n---\n**Testing Guide:**\n- **Safe to Test**: Endpoints under the Dashboard and Providers tags are safe to use for CRUD operations. Virtual accounts can be created with `type: static` safely.\n- **Use Caution**: Live Transaction initializations will redirect to actual payment gateways and may deduct funds if real card details are entered. Ensure you are using Test API Keys (`X-Paye-API-Key: paye_test_...`) when exploring transaction flows.\n- **Misdirected Payments**: These are auto-generated when webhooks fail to find a matching VA. You can list them and mark them as resolved safely.\n---\n\nAuthentication Modes:\n1. Bearer JWT Token: Passed as \"Authorization: Bearer <token>\". Scoped to Dashboard CRUD resources (projects, provider credentials, webhook routes, logs).\n2. API Key Header: Passed as \"X-Paye-API-Key: paye_live_...\" or \"paye_test_...\". Scoped to server-to-server transaction initializations, refunds, and payouts.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

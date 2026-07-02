@@ -138,6 +138,17 @@ definitions:
       status:
         type: boolean
     type: object
+  dto.AggregatorStatementResponse:
+    properties:
+      end_date:
+        type: string
+      providers:
+        additionalProperties:
+          $ref: '#/definitions/dto.ProviderSummary'
+        type: object
+      start_date:
+        type: string
+    type: object
   dto.CreateVirtualAccountDTO:
     properties:
       account_name:
@@ -328,6 +339,13 @@ definitions:
         type: string
       webhook_secret:
         type: string
+    type: object
+  dto.ProviderSummary:
+    properties:
+      total_volume:
+        type: number
+      transaction_count:
+        type: integer
     type: object
   dto.ProviderType:
     enum:
@@ -613,6 +631,8 @@ info:
   contact: {}
   description: |-
     Unified payment routing engine and secure webhook proxies for African developers.
+
+    ![Paye Logo](/favicon_io/android-chrome-192x192.png)
 
     Production Server: https://paye.africa
     Local Server: http://localhost:8080
@@ -1249,6 +1269,50 @@ paths:
       summary: Register a Test provider configuration
       tags:
       - Providers
+  /reports/statement:
+    get:
+      description: Generate a statement aggregating volumes across providers, optionally
+        downloading as PDF.
+      parameters:
+      - description: Start Date (2026-06-01T00:00:00Z)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End Date (2026-06-30T23:59:59Z)
+        in: query
+        name: end_date
+        required: true
+        type: string
+      - description: Comma separated statuses (e.g. success,failed)
+        in: query
+        name: statuses
+        type: string
+      - description: 'Format: json or pdf'
+        in: query
+        name: format
+        type: string
+      produces:
+      - application/json
+      - application/pdf
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AggregatorStatementResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Generate aggregator statement
+      tags:
+      - Reports
   /sdk/{publicId}:
     get:
       description: Serve the Javascript SDK file customized for the merchant's active
@@ -1615,6 +1679,55 @@ paths:
       summary: Update a virtual account
       tags:
       - Virtual Accounts
+  /virtual-accounts/{pvc_id}/statement:
+    get:
+      description: Generate a statement of transactions for a specific virtual account,
+        optionally downloading as PDF.
+      parameters:
+      - description: PVC ID
+        in: path
+        name: pvc_id
+        required: true
+        type: string
+      - description: Start Date (2026-06-01T00:00:00Z)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End Date (2026-06-30T23:59:59Z)
+        in: query
+        name: end_date
+        required: true
+        type: string
+      - description: Comma separated statuses (e.g. success,failed)
+        in: query
+        name: statuses
+        type: string
+      - description: 'Format: json or pdf'
+        in: query
+        name: format
+        type: string
+      produces:
+      - application/json
+      - application/pdf
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerVirtualAccountTransactionListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Generate Virtual Account statement
+      tags:
+      - Reports
   /virtual-accounts/{pvc_id}/suspend:
     patch:
       description: Suspend an active virtual account

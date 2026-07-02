@@ -2,6 +2,7 @@ package virtual_accounts
 
 import (
 	"context"
+	"time"
 
 	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
@@ -133,4 +134,26 @@ func (r *VARepository) FindTransactionByReference(ctx context.Context, reference
 	var tx models.VirtualAccountTransaction
 	err := r.db.WithContext(ctx).Where("reference = ?", reference).First(&tx).Error
 	return &tx, err
+}
+
+// GetVATransactionsForStatement fetches transactions for a specific virtual account within a date range and matching specific statuses
+func (r *VARepository) GetVATransactionsForStatement(ctx context.Context, projectID, pvcID string, isLive bool, startTime, endTime time.Time, statuses []string) ([]*models.VirtualAccountTransaction, error) {
+	var txs []*models.VirtualAccountTransaction
+	query := r.db.WithContext(ctx).Where("project_id = ? AND pvc_id = ? AND is_live = ? AND created_at >= ? AND created_at <= ?", projectID, pvcID, isLive, startTime, endTime)
+	if len(statuses) > 0 {
+		query = query.Where("status IN ?", statuses)
+	}
+	err := query.Order("created_at DESC").Find(&txs).Error
+	return txs, err
+}
+
+// GetAggregatorVATransactionsForStatement fetches all VA transactions across a project for aggregator statements
+func (r *VARepository) GetAggregatorVATransactionsForStatement(ctx context.Context, projectID string, isLive bool, startTime, endTime time.Time, statuses []string) ([]*models.VirtualAccountTransaction, error) {
+	var txs []*models.VirtualAccountTransaction
+	query := r.db.WithContext(ctx).Where("project_id = ? AND is_live = ? AND created_at >= ? AND created_at <= ?", projectID, isLive, startTime, endTime)
+	if len(statuses) > 0 {
+		query = query.Where("status IN ?", statuses)
+	}
+	err := query.Order("created_at DESC").Find(&txs).Error
+	return txs, err
 }

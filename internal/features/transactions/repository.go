@@ -54,3 +54,14 @@ func (r *TransactionRepo) FindOlderPendingTransactions(ctx context.Context, star
 		Find(&txs).Error
 	return txs, err
 }
+
+// GetTransactionsForStatement fetches transactions for reporting within a date range and matching specific statuses
+func (r *TransactionRepo) GetTransactionsForStatement(ctx context.Context, projectID string, isLive bool, startTime, endTime time.Time, statuses []string) ([]*models.Transaction, error) {
+	var txs []*models.Transaction
+	query := r.db.WithContext(ctx).Where("project_id = ? AND is_live = ? AND created_at >= ? AND created_at <= ?", projectID, isLive, startTime, endTime)
+	if len(statuses) > 0 {
+		query = query.Where("status IN ?", statuses)
+	}
+	err := query.Order("created_at DESC").Find(&txs).Error
+	return txs, err
+}

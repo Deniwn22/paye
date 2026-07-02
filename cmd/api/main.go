@@ -22,6 +22,7 @@ import (
 	"github.com/ttomsin/paye/internal/features/paystack"
 	"github.com/ttomsin/paye/internal/features/projects"
 	"github.com/ttomsin/paye/internal/features/providers"
+	"github.com/ttomsin/paye/internal/features/reporting"
 	"github.com/ttomsin/paye/internal/features/sdk"
 	"github.com/ttomsin/paye/internal/features/subscriptions"
 	"github.com/ttomsin/paye/internal/features/transactions"
@@ -34,6 +35,8 @@ import (
 // @title Paye API
 // @version 1.0
 // @description Unified payment routing engine and secure webhook proxies for African developers.
+// @description 
+// @description ![Paye Logo](/favicon_io/android-chrome-192x192.png)
 // @description
 // @description Production Server: https://paye.africa
 // @description Local Server: http://localhost:8080
@@ -158,6 +161,7 @@ func main() {
 	transactionService := transactions.NewTransactionService(transactionRepo, providerRepo, webhookRepo, derivedEncryptionKey, notificationService)
 	subscriptionService := subscriptions.NewSubscriptionService(database.DB, providerRepo, derivedEncryptionKey)
 	vaService := virtual_accounts.NewVAService(vaRepo, providerRepo, derivedEncryptionKey)
+	reportingService := reporting.NewReportingService(transactionRepo, vaRepo)
 
 	// Background worker for processing due subscriptions
 	c := cron.New()
@@ -211,6 +215,7 @@ func main() {
 	transactionHandler := transactions.NewTransactionHandler(transactionService)
 	sdkHandler := sdk.NewSDKHandler(userRepo, projectRepo, providerRepo, transactionService, derivedEncryptionKey, database.DB, subscriptionService)
 	vaHandler := virtual_accounts.NewVAHandler(vaService)
+	reportingHandler := reporting.NewReportingHandler(reportingService, projectRepo, vaRepo)
 
 	// Dynamic Swagger Host Configuration
 	if os.Getenv("GIN_MODE") == "release" {
@@ -238,6 +243,9 @@ func main() {
 
 	// Serve static files in testweb directory for development/testing
 	r.Static("/testweb", "./testweb")
+
+	// Serve favicon_io statically for UI assets and Swagger logo
+	r.Static("/favicon_io", "./favicon_io")
 
 	// Public Group
 	v1 := r.Group("/api/v1")
@@ -304,6 +312,9 @@ func main() {
 	// Register Dashboard stats and logs routes (Protected)
 	dashboard.RegisterRoutes(protected, dashboardHandler)
 
+	// Register Reporting route (Protected by JWT)
+	reporting.RegisterRoutes(protected, reportingHandler)
+
 	// Register Transaction list route (Protected by JWT)
 	protected.GET("/transactions", transactionHandler.ListTransactionsHandler)
 
@@ -315,6 +326,7 @@ func main() {
 	// Register Transaction & Virtual Account routes (Protected by API Key)
 	transactions.RegisterRoutes(apiKeyProtected, transactionHandler)
 	virtual_accounts.RegisterRoutes(apiKeyProtected, vaHandler)
+	reporting.RegisterVARoutes(apiKeyProtected, reportingHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
