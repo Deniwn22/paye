@@ -6,6 +6,7 @@ import (
 	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type VARepository struct {
@@ -51,7 +52,7 @@ func (r *VARepository) UpdateVirtualAccount(ctx context.Context, va *models.Virt
 }
 
 func (r *VARepository) CreateTransaction(ctx context.Context, tx *models.VirtualAccountTransaction) (*models.VirtualAccountTransaction, error) {
-	if err := r.db.WithContext(ctx).Create(tx).Error; err != nil {
+	if err := r.db.WithContext(ctx).Clauses(clause.OnConflict{DoNothing: true}).Create(tx).Error; err != nil {
 		return nil, err
 	}
 	return tx, nil
@@ -77,7 +78,7 @@ func (r *VARepository) FindByBankAccountNumber(ctx context.Context, bankAccountN
 }
 
 func (r *VARepository) CreateMisdirectedPayment(ctx context.Context, mp *models.MisdirectedPayment) (*models.MisdirectedPayment, error) {
-	if err := r.db.WithContext(ctx).Create(mp).Error; err != nil {
+	if err := r.db.WithContext(ctx).Clauses(clause.OnConflict{DoNothing: true}).Create(mp).Error; err != nil {
 		return nil, err
 	}
 	return mp, nil
