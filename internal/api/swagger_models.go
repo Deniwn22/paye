@@ -100,3 +100,10 @@ type SwaggerVirtualAccountTransactionListResponse struct {
 	Message string                                  `json:"message"`
 	Data    []dto.VirtualAccountTransactionResponse `json:"data"`
 }
+
+// SwaggerStatementVerifyResponse represents the statement verify success response
+type SwaggerStatementVerifyResponse struct {
+	Status  bool                   `json:"status"`
+	Message string                 `json:"message"`
+	Data    dto.StatementRecordDTO `json:"data"`
+}

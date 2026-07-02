@@ -22,3 +22,16 @@ type ProviderSummary struct {
 	TotalVolume     float64 `json:"total_volume"`
 	TransactionCount int64  `json:"transaction_count"`
 }
+
+// StatementRecordDTO represents the verified statement payload
+type StatementRecordDTO struct {
+	ID               string    `json:"id"`
+	ProjectName      string    `json:"project_name"`
+	Type             string    `json:"type"`
+	TotalVolume      float64   `json:"total_volume"`
+	TransactionCount int64     `json:"transaction_count"`
+	StartDate        time.Time `json:"start_date"`
+	EndDate          time.Time `json:"end_date"`
+	CreatedAt        time.Time `json:"created_at"`
+	IsLive           bool      `json:"is_live"`
+}

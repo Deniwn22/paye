@@ -1078,7 +1078,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/api.SwaggerStatementVerifyResponse"
                         }
                     },
                     "400": {
@@ -2400,6 +2400,20 @@ const docTemplate = `{
                 }
             }
         },
+        "api.SwaggerStatementVerifyResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dto.StatementRecordDTO"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
         "api.SwaggerTransactionInitializeResponse": {
             "type": "object",
             "properties": {
@@ -2850,6 +2864,38 @@ const docTemplate = `{
             "x-enum-varnames": [
                 "Paystack"
             ]
+        },
+        "dto.StatementRecordDTO": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_live": {
+                    "type": "boolean"
+                },
+                "project_name": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "total_volume": {
+                    "type": "number"
+                },
+                "transaction_count": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
         },
         "dto.UpdatePaymentProviderRequest": {
             "type": "object",

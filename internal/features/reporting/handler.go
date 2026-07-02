@@ -161,7 +161,7 @@ func (h *ReportingHandler) GenerateVAStatementHandler(c *gin.Context) {
 // @Tags Reports
 // @Produce json
 // @Param id path string true "Verification Ref (UUID)"
-// @Success 200 {object} api.SwaggerSimpleResponse
+// @Success 200 {object} api.SwaggerStatementVerifyResponse
 // @Failure 400 {object} api.SwaggerSimpleResponse
 // @Failure 404 {object} api.SwaggerSimpleResponse
 // @Router /reports/statements/verify/{id} [get]
