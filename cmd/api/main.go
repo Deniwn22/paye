@@ -161,7 +161,8 @@ func main() {
 	transactionService := transactions.NewTransactionService(transactionRepo, providerRepo, webhookRepo, derivedEncryptionKey, notificationService)
 	subscriptionService := subscriptions.NewSubscriptionService(database.DB, providerRepo, derivedEncryptionKey)
 	vaService := virtual_accounts.NewVAService(vaRepo, providerRepo, derivedEncryptionKey)
-	reportingService := reporting.NewReportingService(transactionRepo, vaRepo)
+	reportingRepo := reporting.NewReportingRepo(database.DB)
+	reportingService := reporting.NewReportingService(transactionRepo, vaRepo, reportingRepo)
 
 	// Background worker for processing due subscriptions
 	c := cron.New()
@@ -215,7 +216,7 @@ func main() {
 	transactionHandler := transactions.NewTransactionHandler(transactionService)
 	sdkHandler := sdk.NewSDKHandler(userRepo, projectRepo, providerRepo, transactionService, derivedEncryptionKey, database.DB, subscriptionService)
 	vaHandler := virtual_accounts.NewVAHandler(vaService)
-	reportingHandler := reporting.NewReportingHandler(reportingService, projectRepo, vaRepo)
+	reportingHandler := reporting.NewReportingHandler(reportingService, projectRepo, vaRepo, reportingRepo)
 
 	// Dynamic Swagger Host Configuration
 	if os.Getenv("GIN_MODE") == "release" {
@@ -273,6 +274,9 @@ func main() {
 
 	// Auth Routes (Public)
 	auth.RegisterRoutes(v1, authHandler)
+	
+	// Reporting Routes (Public)
+	reporting.RegisterPublicRoutes(v1, reportingHandler)
 
 	// Payment Providers Route (Public)
 	v1.GET("/payment-providers", providerHandler.ListPaymentProvidersHandler)

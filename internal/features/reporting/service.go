@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/uuid"
+
 	"github.com/johnfercher/maroto/v2"
 	"github.com/johnfercher/maroto/v2/pkg/components/col"
 	"github.com/johnfercher/maroto/v2/pkg/components/image"
@@ -25,14 +27,16 @@ import (
 )
 
 type ReportingService struct {
-	txRepo *transactions.TransactionRepo
-	vaRepo *virtual_accounts.VARepository
+	txRepo  *transactions.TransactionRepo
+	vaRepo  *virtual_accounts.VARepository
+	repRepo *ReportingRepo
 }
 
-func NewReportingService(txRepo *transactions.TransactionRepo, vaRepo *virtual_accounts.VARepository) *ReportingService {
+func NewReportingService(txRepo *transactions.TransactionRepo, vaRepo *virtual_accounts.VARepository, repRepo *ReportingRepo) *ReportingService {
 	return &ReportingService{
-		txRepo: txRepo,
-		vaRepo: vaRepo,
+		txRepo:  txRepo,
+		vaRepo:  vaRepo,
+		repRepo: repRepo,
 	}
 }
 
@@ -83,7 +87,37 @@ func (s *ReportingService) GenerateAggregatorStatement(ctx context.Context, proj
 }
 
 // GeneratePDFStatement outputs the aggregated JSON to a styled PDF
-func (s *ReportingService) GeneratePDFStatement(data *dto.AggregatorStatementResponse, projectName string) ([]byte, error) {
+func (s *ReportingService) GeneratePDFStatement(ctx context.Context, projectID string, data *dto.AggregatorStatementResponse, projectName string) ([]byte, error) {
+	// Create Statement Record
+	var totalVolume float64
+	var txCount int64
+	for _, stat := range data.CheckoutStats {
+		totalVolume += stat.TotalVolume
+		txCount += stat.TransactionCount
+	}
+	for _, stat := range data.VAStats {
+		totalVolume += stat.TotalVolume
+		txCount += stat.TransactionCount
+	}
+
+	isLive := middleware.GetIsLiveFromContext(ctx)
+
+	record := &models.StatementRecord{
+		ProjectID:        uuid.MustParse(projectID),
+		Type:             "aggregator",
+		EntityID:         "",
+		TotalVolume:      totalVolume,
+		TransactionCount: txCount,
+		StartDate:        data.StartDate,
+		EndDate:          data.EndDate,
+		IsLive:           isLive,
+	}
+	record.ID = uuid.New()
+	
+	if err := s.repRepo.CreateStatementRecord(ctx, record); err != nil {
+		return nil, fmt.Errorf("failed to save statement record: %w", err)
+	}
+
 	cfg := config.NewBuilder().
 		WithPageNumber().
 		WithLeftMargin(15).
@@ -98,7 +132,7 @@ func (s *ReportingService) GeneratePDFStatement(data *dto.AggregatorStatementRes
 	if len(logoPNG) > 0 {
 		logoCol = image.NewFromBytesCol(2, logoPNG, extension.Png, props.Rect{
 			Center:  true,
-			Percent: 100,
+			Percent: 50,
 		})
 	} else {
 		logoCol = col.New(2)
@@ -116,7 +150,7 @@ func (s *ReportingService) GeneratePDFStatement(data *dto.AggregatorStatementRes
 
 	m.AddRow(10, text.NewCol(12, fmt.Sprintf("Project: %s", projectName), props.Text{Style: fontstyle.Bold, Size: 12}))
 	m.AddRow(10, text.NewCol(12, fmt.Sprintf("Period: %s to %s", data.StartDate.Format("Jan 02, 2006"), data.EndDate.Format("Jan 02, 2006")), props.Text{Size: 10}))
-
+	
 	m.AddRow(10) // Spacer
 
 	if len(data.CheckoutStats) > 0 {
@@ -162,12 +196,19 @@ func (s *ReportingService) GeneratePDFStatement(data *dto.AggregatorStatementRes
 
 	m.AddRow(20) // Spacer
 
-	// Add Stamp
-	m.AddRow(30,
+	// Add Stamp and Verification ID
+	m.AddRow(10,
+		col.New(4), // empty space left
+		text.NewCol(8, fmt.Sprintf("Verification Ref: %s", record.ID.String()), props.Text{
+			Size:  8,
+			Align: align.Right,
+		}),
+	)
+	m.AddRow(15,
 		col.New(8), // empty space left
 		text.NewCol(4, "VERIFIED BY PAYE", props.Text{
 			Style: fontstyle.BoldItalic,
-			Size:  14,
+			Size:  12,
 			Align: align.Right,
 		}),
 	)
@@ -205,7 +246,26 @@ func (s *ReportingService) GenerateVAStatement(ctx context.Context, projectID, p
 }
 
 // GenerateVAPDFStatement outputs the virtual account statement to PDF
-func (s *ReportingService) GenerateVAPDFStatement(va *models.VirtualAccount, txs []*models.VirtualAccountTransaction, total float64, req dto.StatementRequest) ([]byte, error) {
+func (s *ReportingService) GenerateVAPDFStatement(ctx context.Context, projectID string, va *models.VirtualAccount, txs []*models.VirtualAccountTransaction, total float64, req dto.StatementRequest) ([]byte, error) {
+	// Create Statement Record
+	isLive := middleware.GetIsLiveFromContext(ctx)
+
+	record := &models.StatementRecord{
+		ProjectID:        uuid.MustParse(projectID),
+		Type:             "virtual_account",
+		EntityID:         va.PvcID,
+		TotalVolume:      total,
+		TransactionCount: int64(len(txs)),
+		StartDate:        req.StartDate,
+		EndDate:          req.EndDate,
+		IsLive:           isLive,
+	}
+	record.ID = uuid.New()
+	
+	if err := s.repRepo.CreateStatementRecord(ctx, record); err != nil {
+		return nil, fmt.Errorf("failed to save statement record: %w", err)
+	}
+
 	cfg := config.NewBuilder().
 		WithPageNumber().
 		WithLeftMargin(15).
@@ -220,7 +280,7 @@ func (s *ReportingService) GenerateVAPDFStatement(va *models.VirtualAccount, txs
 	if len(logoPNG) > 0 {
 		logoCol = image.NewFromBytesCol(2, logoPNG, extension.Png, props.Rect{
 			Center:  true,
-			Percent: 100,
+			Percent: 50,
 		})
 	} else {
 		logoCol = col.New(2)
@@ -244,11 +304,11 @@ func (s *ReportingService) GenerateVAPDFStatement(va *models.VirtualAccount, txs
 
 	m.AddRow(10) // Spacer
 
-	// Add Table Headers
+	// Add Table Headers (Total Cols = 12)
 	m.AddRow(2, line.NewCol(12))
 	m.AddRow(10,
-		text.NewCol(3, "Date", props.Text{Style: fontstyle.Bold, Size: 10}),
-		text.NewCol(3, "Reference", props.Text{Style: fontstyle.Bold, Size: 10}),
+		text.NewCol(2, "Date", props.Text{Style: fontstyle.Bold, Size: 10}),
+		text.NewCol(4, "Reference", props.Text{Style: fontstyle.Bold, Size: 10}),
 		text.NewCol(2, "Status", props.Text{Style: fontstyle.Bold, Size: 10}),
 		text.NewCol(2, "Sender", props.Text{Style: fontstyle.Bold, Size: 10}),
 		text.NewCol(2, "Amount", props.Text{Style: fontstyle.Bold, Size: 10}),
@@ -268,8 +328,8 @@ func (s *ReportingService) GenerateVAPDFStatement(va *models.VirtualAccount, txs
 				senderName = "Unknown"
 			}
 			m.AddRow(10,
-				text.NewCol(3, tx.CreatedAt.Format("Jan 02, 2006"), props.Text{Size: 9}),
-				text.NewCol(3, tx.Reference, props.Text{Size: 8}),
+				text.NewCol(2, tx.CreatedAt.Format("Jan 02, 2006"), props.Text{Size: 9}),
+				text.NewCol(4, tx.Reference, props.Text{Size: 6}),
 				text.NewCol(2, strings.ToUpper(tx.Status), props.Text{Size: 9}),
 				text.NewCol(2, senderName, props.Text{Size: 9}),
 				text.NewCol(2, fmt.Sprintf("%.2f", tx.Amount), props.Text{Size: 9}),
@@ -280,12 +340,19 @@ func (s *ReportingService) GenerateVAPDFStatement(va *models.VirtualAccount, txs
 
 	m.AddRow(20) // Spacer
 
-	// Add Stamp
-	m.AddRow(30,
+	// Add Stamp and Verification ID
+	m.AddRow(10,
+		col.New(4), // empty space left
+		text.NewCol(8, fmt.Sprintf("Verification Ref: %s", record.ID.String()), props.Text{
+			Size:  8,
+			Align: align.Right,
+		}),
+	)
+	m.AddRow(15,
 		col.New(8), // empty space left
 		text.NewCol(4, "VERIFIED BY PAYE", props.Text{
 			Style: fontstyle.BoldItalic,
-			Size:  14,
+			Size:  12,
 			Align: align.Right,
 		}),
 	)

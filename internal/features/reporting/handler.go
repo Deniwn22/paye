@@ -15,13 +15,15 @@ type ReportingHandler struct {
 	service     *ReportingService
 	projectRepo *projects.ProjectRepo
 	vaRepo      *virtual_accounts.VARepository
+	repRepo     *ReportingRepo
 }
 
-func NewReportingHandler(service *ReportingService, projectRepo *projects.ProjectRepo, vaRepo *virtual_accounts.VARepository) *ReportingHandler {
+func NewReportingHandler(service *ReportingService, projectRepo *projects.ProjectRepo, vaRepo *virtual_accounts.VARepository, repRepo *ReportingRepo) *ReportingHandler {
 	return &ReportingHandler{
 		service:     service,
 		projectRepo: projectRepo,
 		vaRepo:      vaRepo,
+		repRepo:     repRepo,
 	}
 }
 
@@ -66,7 +68,7 @@ func (h *ReportingHandler) GenerateAggregatorStatementHandler(c *gin.Context) {
 			projName = proj.Name
 		}
 
-		pdfBytes, err := h.service.GeneratePDFStatement(res, projName)
+		pdfBytes, err := h.service.GeneratePDFStatement(c.Request.Context(), projectID.(string), res, projName)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": false, "message": "failed to generate pdf: " + err.Error()})
 			return
@@ -132,7 +134,7 @@ func (h *ReportingHandler) GenerateVAStatementHandler(c *gin.Context) {
 			return
 		}
 
-		pdfBytes, err := h.service.GenerateVAPDFStatement(va, txs, total, req)
+		pdfBytes, err := h.service.GenerateVAPDFStatement(c.Request.Context(), projectID.(string), va, txs, total, req)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": false, "message": "failed to generate pdf: " + err.Error()})
 			return
@@ -149,6 +151,51 @@ func (h *ReportingHandler) GenerateVAStatementHandler(c *gin.Context) {
 		"data": gin.H{
 			"transactions": txs,
 			"total_received": total,
+		},
+	})
+}
+
+// VerifyStatementHandler verifies a statement record by UUID
+// @Summary Verify Statement Authenticity
+// @Description Verify the authenticity of a generated statement PDF using its unique Verification Ref
+// @Tags Reports
+// @Produce json
+// @Param id path string true "Verification Ref (UUID)"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 404 {object} api.SwaggerSimpleResponse
+// @Router /reports/statements/verify/{id} [get]
+func (h *ReportingHandler) VerifyStatementHandler(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"status": false, "message": "verification id is required"})
+		return
+	}
+
+	record, err := h.repRepo.FindStatementRecordByID(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"status": false, "message": "statement not found or invalid"})
+		return
+	}
+
+	projectName := "Paye Merchant"
+	if record.Project != nil {
+		projectName = record.Project.Name
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": true,
+		"message": "statement verified successfully",
+		"data": gin.H{
+			"id":                record.ID,
+			"project_name":      projectName,
+			"type":              record.Type,
+			"total_volume":      record.TotalVolume,
+			"transaction_count": record.TransactionCount,
+			"start_date":        record.StartDate,
+			"end_date":          record.EndDate,
+			"created_at":        record.CreatedAt,
+			"is_live":           record.IsLive,
 		},
 	})
 }

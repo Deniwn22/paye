@@ -14,3 +14,7 @@ func RegisterVARoutes(rg *gin.RouterGroup, handler *ReportingHandler) {
 	// Virtual Account Statement
 	rg.GET("/virtual-accounts/:pvc_id/statement", handler.GenerateVAStatementHandler)
 }
+
+func RegisterPublicRoutes(rg *gin.RouterGroup, handler *ReportingHandler) {
+	rg.GET("/reports/statements/verify/:id", handler.VerifyStatementHandler)
+}
