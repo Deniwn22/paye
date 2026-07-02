@@ -16,7 +16,9 @@ All notable changes to this project will be documented in this file.
 - **Swagger Documentation Sandbox:** Overhauled docs UI to include an interactive Swagger Sandbox playground.
 - **JS SDK & Inline Checkout:** Introduced dropping a `<script>` tag for instant checkouts with dynamic layout scaling.
 - **Dynamic Account Balances:** API automatically calculates and returns a `total_received` field on Virtual Account payload models so frontend doesn't need to parse raw transactions manually.
-
+- **Reporting & Statements:** Implemented a new internal reporting engine with endpoints for Level 2 Merchant Aggregator statements and Customer-Level Virtual Account statements.
+- **PDF Generation:** Integrated `maroto/v2` to dynamically generate beautifully styled, branded PDF statements complete with the Paye logo and a verification stamp.
+- **Swagger Branding:** Custom Paye logo is now statically served and embedded directly into the Swagger documentation headers.
 ### Changed
 - **Unified Webhook Format:** Changed architecture to use unified routing for webhooks via Paye proxy slugs, validating signatures before forwarding.
 - **Provider Registry:** Switched from static configs to a dynamic registry of payment providers with database persistence and goose SQL migrations.

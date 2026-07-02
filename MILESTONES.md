@@ -29,3 +29,4 @@ This document tracks the high-level roadmap and major milestones for the Paye pl
 ## Milestone 5: Platform & Collaboration
 - [ ] Team Workspaces: Support developer invitations and role-based permissions (Owner, Admin, Viewer).
 - [ ] Detailed Analytics Dashboard: Expand the analytics to include conversion rates, failure reasons, and volume by provider.
+- [x] PDF Reporting & Statements: Internal aggregator engine capable of dynamically generating custom, branded PDF statements for merchant volumes and customer virtual accounts.
