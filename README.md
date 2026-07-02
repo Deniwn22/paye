@@ -6,6 +6,12 @@ Unified payment routing engine and secure webhook proxies for African businesses
 
 Paye acts as a unified middle-layer connecting your apps to payment providers like Nomba, Paystack, Flutterwave, OPay, etc. Build your integration once against the Paye REST API or drop in our JS SDK, manage API credentials dynamically via the dashboard, generate Static Virtual Accounts on the fly, and route webhook events securely through isolated proxy slugs.
 
+## Quick Links
+- 🌍 **Web App:** [https://paye.africa](https://paye.africa)
+- 📖 **Documentation:** [https://paye.africa/docs](https://paye.africa/docs)
+- 🔌 **API Reference (Swagger):** [https://api.paye.africa/swagger/index.html](https://api.paye.africa/swagger/index.html)
+- 🗺️ **Roadmap & Milestones:** [MILESTONES.md](./MILESTONES.md)
+
 ## Architecture
 
 ### How Paye Works
