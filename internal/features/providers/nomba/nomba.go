@@ -71,7 +71,12 @@ func (n *Nomba) makeRequest(method, url string, body []byte) (*http.Response, er
 
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("accountId", n.tokenManager.accountID)
+	
+	accID := n.tokenManager.accountID
+	if n.subAccountID != "" {
+		accID = n.subAccountID
+	}
+	req.Header.Set("accountId", accID)
 
 	client := &http.Client{}
 	return client.Do(req)
