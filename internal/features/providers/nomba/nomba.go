@@ -238,9 +238,9 @@ func (n *Nomba) VerifyTransaction(reference string) (*providers.TransactionRespo
 // ── Webhook ───────────────────────────────────────────────────────────────────
 
 type nombaMerchant struct {
-	WalletID      string `json:"walletId"`
-	WalletBalance string `json:"walletBalance"`
-	UserID        string `json:"userId"`
+	WalletID      string  `json:"walletId"`
+	WalletBalance float64 `json:"walletBalance"`
+	UserID        string  `json:"userId"`
 }
 
 type nombaTransaction struct {
