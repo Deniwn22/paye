@@ -48,19 +48,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerWebhookLogListResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerWebhookLogListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -85,19 +85,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerDashboardStatsResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerDashboardStatsResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -122,19 +122,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -159,19 +159,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -202,7 +202,7 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -236,25 +236,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -288,25 +288,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -326,13 +326,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerPaymentProviderListResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerPaymentProviderListResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -370,7 +370,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdatePaymentProviderRequest"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.UpdatePaymentProviderRequest"
                         }
                     }
                 ],
@@ -378,31 +378,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "455": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -436,31 +436,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -485,19 +485,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -526,7 +526,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/projects.CreateProjectRequest"
+                            "$ref": "#/definitions/internal_features_projects.CreateProjectRequest"
                         }
                     }
                 ],
@@ -534,25 +534,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -586,31 +586,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -642,25 +642,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -685,19 +685,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerProviderConfigListResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerProviderConfigListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -728,7 +728,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.ProviderConfigRequest"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.ProviderConfigRequest"
                         }
                     }
                 ],
@@ -736,25 +736,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerProviderConfigResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerProviderConfigResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -785,7 +785,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.ProviderConfigRequest"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.ProviderConfigRequest"
                         }
                     }
                 ],
@@ -793,25 +793,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerProviderConfigResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerProviderConfigResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -849,7 +849,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.ProviderConfigRequest"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.ProviderConfigRequest"
                         }
                     }
                 ],
@@ -857,31 +857,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerProviderConfigResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerProviderConfigResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -913,25 +913,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -965,25 +965,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1037,19 +1037,92 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.AggregatorStatementResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.AggregatorStatementResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/reports/virtual-accounts/{pvc_id}/statement": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Generate a statement of transactions for a specific virtual account, optionally downloading as PDF.",
+                "produces": [
+                    "application/json",
+                    "application/pdf"
+                ],
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Generate Virtual Account statement",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "PVC ID",
+                        "name": "pvc_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start Date (2026-06-01T00:00:00Z)",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End Date (2026-06-30T23:59:59Z)",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma separated statuses (e.g. success,failed)",
+                        "name": "statuses",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Format: json or pdf",
+                        "name": "format",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerVirtualAccountTransactionListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1075,7 +1148,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/sdk.CreateSDKSubscriptionRequest"
+                            "$ref": "#/definitions/internal_features_sdk.CreateSDKSubscriptionRequest"
                         }
                     }
                 ],
@@ -1083,25 +1156,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1127,7 +1200,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/sdk.InitializeSDKTransactionRequest"
+                            "$ref": "#/definitions/internal_features_sdk.InitializeSDKTransactionRequest"
                         }
                     }
                 ],
@@ -1135,25 +1208,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1223,19 +1296,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerTransactionListResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerTransactionListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1268,7 +1341,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.InitializeTransactionRequest"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.InitializeTransactionRequest"
                         }
                     }
                 ],
@@ -1276,25 +1349,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerTransactionInitializeResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerTransactionInitializeResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1330,25 +1403,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerTransactionVerifyResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerTransactionVerifyResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1373,19 +1446,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerVirtualAccountListResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerVirtualAccountListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1414,7 +1487,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateVirtualAccountDTO"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.CreateVirtualAccountDTO"
                         }
                     }
                 ],
@@ -1422,25 +1495,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerVirtualAccountResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerVirtualAccountResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1465,19 +1538,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1511,25 +1584,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1563,25 +1636,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerVirtualAccountResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerVirtualAccountResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1617,7 +1690,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateVADTO"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.UpdateVADTO"
                         }
                     }
                 ],
@@ -1625,25 +1698,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1678,25 +1751,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1757,19 +1830,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerVirtualAccountTransactionListResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerVirtualAccountTransactionListResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1803,25 +1876,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1855,25 +1928,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerVirtualAccountTransactionListResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerVirtualAccountTransactionListResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1906,19 +1979,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerWebhookConfigListResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerWebhookConfigListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -1947,7 +2020,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.WebhookConfigRequest"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.WebhookConfigRequest"
                         }
                     }
                 ],
@@ -1955,25 +2028,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerWebhookConfigResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerWebhookConfigResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -2011,7 +2084,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.WebhookConfigRequest"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.WebhookConfigRequest"
                         }
                     }
                 ],
@@ -2019,31 +2092,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerWebhookConfigResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerWebhookConfigResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -2075,25 +2148,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -2138,19 +2211,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -2199,13 +2272,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse"
                         }
                     }
                 }
@@ -2213,11 +2286,11 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "api.SwaggerDashboardStatsResponse": {
+        "github_com_ttomsin_paye_internal_api.SwaggerDashboardStatsResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.DashboardStatsResponse"
+                    "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.DashboardStatsResponse"
                 },
                 "message": {
                     "type": "string"
@@ -2227,13 +2300,13 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SwaggerPaymentProviderListResponse": {
+        "github_com_ttomsin_paye_internal_api.SwaggerPaymentProviderListResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.PaymentProviderResponse"
+                        "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.PaymentProviderResponse"
                     }
                 },
                 "message": {
@@ -2244,13 +2317,13 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SwaggerProviderConfigListResponse": {
+        "github_com_ttomsin_paye_internal_api.SwaggerProviderConfigListResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.ProviderConfigResponse"
+                        "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.ProviderConfigResponse"
                     }
                 },
                 "message": {
@@ -2261,11 +2334,11 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SwaggerProviderConfigResponse": {
+        "github_com_ttomsin_paye_internal_api.SwaggerProviderConfigResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.ProviderConfigResponse"
+                    "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.ProviderConfigResponse"
                 },
                 "message": {
                     "type": "string"
@@ -2275,7 +2348,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SwaggerSimpleResponse": {
+        "github_com_ttomsin_paye_internal_api.SwaggerSimpleResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -2286,11 +2359,11 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SwaggerTransactionInitializeResponse": {
+        "github_com_ttomsin_paye_internal_api.SwaggerTransactionInitializeResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.InitializeTransactionResponse"
+                    "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.InitializeTransactionResponse"
                 },
                 "message": {
                     "type": "string"
@@ -2300,13 +2373,13 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SwaggerTransactionListResponse": {
+        "github_com_ttomsin_paye_internal_api.SwaggerTransactionListResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.VerifyTransactionResponse"
+                        "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.VerifyTransactionResponse"
                     }
                 },
                 "message": {
@@ -2317,11 +2390,11 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SwaggerTransactionVerifyResponse": {
+        "github_com_ttomsin_paye_internal_api.SwaggerTransactionVerifyResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.VerifyTransactionResponse"
+                    "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.VerifyTransactionResponse"
                 },
                 "message": {
                     "type": "string"
@@ -2331,13 +2404,13 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SwaggerVirtualAccountListResponse": {
+        "github_com_ttomsin_paye_internal_api.SwaggerVirtualAccountListResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.VirtualAccountResponse"
+                        "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.VirtualAccountResponse"
                     }
                 },
                 "message": {
@@ -2348,11 +2421,11 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SwaggerVirtualAccountResponse": {
+        "github_com_ttomsin_paye_internal_api.SwaggerVirtualAccountResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.VirtualAccountResponse"
+                    "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.VirtualAccountResponse"
                 },
                 "message": {
                     "type": "string"
@@ -2362,13 +2435,13 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SwaggerVirtualAccountTransactionListResponse": {
+        "github_com_ttomsin_paye_internal_api.SwaggerVirtualAccountTransactionListResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.VirtualAccountTransactionResponse"
+                        "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.VirtualAccountTransactionResponse"
                     }
                 },
                 "message": {
@@ -2379,13 +2452,13 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SwaggerWebhookConfigListResponse": {
+        "github_com_ttomsin_paye_internal_api.SwaggerWebhookConfigListResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.WebhookConfigResponse"
+                        "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.WebhookConfigResponse"
                     }
                 },
                 "message": {
@@ -2396,11 +2469,11 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SwaggerWebhookConfigResponse": {
+        "github_com_ttomsin_paye_internal_api.SwaggerWebhookConfigResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.WebhookConfigResponse"
+                    "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.WebhookConfigResponse"
                 },
                 "message": {
                     "type": "string"
@@ -2410,13 +2483,13 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SwaggerWebhookLogListResponse": {
+        "github_com_ttomsin_paye_internal_api.SwaggerWebhookLogListResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.WebhookLogResponse"
+                        "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.WebhookLogResponse"
                     }
                 },
                 "message": {
@@ -2427,7 +2500,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.AggregatorStatementResponse": {
+        "github_com_ttomsin_paye_internal_dto.AggregatorStatementResponse": {
             "type": "object",
             "properties": {
                 "end_date": {
@@ -2436,7 +2509,7 @@ const docTemplate = `{
                 "providers": {
                     "type": "object",
                     "additionalProperties": {
-                        "$ref": "#/definitions/dto.ProviderSummary"
+                        "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.ProviderSummary"
                     }
                 },
                 "start_date": {
@@ -2444,7 +2517,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateVirtualAccountDTO": {
+        "github_com_ttomsin_paye_internal_dto.CreateVirtualAccountDTO": {
             "type": "object",
             "required": [
                 "account_name",
@@ -2491,7 +2564,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.DashboardStatsResponse": {
+        "github_com_ttomsin_paye_internal_dto.DashboardStatsResponse": {
             "type": "object",
             "properties": {
                 "active_providers_count": {
@@ -2514,7 +2587,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.InitializeTransactionRequest": {
+        "github_com_ttomsin_paye_internal_dto.InitializeTransactionRequest": {
             "type": "object",
             "required": [
                 "amount",
@@ -2550,7 +2623,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.InitializeTransactionResponse": {
+        "github_com_ttomsin_paye_internal_dto.InitializeTransactionResponse": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -2592,7 +2665,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.PaymentProviderResponse": {
+        "github_com_ttomsin_paye_internal_dto.PaymentProviderResponse": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2618,7 +2691,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ProviderConfigRequest": {
+        "github_com_ttomsin_paye_internal_dto.ProviderConfigRequest": {
             "type": "object",
             "required": [
                 "label",
@@ -2635,7 +2708,7 @@ const docTemplate = `{
                     "example": "My Paystack Account"
                 },
                 "metadata": {
-                    "$ref": "#/definitions/models.ProviderMetadata"
+                    "$ref": "#/definitions/github_com_ttomsin_paye_internal_models.ProviderMetadata"
                 },
                 "provider_name": {
                     "enum": [
@@ -2646,7 +2719,7 @@ const docTemplate = `{
                     ],
                     "allOf": [
                         {
-                            "$ref": "#/definitions/dto.ProviderType"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_dto.ProviderType"
                         }
                     ],
                     "example": "paystack"
@@ -2664,7 +2737,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ProviderConfigResponse": {
+        "github_com_ttomsin_paye_internal_dto.ProviderConfigResponse": {
             "type": "object",
             "properties": {
                 "environment": {
@@ -2688,7 +2761,7 @@ const docTemplate = `{
                     "example": "My Paystack Account"
                 },
                 "metadata": {
-                    "$ref": "#/definitions/models.ProviderMetadata"
+                    "$ref": "#/definitions/github_com_ttomsin_paye_internal_models.ProviderMetadata"
                 },
                 "provider_name": {
                     "type": "string",
@@ -2711,7 +2784,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ProviderSummary": {
+        "github_com_ttomsin_paye_internal_dto.ProviderSummary": {
             "type": "object",
             "properties": {
                 "total_volume": {
@@ -2722,7 +2795,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ProviderType": {
+        "github_com_ttomsin_paye_internal_dto.ProviderType": {
             "type": "string",
             "enum": [
                 "paystack"
@@ -2731,7 +2804,7 @@ const docTemplate = `{
                 "Paystack"
             ]
         },
-        "dto.UpdatePaymentProviderRequest": {
+        "github_com_ttomsin_paye_internal_dto.UpdatePaymentProviderRequest": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2748,7 +2821,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateVADTO": {
+        "github_com_ttomsin_paye_internal_dto.UpdateVADTO": {
             "type": "object",
             "properties": {
                 "account_name": {
@@ -2757,7 +2830,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.VerifyTransactionResponse": {
+        "github_com_ttomsin_paye_internal_dto.VerifyTransactionResponse": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -2791,7 +2864,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.VirtualAccountResponse": {
+        "github_com_ttomsin_paye_internal_dto.VirtualAccountResponse": {
             "type": "object",
             "properties": {
                 "account_name": {
@@ -2872,7 +2945,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.VirtualAccountTransactionResponse": {
+        "github_com_ttomsin_paye_internal_dto.VirtualAccountTransactionResponse": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -2937,7 +3010,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.WebhookConfigRequest": {
+        "github_com_ttomsin_paye_internal_dto.WebhookConfigRequest": {
             "type": "object",
             "required": [
                 "provider_name"
@@ -2959,13 +3032,13 @@ const docTemplate = `{
                     "description": "\"payment\" | \"va\" | \"all\", defaults to \"payment\"",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.WbhookType"
+                            "$ref": "#/definitions/github_com_ttomsin_paye_internal_models.WbhookType"
                         }
                     ]
                 }
             }
         },
-        "dto.WebhookConfigResponse": {
+        "github_com_ttomsin_paye_internal_dto.WebhookConfigResponse": {
             "type": "object",
             "properties": {
                 "environment": {
@@ -2984,11 +3057,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/models.WbhookType"
+                    "$ref": "#/definitions/github_com_ttomsin_paye_internal_models.WbhookType"
                 }
             }
         },
-        "dto.WebhookLogResponse": {
+        "github_com_ttomsin_paye_internal_dto.WebhookLogResponse": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -3029,7 +3102,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.ProviderMetadata": {
+        "github_com_ttomsin_paye_internal_models.ProviderMetadata": {
             "type": "object",
             "properties": {
                 "nomba_account_id": {
@@ -3046,7 +3119,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.WbhookType": {
+        "github_com_ttomsin_paye_internal_models.WbhookType": {
             "type": "string",
             "enum": [
                 "va",
@@ -3059,7 +3132,7 @@ const docTemplate = `{
                 "ALL"
             ]
         },
-        "projects.CreateProjectRequest": {
+        "internal_features_projects.CreateProjectRequest": {
             "type": "object",
             "required": [
                 "name"
@@ -3070,7 +3143,7 @@ const docTemplate = `{
                 }
             }
         },
-        "sdk.CreateSDKSubscriptionRequest": {
+        "internal_features_sdk.CreateSDKSubscriptionRequest": {
             "type": "object",
             "required": [
                 "customerEmail",
@@ -3093,7 +3166,7 @@ const docTemplate = `{
                 }
             }
         },
-        "sdk.InitializeSDKTransactionRequest": {
+        "internal_features_sdk.InitializeSDKTransactionRequest": {
             "type": "object",
             "required": [
                 "amount",

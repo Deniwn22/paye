@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/ttomsin/paye/internal/api"
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/features/projects"
 	"github.com/ttomsin/paye/internal/features/virtual_accounts"
@@ -98,6 +99,7 @@ func (h *ReportingHandler) GenerateAggregatorStatementHandler(c *gin.Context) {
 // @Failure 400 {object} api.SwaggerSimpleResponse
 // @Failure 500 {object} api.SwaggerSimpleResponse
 // @Router /virtual-accounts/{pvc_id}/statement [get]
+// @Router /reports/virtual-accounts/{pvc_id}/statement [get]
 func (h *ReportingHandler) GenerateVAStatementHandler(c *gin.Context) {
 	projectID, exists := c.Get("project_id")
 	if !exists {
