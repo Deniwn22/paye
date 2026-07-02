@@ -11,6 +11,7 @@ Paye acts as a unified middle-layer connecting your apps to payment providers li
 - 📖 **Documentation:** [https://paye.africa/docs](https://paye.africa/docs)
 - 🔌 **API Reference (Swagger):** [https://api.paye.africa/swagger/index.html](https://api.paye.africa/swagger/index.html)
 - 🗺️ **Roadmap & Milestones:** [MILESTONES.md](./MILESTONES.md)
+- 📝 **Changelog:** [CHANGELOG.md](./CHANGELOG.md)
 
 ## Architecture
 
