@@ -665,7 +665,8 @@ info:
   contact: {}
   description: |-
     Unified payment routing engine and secure webhook proxies for African developers.
-    <img src="/api/v1/favicon_io/android-chrome-192x192.png" alt="Paye Logo" width="120" />
+
+    ![Paye Logo](/favicon_io/android-chrome-192x192.png)
 
     Production Server: https://paye.africa
     Local Server: http://localhost:8080

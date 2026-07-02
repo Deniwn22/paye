@@ -35,7 +35,8 @@ import (
 // @title Paye API
 // @version 1.0
 // @description Unified payment routing engine and secure webhook proxies for African developers.
-// @description <img src="/api/v1/favicon_io/android-chrome-192x192.png" alt="Paye Logo" width="120" />
+// @description 
+// @description ![Paye Logo](/favicon_io/android-chrome-192x192.png)
 // @description
 // @description Production Server: https://paye.africa
 // @description Local Server: http://localhost:8080
@@ -244,8 +245,8 @@ func main() {
 	// Serve static files in testweb directory for development/testing
 	r.Static("/testweb", "./testweb")
 
-	// Serve favicon_io statically under /api/v1 to bypass ingress restrictions and avoid Gin router conflicts with /swagger/*any
-	r.Static("/api/v1/favicon_io", "./favicon_io")
+	// Serve favicon_io statically for UI assets and Swagger logo
+	r.Static("/favicon_io", "./favicon_io")
 
 	// Public Group
 	v1 := r.Group("/api/v1")
