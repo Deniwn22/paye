@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 - **Dashboard Stats Refactoring:** Decoupled dashboard analytics from webhook logs, deriving total volume directly from `transactions` and `virtual_account_transactions` tables to ensure perfect accuracy.
 - **Swagger Documentation Sandbox:** Overhauled docs UI to include an interactive Swagger Sandbox playground.
 - **JS SDK & Inline Checkout:** Introduced dropping a `<script>` tag for instant checkouts with dynamic layout scaling.
+- **Dynamic Account Balances:** API automatically calculates and returns a `total_received` field on Virtual Account payload models so frontend doesn't need to parse raw transactions manually.
 
 ### Changed
 - **Unified Webhook Format:** Changed architecture to use unified routing for webhooks via Paye proxy slugs, validating signatures before forwarding.
@@ -25,7 +26,11 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - **Signature Verification:** Skipped legacy key verification for live mode on webhooks.
 - **Dashboard Alignment:** Fixed `test`/`live` mode isolation correctly mapping across the JS SDK and the merchant dashboard.
-- **Virtual Account Subaccounts:** Added strict SubAccountID headers mapping to Virtual Account verification requests for Nomba integration.
+- **Virtual Account Auth:** Resolved Nomba 403 errors by properly mapping the golden Parent Account ID header vs SubAccount query scopes.
+- **Polling Loop Bugs:** Fixed endless polling loops for abandoned checkouts by auto-marking pending checkouts as `abandoned` if unresolved after 1 hour.
+- **Cron Db Errors:** Gracefully handled duplicate key constraints (`SQLSTATE 23505`) via UPSERT logic when cron jobs poll for already-logged Virtual Account transfers.
+- **Webhook Drift Parsing:** Resolved a bug where Nomba webhooks were dropped due to strict `string` parsing of native decimal floats (`WalletBalance`).
+- **Missing Documentation:** Filled in strict DTO schemas and mapped missing endpoints (like Virtual Account transaction lists) for Swagger generation.
 
 ---
 

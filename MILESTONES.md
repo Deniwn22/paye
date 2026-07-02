@@ -20,6 +20,7 @@ This document tracks the high-level roadmap and major milestones for the Paye pl
 - [ ] Advanced Webhook Delivery Engine: Queue webhook proxy payloads with exponential backoff retries.
 - [ ] Dead Letter Queue (DLQ) & Manual Replay: Allow merchants to manually replay failed webhook deliveries from the dashboard.
 - [ ] Smart Routing & Failover: Dynamically switch gateway routes based on conversion rates or latency, and enable automated backup failovers during provider downtime.
+- [ ] Webhook Schema Drift Detection: Implement JSON Schema validation at the webhook ingress layer to automatically detect, alert on, and fallback from undocumented payload changes by upstream providers.
 
 ## Milestone 4: Subscriptions & Recurring Billing
 - [ ] Unified Subscription Engine: Abstract recurring billing contracts across underlying gateways.
