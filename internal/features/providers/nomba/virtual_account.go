@@ -215,8 +215,11 @@ func (n *Nomba) PollVirtualAccountTransactions(ctx context.Context, startDate, e
 	endStr := endDate.UTC().Format("2006-01-02T15:04:05")
 
 	url := fmt.Sprintf("%s/transactions/accounts?type=vact_transfer&startDate=%s&endDate=%s&limit=50", n.getBaseURL(), startStr, endStr)
+	if accID != n.tokenManager.accountID {
+		url += fmt.Sprintf("&accountId=%s", accID)
+	}
 	
-	resp, err := n.makeRequestWithAccount("GET", url, nil, accID)
+	resp, err := n.makeRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
