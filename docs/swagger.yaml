@@ -96,6 +96,17 @@ definitions:
       status:
         type: boolean
     type: object
+  api.SwaggerVirtualAccountTransactionListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.VirtualAccountTransactionResponse'
+        type: array
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
   api.SwaggerWebhookConfigListResponse:
     properties:
       data:
@@ -416,11 +427,62 @@ definitions:
       status:
         example: active
         type: string
+      total_received:
+        example: 15000
+        type: number
       type:
         example: static
         type: string
       updated_at:
         example: "2026-07-01T12:00:00Z"
+        type: string
+    type: object
+  dto.VirtualAccountTransactionResponse:
+    properties:
+      amount:
+        example: 15000
+        type: number
+      created_at:
+        example: "2026-07-01T12:00:00Z"
+        type: string
+      currency:
+        example: NGN
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      is_live:
+        example: true
+        type: boolean
+      project_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      provider:
+        example: nomba
+        type: string
+      pvc_id:
+        example: VA-123456789
+        type: string
+      reference:
+        example: API-VACT_TRA-067fg...
+        type: string
+      sender_account:
+        example: "1234567890"
+        type: string
+      sender_bank:
+        example: Guaranty Trust Bank
+        type: string
+      sender_name:
+        example: John Doe
+        type: string
+      status:
+        example: success
+        type: string
+      updated_at:
+        example: "2026-07-01T12:00:00Z"
+        type: string
+      virtual_account_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
         type: string
     type: object
   dto.WebhookConfigRequest:
@@ -1601,7 +1663,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SwaggerSimpleResponse'
+            $ref: '#/definitions/api.SwaggerVirtualAccountTransactionListResponse'
         "400":
           description: Bad Request
           schema:

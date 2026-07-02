@@ -1710,7 +1710,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                            "$ref": "#/definitions/api.SwaggerVirtualAccountTransactionListResponse"
                         }
                     },
                     "400": {
@@ -2217,6 +2217,23 @@
                 }
             }
         },
+        "api.SwaggerVirtualAccountTransactionListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.VirtualAccountTransactionResponse"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
         "api.SwaggerWebhookConfigListResponse": {
             "type": "object",
             "properties": {
@@ -2668,6 +2685,10 @@
                     "type": "string",
                     "example": "active"
                 },
+                "total_received": {
+                    "type": "number",
+                    "example": 15000
+                },
                 "type": {
                     "type": "string",
                     "example": "static"
@@ -2675,6 +2696,71 @@
                 "updated_at": {
                     "type": "string",
                     "example": "2026-07-01T12:00:00Z"
+                }
+            }
+        },
+        "dto.VirtualAccountTransactionResponse": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 15000
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-07-01T12:00:00Z"
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "NGN"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "is_live": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "project_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "provider": {
+                    "type": "string",
+                    "example": "nomba"
+                },
+                "pvc_id": {
+                    "type": "string",
+                    "example": "VA-123456789"
+                },
+                "reference": {
+                    "type": "string",
+                    "example": "API-VACT_TRA-067fg..."
+                },
+                "sender_account": {
+                    "type": "string",
+                    "example": "1234567890"
+                },
+                "sender_bank": {
+                    "type": "string",
+                    "example": "Guaranty Trust Bank"
+                },
+                "sender_name": {
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2026-07-01T12:00:00Z"
+                },
+                "virtual_account_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 }
             }
         },

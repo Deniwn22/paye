@@ -33,4 +33,23 @@ type VirtualAccountResponse struct {
 	ExpectedAmount    float64 `json:"expected_amount" example:"0"`
 	ExpiryDate        string  `json:"expiry_date,omitempty" example:"2026-12-31T23:59:59Z"`
 	IsLive            bool    `json:"is_live" example:"true"`
+	TotalReceived     float64 `json:"total_received" example:"15000.00"`
+}
+
+type VirtualAccountTransactionResponse struct {
+	ID               string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	CreatedAt        string  `json:"created_at" example:"2026-07-01T12:00:00Z"`
+	UpdatedAt        string  `json:"updated_at" example:"2026-07-01T12:00:00Z"`
+	VirtualAccountID string  `json:"virtual_account_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	ProjectID        string  `json:"project_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	PvcID            string  `json:"pvc_id" example:"VA-123456789"`
+	Amount           float64 `json:"amount" example:"15000.00"`
+	Currency         string  `json:"currency" example:"NGN"`
+	SenderName       string  `json:"sender_name" example:"John Doe"`
+	SenderAccount    string  `json:"sender_account" example:"1234567890"`
+	SenderBank       string  `json:"sender_bank" example:"Guaranty Trust Bank"`
+	Reference        string  `json:"reference" example:"API-VACT_TRA-067fg..."`
+	Status           string  `json:"status" example:"success"`
+	Provider         string  `json:"provider" example:"nomba"`
+	IsLive           bool    `json:"is_live" example:"true"`
 }

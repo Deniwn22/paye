@@ -93,3 +93,10 @@ type SwaggerVirtualAccountListResponse struct {
 	Message string                       `json:"message"`
 	Data    []dto.VirtualAccountResponse `json:"data"`
 }
+
+// SwaggerVirtualAccountTransactionListResponse represents a list of virtual account transactions response
+type SwaggerVirtualAccountTransactionListResponse struct {
+	Status  bool                                    `json:"status"`
+	Message string                                  `json:"message"`
+	Data    []dto.VirtualAccountTransactionResponse `json:"data"`
+}

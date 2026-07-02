@@ -157,7 +157,7 @@ func (h *VAHandler) SuspendVirtualAccountHandler(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param pvc_id path string true "PVC ID"
-// @Success 200 {object} api.SwaggerSimpleResponse
+// @Success 200 {object} api.SwaggerVirtualAccountTransactionListResponse
 // @Failure 400 {object} api.SwaggerSimpleResponse
 // @Failure 401 {object} api.SwaggerSimpleResponse
 // @Failure 500 {object} api.SwaggerSimpleResponse
