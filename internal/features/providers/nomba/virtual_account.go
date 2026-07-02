@@ -187,3 +187,74 @@ func (n *Nomba) ExpireVirtualAccount(ctx context.Context, accountRef string) err
 
 	return nil
 }
+
+type nombaAccountTransactionsResponse struct {
+	Code        string `json:"code"`
+	Description string `json:"description"`
+	Data        struct {
+		Cursor  string `json:"cursor"`
+		Results []struct {
+			ID                 string  `json:"id"`
+			Status             string  `json:"status"`
+			TransactionAmount  float64 `json:"transactionAmount"`
+			Fee                float64 `json:"fee"`
+			Type               string  `json:"type"`
+			TimeCreated        string  `json:"timeCreated"`
+			AliasAccountNumber string  `json:"aliasAccountNumber"`
+		} `json:"results"`
+	} `json:"data"`
+}
+
+func (n *Nomba) PollVirtualAccountTransactions(ctx context.Context, startDate, endDate time.Time) ([]providers.VATransactionResult, error) {
+	accID := n.tokenManager.accountID
+	if n.subAccountID != "" {
+		accID = n.subAccountID
+	}
+
+	startStr := startDate.UTC().Format("2006-01-02T15:04:05")
+	endStr := endDate.UTC().Format("2006-01-02T15:04:05")
+
+	url := fmt.Sprintf("%s/transactions/accounts?type=vact_transfer&startDate=%s&endDate=%s&limit=50", n.getBaseURL(), startStr, endStr)
+	
+	resp, err := n.makeRequestWithAccount("GET", url, nil, accID)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var errResult map[string]any
+		json.NewDecoder(resp.Body).Decode(&errResult)
+		return nil, fmt.Errorf("nomba: fetch account tx error: %v", errResult)
+	}
+
+	var result nombaAccountTransactionsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("nomba: failed to decode tx response: %w", err)
+	}
+
+	if result.Code != "00" {
+		return nil, fmt.Errorf("nomba: fetch tx failed: %s", result.Description)
+	}
+
+	var txs []providers.VATransactionResult
+	for _, tx := range result.Data.Results {
+		if tx.Type != "vact_transfer" {
+			continue
+		}
+		
+		status := "failed"
+		if tx.Status == "SUCCESS" {
+			status = "success"
+		}
+		
+		txs = append(txs, providers.VATransactionResult{
+			Reference:     tx.ID,
+			Amount:        tx.TransactionAmount,
+			Status:        status,
+			TimeCreated:   tx.TimeCreated,
+			TargetAccount: tx.AliasAccountNumber,
+		})
+	}
+	return txs, nil
+}

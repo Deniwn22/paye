@@ -96,6 +96,13 @@ func (p *ProviderRepo) FindAllActiveProvidersByName(ctx context.Context, project
 	return providers, err
 }
 
+// FindAllActiveProvidersByEnv returns all active provider configs globally for a specific provider and environment
+func (p *ProviderRepo) FindAllActiveProvidersByEnv(ctx context.Context, providerName string, env string) ([]*models.ProviderConfig, error) {
+	var providers []*models.ProviderConfig
+	err := p.db.WithContext(ctx).Where("provider_name = ? AND is_active = ? AND environment = ?", providerName, true, env).Find(&providers).Error
+	return providers, err
+}
+
 // ListPaymentProviders returns a list of all payment providers
 func (p *ProviderRepo) ListPaymentProviders(ctx context.Context) ([]*models.PaymentProvider, error) {
 	var providers []*models.PaymentProvider

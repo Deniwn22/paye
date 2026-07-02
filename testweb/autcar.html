@@ -1323,8 +1323,8 @@
                                 id="paye-checkout-loggedin"
                                 data-paye-checkout
                                 data-email-source="#loggedin-email"
-                                data-amount="500"
-                                data-button-text="Pay ₦500,000 Deposit"
+                                data-amount="100"
+                                data-button-text="Pay ₦100,000 Deposit"
                                 data-currency="NGN"
                             ></div>
                         </div>
@@ -1476,7 +1476,7 @@
         </footer>
 
         <!-- PAYE SDK -->
-        <script src="https://api.paye.africa/sdk/paye_test_pub_b9b734506a9cd0f6237e8721aa676d01.js"></script>
+        <script src="https://api.paye.africa/sdk/paye_live_pub_2ff8e7c8fde2c91e779b179fb29f435d.js"></script>
 
         <script>
             const cars = [
@@ -1514,8 +1514,8 @@
                         "Digital Cluster",
                         "Wireless Charging",
                     ],
-                    price: "₦18,500,000",
-                    amount: 500,
+                    price: "₦18,100,000",
+                    amount: 100,
                 },
                 {
                     emoji: "🚐",
@@ -1532,7 +1532,7 @@
                         "Adaptive Headlights",
                     ],
                     price: "₦28,000,000",
-                    amount: 500,
+                    amount: 100,
                 },
                 {
                     emoji: "🚘",
@@ -1550,7 +1550,7 @@
                         "Power Sunroof",
                     ],
                     price: "₦8,900,000",
-                    amount: 500,
+                    amount: 100,
                 },
                 {
                     emoji: "🚛",
@@ -1567,7 +1567,7 @@
                         "Matrix LED",
                     ],
                     price: "₦52,000,000",
-                    amount: 500,
+                    amount: 100,
                 },
                 {
                     emoji: "🚙",
@@ -1583,8 +1583,8 @@
                         "Power Liftgate",
                         "JBL Audio",
                     ],
-                    price: "₦6,500,000",
-                    amount: 500,
+                    price: "₦6,100,000",
+                    amount: 100,
                 },
             ];
 
@@ -1807,7 +1807,7 @@
                     else if (type === "used")
                         show = card.dataset.condition === "used";
                     else if (type === "under10m")
-                        show = parseInt(card.dataset.price) < 50000;
+                        show = parseInt(card.dataset.price) < 10000;
                     else show = card.dataset.type === type;
                     card.style.display = show ? "" : "none";
                     if (show) visible++;

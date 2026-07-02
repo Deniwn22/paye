@@ -11,7 +11,8 @@ All notable changes to this project will be documented in this file.
 - **Virtual Accounts (VA):** Introduced API and webhook integrations for provisioning and processing Virtual Accounts.
 - **Misdirected Payments:** Safe handling and idempotent processing for webhooks regarding misdirected transfers.
 - **Structured Logging:** Switched logging engine to `slog` for structured JSON logs.
-- **Background Polling:** Added scheduled background jobs for polling transaction statuses on pending checkouts.
+- **Background Polling:** Added scheduled background jobs for polling transaction statuses on pending checkouts and serving as a fallback for missed Virtual Account webhooks.
+- **Dashboard Stats Refactoring:** Decoupled dashboard analytics from webhook logs, deriving total volume directly from `transactions` and `virtual_account_transactions` tables to ensure perfect accuracy.
 - **Swagger Documentation Sandbox:** Overhauled docs UI to include an interactive Swagger Sandbox playground.
 - **JS SDK & Inline Checkout:** Introduced dropping a `<script>` tag for instant checkouts with dynamic layout scaling.
 
@@ -24,6 +25,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - **Signature Verification:** Skipped legacy key verification for live mode on webhooks.
 - **Dashboard Alignment:** Fixed `test`/`live` mode isolation correctly mapping across the JS SDK and the merchant dashboard.
+- **Virtual Account Subaccounts:** Added strict SubAccountID headers mapping to Virtual Account verification requests for Nomba integration.
 
 ---
 

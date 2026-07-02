@@ -21,30 +21,60 @@ func (r *DashboardRepo) GetStats(ctx context.Context, projectID string) (*dto.Da
 	var stats dto.DashboardStatsResponse
 	isLive := middleware.GetIsLiveFromContext(ctx)
 
-	// Total Volume (sum of successful transaction amounts)
-	err := r.db.WithContext(ctx).Table("webhook_logs").
+	var checkoutVolume float64
+	err := r.db.WithContext(ctx).Table("transactions").
 		Where("project_id = ? AND is_live = ? AND status = ?", projectID, isLive, "success").
 		Select("COALESCE(SUM(amount), 0)").
-		Row().Scan(&stats.TotalVolume)
+		Row().Scan(&checkoutVolume)
 	if err != nil {
 		return nil, err
 	}
+
+	var vaVolume float64
+	err = r.db.WithContext(ctx).Table("virtual_account_transactions").
+		Where("project_id = ? AND is_live = ? AND status = ?", projectID, isLive, "success").
+		Select("COALESCE(SUM(amount), 0)").
+		Row().Scan(&vaVolume)
+	if err != nil {
+		return nil, err
+	}
+	stats.TotalVolume = checkoutVolume + vaVolume
 
 	// Total Successful Transactions
-	err = r.db.WithContext(ctx).Table("webhook_logs").
+	var checkoutCount int64
+	err = r.db.WithContext(ctx).Table("transactions").
 		Where("project_id = ? AND is_live = ? AND status = ?", projectID, isLive, "success").
-		Count(&stats.TotalTransactions).Error
+		Count(&checkoutCount).Error
 	if err != nil {
 		return nil, err
 	}
 
-	// Failed Transactions
-	err = r.db.WithContext(ctx).Table("webhook_logs").
-		Where("project_id = ? AND is_live = ? AND status = ?", projectID, isLive, "failed").
-		Count(&stats.FailedTransactions).Error
+	var vaCount int64
+	err = r.db.WithContext(ctx).Table("virtual_account_transactions").
+		Where("project_id = ? AND is_live = ? AND status = ?", projectID, isLive, "success").
+		Count(&vaCount).Error
 	if err != nil {
 		return nil, err
 	}
+	stats.TotalTransactions = checkoutCount + vaCount
+
+	// Failed Transactions
+	var failedCheckoutCount int64
+	err = r.db.WithContext(ctx).Table("transactions").
+		Where("project_id = ? AND is_live = ? AND status = ?", projectID, isLive, "failed").
+		Count(&failedCheckoutCount).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var failedVACount int64
+	err = r.db.WithContext(ctx).Table("virtual_account_transactions").
+		Where("project_id = ? AND is_live = ? AND status = ?", projectID, isLive, "failed").
+		Count(&failedVACount).Error
+	if err != nil {
+		return nil, err
+	}
+	stats.FailedTransactions = failedCheckoutCount + failedVACount
 
 	// Successful Webhook Deliveries (status in [200, 299])
 	err = r.db.WithContext(ctx).Table("webhook_logs").

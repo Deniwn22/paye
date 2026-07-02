@@ -186,6 +186,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Background job to poll virtual account transactions (fallback for missing webhooks)
+	_, err = c.AddFunc("*/5 * * * *", func() {
+		slog.Info("Running cron job: PollVirtualAccounts")
+		err := vaService.PollVirtualAccounts(context.Background())
+		if err != nil {
+			slog.Error("Cron error (PollVirtualAccounts)", "error", err)
+		}
+	})
+	if err != nil {
+		slog.Error("failed to add VA polling cron job", "error", err)
+		os.Exit(1)
+	}
+
 	c.Start()
 
 	//init handlers

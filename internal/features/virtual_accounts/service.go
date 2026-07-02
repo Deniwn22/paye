@@ -1,8 +1,15 @@
 package virtual_accounts
 
 import (
+	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/ttomsin/paye/internal/crypto"
@@ -216,4 +223,169 @@ func (s *VAService) ResolveMisdirectedPayment(ctx context.Context, projectID str
 	}
 	mp.Status = "resolved"
 	return s.repo.UpdateMisdirectedPayment(ctx, mp)
+}
+
+func (s *VAService) PollVirtualAccounts(ctx context.Context) error {
+	envs := []string{"live", "test"}
+	for _, env := range envs {
+		isLive := (env == "live")
+		// Get all active Nomba providers
+		nombaProviders, err := s.providerRepo.FindAllActiveProvidersByEnv(ctx, "nomba", env)
+		if err != nil {
+			continue
+		}
+
+		for _, pc := range nombaProviders {
+			encSecret := pc.SecretKey
+			encClientID := pc.PublicKey
+
+			clientSecret, _ := crypto.Decrypt(encSecret, s.encryptionKey)
+			clientID, _ := crypto.Decrypt(encClientID, s.encryptionKey)
+
+			accountID := pc.Metadata.NombaAccountID
+			subAccountID := pc.Metadata.NombaSubAccountID
+
+			webhookSecret, _ := crypto.Decrypt(pc.WebhookSecret, s.encryptionKey)
+			client := nomba.New(clientID, clientSecret, webhookSecret, accountID, subAccountID, isLive)
+
+			// Poll transactions for the last 1 hour
+			endDate := time.Now()
+			startDate := endDate.Add(-1 * time.Hour)
+			txs, err := client.PollVirtualAccountTransactions(ctx, startDate, endDate)
+			if err != nil {
+				continue
+			}
+
+			for _, tx := range txs {
+				// IDEMPOTENCY: check if processed
+				if _, err := s.repo.FindTransactionByReference(ctx, tx.Reference); err == nil {
+					continue
+				}
+
+				// Check if TargetAccount (aliasAccountNumber) belongs to a VA in our DB
+				va, err := s.repo.FindByBankAccountNumber(ctx, tx.TargetAccount, pc.ProjectID.String())
+				if err != nil {
+					// Misdirected - no VA matches
+					mp := &models.MisdirectedPayment{
+						ProjectID:         &pc.ProjectID,
+						BankAccountNumber: tx.TargetAccount,
+						Amount:            tx.Amount,
+						Currency:          "NGN",
+						SenderName:        tx.SenderName,
+						SenderAccount:     tx.SenderAccount,
+						SenderBank:        tx.SenderBank,
+						Reference:         tx.Reference,
+						Reason:            "va_not_found",
+						Status:            "unresolved",
+						Provider:          "nomba",
+						IsLive:            isLive,
+					}
+					s.repo.CreateMisdirectedPayment(ctx, mp)
+					continue
+				}
+
+				if va.Status != "active" {
+					// Misdirected - inactive VA
+					mp := &models.MisdirectedPayment{
+						ProjectID:         &pc.ProjectID,
+						BankAccountNumber: tx.TargetAccount,
+						Amount:            tx.Amount,
+						Currency:          "NGN",
+						SenderName:        tx.SenderName,
+						SenderAccount:     tx.SenderAccount,
+						SenderBank:        tx.SenderBank,
+						Reference:         tx.Reference,
+						Reason:            "va_" + va.Status,
+						Status:            "unresolved",
+						Provider:          "nomba",
+						IsLive:            isLive,
+					}
+					s.repo.CreateMisdirectedPayment(ctx, mp)
+					continue
+				}
+
+				// Create the transaction
+				vatx := &models.VirtualAccountTransaction{
+					VirtualAccountID: va.Base.ID,
+					ProjectID:        pc.ProjectID,
+					PvcID:            va.PvcID,
+					Amount:           tx.Amount,
+					Currency:         "NGN",
+					SenderName:       tx.SenderName,
+					SenderAccount:    tx.SenderAccount,
+					SenderBank:       tx.SenderBank,
+					Reference:        tx.Reference,
+					Status:           tx.Status,
+					Provider:         "nomba",
+					IsLive:           isLive,
+				}
+				s.repo.CreateTransaction(ctx, vatx)
+
+				// Fabricate webhook payload for the merchant
+				merchantPayload, _ := json.Marshal(map[string]any{
+					"event":              "virtual_account.credit",
+					"pvc_id":             va.PvcID,
+					"customer_reference": va.CustomerReference,
+					"amount":             tx.Amount,
+					"currency":           "NGN",
+					"sender_name":        tx.SenderName,
+					"sender_account":     tx.SenderAccount,
+					"sender_bank":        tx.SenderBank,
+					"reference":          tx.Reference,
+				})
+
+				// Fetch WebhookConfig and trigger it
+				var wcs []models.WebhookConfig
+				s.repo.GetDB().WithContext(ctx).Preload("Project").Where("project_id = ? AND event_name = ? AND is_active = ? AND is_live = ?", pc.ProjectID, "virtual_account.credit", true, isLive).Find(&wcs)
+
+				for _, wc := range wcs {
+					wl := &models.WebhookLog{
+						ProjectID:       pc.ProjectID,
+						WebhookConfigID: &wc.Base.ID,
+						Event:           "virtual_account.credit",
+						Reference:       tx.Reference,
+						Amount:          tx.Amount,
+						Status:          "success",
+						ForwardedStatus: 0,
+						Payload:         "{\"source\": \"polling_fallback\"}",
+						IsLive:          isLive,
+					}
+
+					if wc.TargetURL == "" {
+						wl.ForwardedStatus = 200
+						wl.ErrorMessage = "Locally stored; no forwarding target URL configured"
+						s.repo.GetDB().WithContext(ctx).Create(wl)
+					} else {
+						apiKey := wc.Project.ApiKey
+						if !isLive && wc.Project.TestApiKey != "" {
+							apiKey = wc.Project.TestApiKey
+						}
+						go s.forwardWebhook(wl, wc.TargetURL, apiKey, merchantPayload)
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (s *VAService) forwardWebhook(wl *models.WebhookLog, targetURL, apiKey string, payload []byte) {
+	mac := hmac.New(sha256.New, []byte(apiKey))
+	mac.Write(payload)
+	payeSignature := hex.EncodeToString(mac.Sum(nil))
+
+	req, _ := http.NewRequest("POST", targetURL, bytes.NewBuffer(payload))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("x-paye-signature", payeSignature)
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+
+	if err != nil {
+		wl.ErrorMessage = err.Error()
+	} else {
+		defer resp.Body.Close()
+		wl.ForwardedStatus = resp.StatusCode
+	}
+	s.repo.GetDB().WithContext(context.Background()).Create(wl)
 }

@@ -16,6 +16,10 @@ func NewVARepository(db *gorm.DB) *VARepository {
 	return &VARepository{db: db}
 }
 
+func (r *VARepository) GetDB() *gorm.DB {
+	return r.db
+}
+
 func (r *VARepository) CreateVirtualAccount(ctx context.Context, va *models.VirtualAccount) (*models.VirtualAccount, error) {
 	if err := r.db.WithContext(ctx).Create(va).Error; err != nil {
 		return nil, err

@@ -192,12 +192,24 @@ type VirtualAccount struct {
 	CreatedAt     time.Time
 }
 
+type VATransactionResult struct {
+	Reference     string
+	Amount        float64
+	Status        string
+	TimeCreated   string
+	SenderName    string
+	SenderBank    string
+	SenderAccount string
+	TargetAccount string
+}
+
 type VirtualAccountProvider interface {
 	CreateVirtualAccount(ctx context.Context, req CreateVARequest) (*VirtualAccount, error)
 	GetVirtualAccount(ctx context.Context, accountRef string) (*VirtualAccount, error)
 	SuspendVirtualAccount(ctx context.Context, accountRef string) error
 	UpdateVirtualAccount(ctx context.Context, accountRef string, req UpdateVARequest) error
 	ExpireVirtualAccount(ctx context.Context, accountRef string) error
+	PollVirtualAccountTransactions(ctx context.Context, startDate, endDate time.Time) ([]VATransactionResult, error)
 }
 
 type UpdateVARequest struct {
