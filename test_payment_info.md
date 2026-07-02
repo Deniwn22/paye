@@ -4,6 +4,25 @@ This guide contains all the staging/sandbox test card details, wallet credential
 
 ---
 
+## 🟢 Nomba (Sandbox Mode)
+
+Staging Endpoint: `https://sandbox.nomba.com`
+During sandbox checkout, CVV and Expiry are not validated. Use PIN `9999` and OTP `9999` to approve simulated steps.
+
+### 💳 Staging Test Cards
+| Card Network | Card Number | PIN | OTP | Expected Outcome |
+| :--- | :--- | :--- | :--- | :--- |
+| **Mastercard** | **`5434 6210 7425 2808`** | `9999` | `9999` | **SUCCESS** (OTP Auth) |
+| **Visa** | **`4000 0000 0000 2503`** | `9999` | `9999` | **SUCCESS** (3DS Redirect) |
+| **Mastercard** | **`5484 4972 1831 7651`** | `9999` | - | **DECLINED** (Do Not Honor) |
+
+### 🔐 Simulating OTP Results (Nomba)
+* **Approve Transaction**: Enter `9999`
+* **Simulate Timeout**: Enter `1234`
+* **Simulate Invalid OTP**: Enter `5464`
+
+---
+
 ## 🟢 OPay (Sandbox Mode)
 
 Staging Endpoint: `https://testapi.opaycheckout.com`
@@ -61,22 +80,3 @@ Staging Endpoint: `https://api.flutterwave.com` (with Test Keys)
 ### 🏦 Mock Bank Accounts
 * **Access Bank**: `0690000031` (OTP: `12345`)
 * **Providus Bank**: `5900102340` / `5900002567` (OTP: `12345`)
-
----
-
-## 🟡 Nomba (Sandbox Mode - Currently Deactivated)
-
-Staging Endpoint: `https://sandbox.nomba.com`
-During sandbox checkout, CVV and Expiry are not validated. Use PIN `9999` and OTP `9999` to approve simulated steps.
-
-### 💳 Staging Test Cards
-| Card Network | Card Number | PIN | OTP | Expected Outcome |
-| :--- | :--- | :--- | :--- | :--- |
-| **Mastercard** | **`5434 6210 7425 2808`** | `9999` | `9999` | **SUCCESS** (OTP Auth) |
-| **Visa** | **`4000 0000 0000 2503`** | `9999` | `9999` | **SUCCESS** (3DS Redirect) |
-| **Mastercard** | **`5484 4972 1831 7651`** | `9999` | - | **DECLINED** (Do Not Honor) |
-
-### 🔐 Simulating OTP Results (Nomba)
-* **Approve Transaction**: Enter `9999`
-* **Simulate Timeout**: Enter `1234`
-* **Simulate Invalid OTP**: Enter `5464`

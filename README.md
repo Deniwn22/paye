@@ -249,6 +249,7 @@ To transition Paye from a robust unified payment router into a production-grade 
 2. **Advanced Webhook Delivery Engine**: Queue webhook proxy payloads with exponential backoff retries and manual log replay features (Dead Letter Queue).
 3. **Unified Subscription Engine**: Abstract recurring billing contracts and card tokenization across multiple underlying gateways.
 4. **Automatic VA Migration**: Seamlessly provisioning new accounts on a new provider for existing customers without downtime when a merchant switches providers.
+5. **Expanded Global Provider Support**: Adding integrations for international gateways including **Stripe, Square, Braintree, and Monnify** to allow African merchants to seamlessly accept global payments.
 
 ## License
 MIT
