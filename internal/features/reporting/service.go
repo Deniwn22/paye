@@ -3,15 +3,19 @@ package reporting
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/johnfercher/maroto/v2"
 	"github.com/johnfercher/maroto/v2/pkg/components/col"
 	"github.com/johnfercher/maroto/v2/pkg/components/image"
+	"github.com/johnfercher/maroto/v2/pkg/components/line"
 	"github.com/johnfercher/maroto/v2/pkg/components/text"
 	"github.com/johnfercher/maroto/v2/pkg/config"
 	"github.com/johnfercher/maroto/v2/pkg/consts/align"
+	"github.com/johnfercher/maroto/v2/pkg/consts/extension"
 	"github.com/johnfercher/maroto/v2/pkg/consts/fontstyle"
+	"github.com/johnfercher/maroto/v2/pkg/core"
 	"github.com/johnfercher/maroto/v2/pkg/props"
 
 	"github.com/ttomsin/paye/internal/dto"
@@ -89,11 +93,19 @@ func (s *ReportingService) GeneratePDFStatement(data *dto.AggregatorStatementRes
 	m := maroto.New(cfg)
 
 	// Add Header with Logo
-	m.AddRow(20,
-		image.NewFromFileCol(2, "favicon_io/apple-touch-icon.png", props.Rect{
+	logoBytes, err := os.ReadFile("favicon_io/apple-touch-icon.png")
+	var logoCol core.Col
+	if err == nil {
+		logoCol = image.NewFromBytesCol(2, logoBytes, extension.Png, props.Rect{
 			Center:  true,
 			Percent: 100,
-		}),
+		})
+	} else {
+		logoCol = col.New(2)
+	}
+
+	m.AddRow(20,
+		logoCol,
 		text.NewCol(10, "Statement of Account", props.Text{
 			Top:   5,
 			Style: fontstyle.Bold,
@@ -108,11 +120,13 @@ func (s *ReportingService) GeneratePDFStatement(data *dto.AggregatorStatementRes
 	m.AddRow(10) // Spacer
 
 	// Add Table Headers
+	m.AddRow(2, line.NewCol(12))
 	m.AddRow(10,
 		text.NewCol(4, "Provider", props.Text{Style: fontstyle.Bold, Size: 11}),
 		text.NewCol(4, "Transaction Count", props.Text{Style: fontstyle.Bold, Size: 11}),
 		text.NewCol(4, "Total Volume (NGN)", props.Text{Style: fontstyle.Bold, Size: 11}),
 	)
+	m.AddRow(2, line.NewCol(12))
 
 	// Add Table Rows
 	for provider, stat := range data.Providers {
@@ -121,6 +135,7 @@ func (s *ReportingService) GeneratePDFStatement(data *dto.AggregatorStatementRes
 			text.NewCol(4, fmt.Sprintf("%d", stat.TransactionCount), props.Text{Size: 10}),
 			text.NewCol(4, fmt.Sprintf("%.2f", stat.TotalVolume), props.Text{Size: 10}),
 		)
+		m.AddRow(1, line.NewCol(12, props.Line{Color: &props.Color{Red: 200, Green: 200, Blue: 200}}))
 	}
 
 	m.AddRow(20) // Spacer
@@ -179,11 +194,19 @@ func (s *ReportingService) GenerateVAPDFStatement(va *models.VirtualAccount, txs
 	m := maroto.New(cfg)
 
 	// Add Header with Logo
-	m.AddRow(20,
-		image.NewFromFileCol(2, "favicon_io/apple-touch-icon.png", props.Rect{
+	logoBytes, err := os.ReadFile("favicon_io/apple-touch-icon.png")
+	var logoCol core.Col
+	if err == nil {
+		logoCol = image.NewFromBytesCol(2, logoBytes, extension.Png, props.Rect{
 			Center:  true,
 			Percent: 100,
-		}),
+		})
+	} else {
+		logoCol = col.New(2)
+	}
+
+	m.AddRow(20,
+		logoCol,
 		text.NewCol(10, "Virtual Account Statement", props.Text{
 			Top:   5,
 			Style: fontstyle.Bold,
@@ -201,6 +224,7 @@ func (s *ReportingService) GenerateVAPDFStatement(va *models.VirtualAccount, txs
 	m.AddRow(10) // Spacer
 
 	// Add Table Headers
+	m.AddRow(2, line.NewCol(12))
 	m.AddRow(10,
 		text.NewCol(3, "Date", props.Text{Style: fontstyle.Bold, Size: 10}),
 		text.NewCol(3, "Reference", props.Text{Style: fontstyle.Bold, Size: 10}),
@@ -208,6 +232,7 @@ func (s *ReportingService) GenerateVAPDFStatement(va *models.VirtualAccount, txs
 		text.NewCol(2, "Sender", props.Text{Style: fontstyle.Bold, Size: 10}),
 		text.NewCol(2, "Amount", props.Text{Style: fontstyle.Bold, Size: 10}),
 	)
+	m.AddRow(2, line.NewCol(12))
 
 	// Add Table Rows
 	for _, tx := range txs {
@@ -218,6 +243,7 @@ func (s *ReportingService) GenerateVAPDFStatement(va *models.VirtualAccount, txs
 			text.NewCol(2, tx.SenderName, props.Text{Size: 9}),
 			text.NewCol(2, fmt.Sprintf("%.2f", tx.Amount), props.Text{Size: 9}),
 		)
+		m.AddRow(1, line.NewCol(12, props.Line{Color: &props.Color{Red: 200, Green: 200, Blue: 200}}))
 	}
 
 	m.AddRow(20) // Spacer
