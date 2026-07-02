@@ -315,6 +315,17 @@ func (s *TransactionService) PollPendingTransactions(ctx context.Context) error 
 		slog.Info("Polling status for pending transaction", "reference", tx.Reference, "provider", tx.Provider)
 		_, err := s.VerifyTransaction(ctx, tx.ProjectID.String(), tx.Reference)
 		if err != nil {
+			errStr := err.Error()
+			// If the provider returns a 404 or "not found" AND the transaction is older than 1 hour,
+			// it means the checkout was abandoned by the user.
+			if strings.Contains(strings.ToLower(errStr), "not found") || strings.Contains(errStr, "404") {
+				if time.Since(tx.CreatedAt) > 1*time.Hour {
+					tx.Status = "abandoned"
+					s.repo.UpdateTransaction(ctx, tx)
+					slog.Info("Marked pending transaction as abandoned", "reference", tx.Reference)
+					continue
+				}
+			}
 			slog.Error("Failed to auto-verify transaction during polling", "reference", tx.Reference, "error", err)
 		}
 	}
