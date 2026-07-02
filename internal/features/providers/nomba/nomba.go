@@ -170,10 +170,6 @@ func (n *Nomba) InitializeTransaction(req providers.TransactionRequest) (*provid
 
 // Verify
 
-type nombaFilterRequest struct {
-	OrderReference string `json:"orderReference"`
-}
-
 type nombaTransactionResult struct {
 	ID            string `json:"id"`
 	Status        string `json:"status"`
@@ -181,37 +177,24 @@ type nombaTransactionResult struct {
 	MerchantTxRef string `json:"merchantTxRef"`
 }
 
-type nombaFilterData struct {
-	Results []nombaTransactionResult `json:"results"`
-}
-
-type nombaFilterResponse struct {
-	Code        string          `json:"code"`
-	Description string          `json:"description"`
-	Data        nombaFilterData `json:"data"`
+type nombaSingleTransactionResponse struct {
+	Code        string                 `json:"code"`
+	Description string                 `json:"description"`
+	Data        nombaTransactionResult `json:"data"`
 }
 
 func (n *Nomba) VerifyTransaction(reference string) (*providers.TransactionResponse, error) {
-	filterReq := nombaFilterRequest{
-		OrderReference: reference,
-	}
-
-	body, err := json.Marshal(filterReq)
-	if err != nil {
-		return nil, fmt.Errorf("nomba: failed to marshal verify request: %w", err)
-	}
-
 	accID := n.tokenManager.accountID
 	if n.subAccountID != "" {
 		accID = n.subAccountID
 	}
 
-	url := n.getBaseURL() + "/transactions/accounts"
+	url := fmt.Sprintf("%s/transactions/accounts/single?orderReference=%s", n.getBaseURL(), reference)
 	if accID != n.tokenManager.accountID {
-		url += "?accountId=" + accID
+		url += "&accountId=" + accID
 	}
 
-	resp, err := n.makeRequest("POST", url, body)
+	resp, err := n.makeRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +206,7 @@ func (n *Nomba) VerifyTransaction(reference string) (*providers.TransactionRespo
 		return nil, fmt.Errorf("nomba: verify error: %v", errResult)
 	}
 
-	var result nombaFilterResponse
+	var result nombaSingleTransactionResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("nomba: failed to decode verify response: %w", err)
 	}
@@ -232,11 +215,10 @@ func (n *Nomba) VerifyTransaction(reference string) (*providers.TransactionRespo
 		return nil, fmt.Errorf("nomba: verify failed: %s", result.Description)
 	}
 
-	if len(result.Data.Results) == 0 {
+	tx := result.Data
+	if tx.ID == "" && tx.Status == "" {
 		return nil, fmt.Errorf("nomba: transaction not found for reference: %s", reference)
 	}
-
-	tx := result.Data.Results[0]
 
 	var amount float64
 	if tx.Amount != "" {
