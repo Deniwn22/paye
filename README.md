@@ -1,8 +1,10 @@
 # Paye
 
+🏆 **Currently competing in the DevCareer x Nomba Hackathon 2026**
+
 Unified payment routing engine and secure webhook proxies for African developers. 
 
-Paye acts as a unified middle-layer connecting your apps to payment providers like Paystack and Flutterwave. Build your integration once against the Paye REST API or drop in our JS SDK, manage API credentials dynamically via the dashboard, and route webhook events securely through isolated proxy slugs.
+Paye acts as a unified middle-layer connecting your apps to payment providers like Nomba, Paystack, Flutterwave, and OPay. Build your integration once against the Paye REST API or drop in our JS SDK, manage API credentials dynamically via the dashboard, generate Static Virtual Accounts on the fly, and route webhook events securely through isolated proxy slugs.
 
 ## Architecture
 
@@ -21,63 +23,67 @@ flowchart TD
         direction TB
         GW["API Gateway\n/api/v1/*"]
         SDKEP["SDK Endpoint\n/sdk/:public_id.js"]
-        ROUTER["Unified Router\nProvider Resolution"]
-        WEBHOOK["Webhook Proxy\n/webhooks/:slug"]
-        DB[("PostgreSQL\nEncrypted Credentials\nTransaction Logs")]
+        ROUTER["Unified Router\nCheckout & Virtual Accounts"]
+        WEBHOOK["Webhook Engine\nVerification & Normalization"]
+        REPORTING["Reporting Engine\nVerifiable PDF Statements"]
+        DB[("PostgreSQL/SQLite\nCredentials & Logs")]
         DASH["Merchant Dashboard"]
     end
 
     subgraph PROVIDERS ["💳 Payment Providers"]
+        NB["Nomba"]
         PS["Paystack"]
         FW["Flutterwave"]
-        NB["Nomba"]
+        OP["OPay"]
     end
 
     APP -->|"REST API\nX-Paye-API-Key"| GW
     SDK -->|"Inline Checkout"| SDKEP
     SDKEP --> ROUTER
     GW --> ROUTER
-    ROUTER -->|"Active Provider"| PS
-    ROUTER -->|"Active Provider"| FW
-    ROUTER -->|"Active Provider"| NB
+    ROUTER -->|"Initialize/Provision"| NB
+    ROUTER -->|"Initialize"| PS
+    ROUTER -->|"Initialize"| FW
     ROUTER <--> DB
     DASH -->|"Switch Provider\nManage Keys"| DB
+    NB -->|"Webhook Events\n(Transfers/Payments)"| WEBHOOK
     PS -->|"Webhook Events"| WEBHOOK
-    FW -->|"Webhook Events"| WEBHOOK
-    NB -->|"Webhook Events"| WEBHOOK
+    OP -->|"Webhook Events"| WEBHOOK
     WEBHOOK -->|"Verified &amp; Forwarded"| APP
+    WEBHOOK -->|"Record Transaction"| DB
+    REPORTING -->|"Aggregate Data"| DB
+    DASH -->|"Generate PDF"| REPORTING
 ```
 
 ---
 
-### Unified Checkout Flow
+### Unified Virtual Accounts Flow
 
-When a payment is initialized, Paye resolves the active provider, forwards the request, and returns a stable response — the same shape regardless of which provider handled it.
+Paye abstracts the creation of Static Virtual Accounts. You call one endpoint, and Paye provisions the account on the active provider (e.g., Nomba), tracking incoming transfers locally and forwarding standardized webhooks to your server.
 
 ```mermaid
 sequenceDiagram
-    participant Platform as Your Platform
+    participant App as Your App
     participant Paye as Paye API
-    participant Provider as Active Provider<br/>(Paystack / Flutterwave / Nomba)
-    participant Customer as Customer Browser
-
-    Platform->>Paye: POST /api/v1/transactions/initialize<br/>{ amount, email, currency }
-    Paye->>Paye: Resolve active provider<br/>Decrypt credentials
-    Paye->>Provider: Initialize transaction<br/>(provider-specific API)
-    Provider-->>Paye: Checkout URL + Reference
-    Paye-->>Platform: { auth_url, reference }
-    Platform->>Customer: Redirect to auth_url
-    Customer->>Provider: Complete payment
-    Provider->>Paye: Webhook event (payment_success)
-    Paye->>Paye: Verify signature<br/>Log transaction
-    Paye->>Platform: Forwarded webhook<br/>(normalized payload)
+    participant Provider as Active Provider<br/>(e.g., Nomba)
+    
+    App->>Paye: POST /api/v1/virtual-accounts<br/>{ customer_name, email }
+    Paye->>Provider: Create Virtual Account API
+    Provider-->>Paye: Return NUBAN & Bank Name
+    Paye->>Paye: Map pvc_id to underlying NUBAN
+    Paye-->>App: { pvc_id, account_number, bank }
+    
+    Note over Provider, Paye: Customer makes a bank transfer
+    Provider->>Paye: Inbound Transfer Webhook
+    Paye->>Paye: Idempotent Check & Log Transaction
+    Paye->>App: Normalized Transfer Webhook
 ```
 
 ---
 
-### Webhook Proxy Flow
+### Webhook Proxy & Normalization Flow
 
-Each Paye project gets an isolated webhook slug. Provider webhooks are verified (signature checked), normalized, and forwarded to your endpoint — so your server never needs to handle raw provider formats.
+Each Paye project gets an isolated webhook slug. Provider webhooks are verified (signature checked), normalized into a single predictable format, and forwarded to your endpoint — so your server never needs to handle raw provider formats.
 
 ```mermaid
 flowchart LR
@@ -85,7 +91,7 @@ flowchart LR
     FW["Flutterwave\nWebhook"]
     NB["Nomba\nWebhook"]
 
-    PROXY["Paye Webhook Proxy\n/webhooks/:project_slug\n\n✓ Signature Verified\n✓ Logged\n✓ Normalized"]
+    PROXY["Paye Webhook Proxy\n/webhooks/:project_slug\n\n✓ Signature Verified\n✓ Normalized\n✓ Idempotent"]
 
     YOUR["Your Server\nOne endpoint\nOne format"]
 
@@ -93,6 +99,24 @@ flowchart LR
     FW --> PROXY
     NB --> PROXY
     PROXY --> YOUR
+```
+
+---
+
+### Verifiable Statement Engine
+
+Paye doesn't just process payments; it acts as a system of record. Merchants can generate PDF Statements of Account (for aggregated checkout volumes or specific Virtual Accounts). Each PDF contains a cryptographic `Verification Ref` that anyone can verify via a public endpoint.
+
+```mermaid
+flowchart LR
+    MERCHANT["Merchant Dashboard"]
+    PDF["Generated PDF\n(Includes Verification Ref)"]
+    PUBLIC["Public Verifier\n(Investors/Auditors)"]
+    API["Public Endpoint\nGET /statements/verify/:id"]
+
+    MERCHANT -->|"Request Statement"| PDF
+    PUBLIC -->|"Checks ID"| API
+    API -->|"Returns Original Data"| PUBLIC
 ```
 
 ---
@@ -122,10 +146,12 @@ flowchart TD
 
 ## Core Features
 
-- **Dynamic Router**: Connect Paystack or Flutterwave credentials and switch active providers instantly from the dashboard without modifying your codebase.
+- **Static Virtual Accounts**: Provision dedicated NUBANs (powered by Nomba) for your customers through a single abstracted API.
+- **Dynamic Router**: Connect Nomba, Paystack, or Flutterwave credentials and switch active providers instantly from the dashboard without modifying your codebase.
+- **Zero-Exposure Webhooks**: Proxy callback event payloads from gateways back to your application servers. Paye normalizes varying payload structures into one clean schema.
+- **Verifiable PDF Statements**: Generate stylized, downloadable PDF statements with embedded UUIDs that can be publicly authenticated.
 - **Unified REST API**: Initialize and verify transactions across different gateways using a single API contract.
 - **Frontend JS SDK**: Drop a script tag and checkout target on your pages to launch instant inline checkouts securely.
-- **Zero-Exposure Webhooks**: Proxy callback event payloads from gateways back to your application servers through proxy slugs with signature validation.
 
 ## Getting Started
 
@@ -153,16 +179,29 @@ goose -dir internal/db/migrations/postgres postgres "postgres://postgres:postgre
 goose -dir internal/db/migrations/postgres postgres "postgres://postgres:postgres@localhost:5432/paye?sslmode=disable" status
 ```
 
-
 ### 2. Configure Providers
 
 1. Navigate to the merchant dashboard (configured under the `web` workspace, running at `http://localhost:3000`).
 2. Log in or create a new merchant account.
-3. Go to the **Providers** tab and save your provider secret and public keys (e.g. Paystack Live/Test keys). These keys are stored encrypted using AES-GCM at rest.
+3. Go to the **Providers** tab and save your provider keys (e.g. Nomba Client ID/Secret). These keys are stored encrypted using AES-GCM at rest.
 
-### 3. Integrate Checkout
+### 3. Integrate Services
 
-#### Option A: REST API (Backend Integration)
+#### Option A: Virtual Accounts
+
+Provision a Virtual Account for a customer:
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/virtual-accounts" \
+  -H "X-Paye-API-Key: <your_paye_api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "account_name": "John Doe",
+    "email": "customer@example.com"
+  }'
+```
+
+#### Option B: REST API (Backend Checkout Integration)
 
 Initialize a transaction from your server:
 
@@ -177,14 +216,7 @@ curl -X POST "http://localhost:8080/api/v1/transactions/initialize" \
   }'
 ```
 
-Verify transaction status:
-
-```bash
-curl "http://localhost:8080/api/v1/transactions/verify/<transaction_reference>" \
-  -H "X-Paye-API-Key: <your_paye_api_key>"
-```
-
-#### Option B: JS SDK Embed (Zero-Code Frontend)
+#### Option C: JS SDK Embed (Zero-Code Frontend Checkout)
 
 Paste the script tag inside your HTML pages:
 
@@ -207,6 +239,7 @@ The frontend workspace provides:
 - Live volume and success rate analytics.
 - Webhook forward logs for auditing incoming gateway requests.
 - Live provider toggle control switches.
+- Downloadable Statements of Account.
 
 ## Future Roadmap & Evolution Plan
 
@@ -215,7 +248,7 @@ To transition Paye from a robust unified payment router into a production-grade 
 1. **Smart Routing & Failover**: Dynamically switch gateway routes based on conversion rates, latency, or transaction costs, and enable automated backup failovers during provider downtime.
 2. **Advanced Webhook Delivery Engine**: Queue webhook proxy payloads with exponential backoff retries and manual log replay features (Dead Letter Queue).
 3. **Unified Subscription Engine**: Abstract recurring billing contracts and card tokenization across multiple underlying gateways.
-4. **Team Workspaces**: Support developer invitations and role-based permissions (Owner, Admin, Viewer) per project.
+4. **Automatic VA Migration**: Seamlessly provisioning new accounts on a new provider for existing customers without downtime when a merchant switches providers.
 
 ## License
 MIT
