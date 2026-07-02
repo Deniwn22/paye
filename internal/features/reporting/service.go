@@ -3,7 +3,6 @@ package reporting
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/johnfercher/maroto/v2"
@@ -56,28 +55,30 @@ func (s *ReportingService) GenerateAggregatorStatement(ctx context.Context, proj
 		return nil, fmt.Errorf("failed to fetch virtual account transactions: %w", err)
 	}
 
-	providerStats := make(map[string]dto.ProviderSummary)
+	checkoutStats := make(map[string]dto.ProviderSummary)
+	vaStats := make(map[string]dto.ProviderSummary)
 
 	for _, tx := range txs {
 		p := tx.Provider
-		stat := providerStats[p]
+		stat := checkoutStats[p]
 		stat.TotalVolume += tx.Amount
 		stat.TransactionCount++
-		providerStats[p] = stat
+		checkoutStats[p] = stat
 	}
 
 	for _, tx := range vaTxs {
 		p := tx.Provider
-		stat := providerStats[p]
+		stat := vaStats[p]
 		stat.TotalVolume += tx.Amount
 		stat.TransactionCount++
-		providerStats[p] = stat
+		vaStats[p] = stat
 	}
 
 	return &dto.AggregatorStatementResponse{
-		StartDate: req.StartDate,
-		EndDate:   req.EndDate,
-		Providers: providerStats,
+		StartDate:     req.StartDate,
+		EndDate:       req.EndDate,
+		CheckoutStats: checkoutStats,
+		VAStats:       vaStats,
 	}, nil
 }
 
@@ -93,10 +94,9 @@ func (s *ReportingService) GeneratePDFStatement(data *dto.AggregatorStatementRes
 	m := maroto.New(cfg)
 
 	// Add Header with Logo
-	logoBytes, err := os.ReadFile("favicon_io/apple-touch-icon.png")
 	var logoCol core.Col
-	if err == nil {
-		logoCol = image.NewFromBytesCol(2, logoBytes, extension.Png, props.Rect{
+	if len(logoPNG) > 0 {
+		logoCol = image.NewFromBytesCol(2, logoPNG, extension.Png, props.Rect{
 			Center:  true,
 			Percent: 100,
 		})
@@ -119,23 +119,45 @@ func (s *ReportingService) GeneratePDFStatement(data *dto.AggregatorStatementRes
 
 	m.AddRow(10) // Spacer
 
-	// Add Table Headers
-	m.AddRow(2, line.NewCol(12))
-	m.AddRow(10,
-		text.NewCol(4, "Provider", props.Text{Style: fontstyle.Bold, Size: 11}),
-		text.NewCol(4, "Transaction Count", props.Text{Style: fontstyle.Bold, Size: 11}),
-		text.NewCol(4, "Total Volume (NGN)", props.Text{Style: fontstyle.Bold, Size: 11}),
-	)
-	m.AddRow(2, line.NewCol(12))
-
-	// Add Table Rows
-	for provider, stat := range data.Providers {
+	if len(data.CheckoutStats) > 0 {
+		m.AddRow(10, text.NewCol(12, "Checkout Payments", props.Text{Style: fontstyle.Bold, Size: 11, Align: align.Left}))
+		m.AddRow(2, line.NewCol(12))
 		m.AddRow(10,
-			text.NewCol(4, strings.ToUpper(provider), props.Text{Size: 10}),
-			text.NewCol(4, fmt.Sprintf("%d", stat.TransactionCount), props.Text{Size: 10}),
-			text.NewCol(4, fmt.Sprintf("%.2f", stat.TotalVolume), props.Text{Size: 10}),
+			text.NewCol(4, "Provider", props.Text{Style: fontstyle.Bold, Size: 10}),
+			text.NewCol(4, "Transaction Count", props.Text{Style: fontstyle.Bold, Size: 10}),
+			text.NewCol(4, "Total Volume (NGN)", props.Text{Style: fontstyle.Bold, Size: 10}),
 		)
-		m.AddRow(1, line.NewCol(12, props.Line{Color: &props.Color{Red: 200, Green: 200, Blue: 200}}))
+		m.AddRow(2, line.NewCol(12))
+
+		for provider, stat := range data.CheckoutStats {
+			m.AddRow(10,
+				text.NewCol(4, strings.ToUpper(provider), props.Text{Size: 9}),
+				text.NewCol(4, fmt.Sprintf("%d", stat.TransactionCount), props.Text{Size: 9}),
+				text.NewCol(4, fmt.Sprintf("%.2f", stat.TotalVolume), props.Text{Size: 9}),
+			)
+			m.AddRow(1, line.NewCol(12, props.Line{Color: &props.Color{Red: 200, Green: 200, Blue: 200}}))
+		}
+		m.AddRow(10) // Spacer
+	}
+
+	if len(data.VAStats) > 0 {
+		m.AddRow(10, text.NewCol(12, "Virtual Account Payments", props.Text{Style: fontstyle.Bold, Size: 11, Align: align.Left}))
+		m.AddRow(2, line.NewCol(12))
+		m.AddRow(10,
+			text.NewCol(4, "Provider", props.Text{Style: fontstyle.Bold, Size: 10}),
+			text.NewCol(4, "Transaction Count", props.Text{Style: fontstyle.Bold, Size: 10}),
+			text.NewCol(4, "Total Volume (NGN)", props.Text{Style: fontstyle.Bold, Size: 10}),
+		)
+		m.AddRow(2, line.NewCol(12))
+
+		for provider, stat := range data.VAStats {
+			m.AddRow(10,
+				text.NewCol(4, strings.ToUpper(provider), props.Text{Size: 9}),
+				text.NewCol(4, fmt.Sprintf("%d", stat.TransactionCount), props.Text{Size: 9}),
+				text.NewCol(4, fmt.Sprintf("%.2f", stat.TotalVolume), props.Text{Size: 9}),
+			)
+			m.AddRow(1, line.NewCol(12, props.Line{Color: &props.Color{Red: 200, Green: 200, Blue: 200}}))
+		}
 	}
 
 	m.AddRow(20) // Spacer
@@ -194,10 +216,9 @@ func (s *ReportingService) GenerateVAPDFStatement(va *models.VirtualAccount, txs
 	m := maroto.New(cfg)
 
 	// Add Header with Logo
-	logoBytes, err := os.ReadFile("favicon_io/apple-touch-icon.png")
 	var logoCol core.Col
-	if err == nil {
-		logoCol = image.NewFromBytesCol(2, logoBytes, extension.Png, props.Rect{
+	if len(logoPNG) > 0 {
+		logoCol = image.NewFromBytesCol(2, logoPNG, extension.Png, props.Rect{
 			Center:  true,
 			Percent: 100,
 		})
@@ -235,15 +256,26 @@ func (s *ReportingService) GenerateVAPDFStatement(va *models.VirtualAccount, txs
 	m.AddRow(2, line.NewCol(12))
 
 	// Add Table Rows
-	for _, tx := range txs {
-		m.AddRow(10,
-			text.NewCol(3, tx.CreatedAt.Format("Jan 02, 2006"), props.Text{Size: 9}),
-			text.NewCol(3, tx.Reference, props.Text{Size: 8}),
-			text.NewCol(2, strings.ToUpper(tx.Status), props.Text{Size: 9}),
-			text.NewCol(2, tx.SenderName, props.Text{Size: 9}),
-			text.NewCol(2, fmt.Sprintf("%.2f", tx.Amount), props.Text{Size: 9}),
-		)
-		m.AddRow(1, line.NewCol(12, props.Line{Color: &props.Color{Red: 200, Green: 200, Blue: 200}}))
+	if len(txs) == 0 {
+		m.AddRow(10, text.NewCol(12, "No transactions found for this period.", props.Text{Size: 10, Align: align.Center}))
+	} else {
+		for _, tx := range txs {
+			senderName := tx.SenderName
+			if senderName == "" {
+				senderName = tx.SenderAccount
+			}
+			if senderName == "" {
+				senderName = "Unknown"
+			}
+			m.AddRow(10,
+				text.NewCol(3, tx.CreatedAt.Format("Jan 02, 2006"), props.Text{Size: 9}),
+				text.NewCol(3, tx.Reference, props.Text{Size: 8}),
+				text.NewCol(2, strings.ToUpper(tx.Status), props.Text{Size: 9}),
+				text.NewCol(2, senderName, props.Text{Size: 9}),
+				text.NewCol(2, fmt.Sprintf("%.2f", tx.Amount), props.Text{Size: 9}),
+			)
+			m.AddRow(1, line.NewCol(12, props.Line{Color: &props.Color{Red: 200, Green: 200, Blue: 200}}))
+		}
 	}
 
 	m.AddRow(20) // Spacer

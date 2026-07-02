@@ -12,9 +12,10 @@ type StatementRequest struct {
 
 // AggregatorStatementResponse holds the aggregated stats per provider
 type AggregatorStatementResponse struct {
-	StartDate time.Time                  `json:"start_date"`
-	EndDate   time.Time                  `json:"end_date"`
-	Providers map[string]ProviderSummary `json:"providers"`
+	StartDate     time.Time                  `json:"start_date"`
+	EndDate       time.Time                  `json:"end_date"`
+	CheckoutStats map[string]ProviderSummary `json:"checkout_stats"`
+	VAStats       map[string]ProviderSummary `json:"va_stats"`
 }
 
 type ProviderSummary struct {
