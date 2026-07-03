@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"log/slog"
+	"net/http"
 	"os"
 	"time"
 
@@ -202,6 +203,28 @@ func main() {
 	if err != nil {
 		slog.Error("failed to add VA polling cron job", "error", err)
 		os.Exit(1)
+	}
+
+	// Background job to keep the Render service awake (only in release mode)
+	if os.Getenv("GIN_MODE") == "release" {
+		_, err = c.AddFunc("*/10 * * * *", func() {
+			slog.Info("Running cron job: KeepAlive Ping")
+			keepAliveURL := os.Getenv("KEEPALIVE_URL")
+			if keepAliveURL == "" {
+				keepAliveURL = "https://api.paye.africa/api/v1/health"
+			}
+			resp, pingErr := http.Get(keepAliveURL)
+			if pingErr != nil {
+				slog.Error("KeepAlive ping failed", "error", pingErr)
+				return
+			}
+			defer resp.Body.Close()
+			slog.Info("KeepAlive ping successful", "status", resp.StatusCode)
+		})
+		if err != nil {
+			slog.Error("failed to add keepalive cron job", "error", err)
+			os.Exit(1)
+		}
 	}
 
 	c.Start()
