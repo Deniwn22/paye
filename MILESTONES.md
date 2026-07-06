@@ -22,6 +22,10 @@ This document tracks the high-level roadmap and major milestones for the Paye pl
 - [ ] Smart Routing & Failover: Dynamically switch gateway routes based on conversion rates or latency, and enable automated backup failovers during provider downtime.
 - [ ] Webhook Schema Drift Detection: Implement JSON Schema validation at the webhook ingress layer to automatically detect, alert on, and fallback from undocumented payload changes by upstream providers.
 
+## Milestone 4: Communication & Identity
+- [ ] Real Email Verification: Verify merchant email identities to prevent abuse and spam.
+- [ ] Automated Customer VA Emails: Provide the ability for businesses to automatically email their customers when their Virtual Account number changes due to a provider migration.
+
 ## Milestone 4: Subscriptions & Recurring Billing
 - [ ] Unified Subscription Engine: Abstract recurring billing contracts across underlying gateways.
 - [ ] Tokenized Card Storage: Provide a unified interface to charge saved cards regardless of the provider used to save them.

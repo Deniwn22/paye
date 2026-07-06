@@ -17,7 +17,9 @@ All notable changes to this project will be documented in this file.
 - **Dashboard VA Analytics:** Dashboard statistics now automatically count and report active virtual accounts for a project.
 - **Misdirected Payments:** Safe handling and idempotent processing for webhooks regarding misdirected transfers.
 - **Structured Logging:** Switched logging engine to `slog` for structured JSON logs.
-- **Background Polling:** Added scheduled background jobs for polling transaction statuses on pending checkouts and serving as a fallback for missed Virtual Account webhooks.
+- **Enterprise Background Workers:** Re-architected all background tasks into modular, configurable cron workers. You can dynamically set cron schedules or stop/start workers (`WORKER_SUBSCRIPTIONS`, `WORKER_PENDING_TX`, `WORKER_POLL_VA`) directly via the `.env` file without redeploying code.
+- **Zero Data-Loss Reconciliation Worker:** Deployed a highly robust `ReconcileMissedVAWebhooks` automated worker. It continuously scans the raw `webhook_logs` to detect and safely replay any Virtual Account transactions that were skipped or dropped due to network issues or signature failures.
+- **Real-Time Recovery Notifications:** When the reconciliation worker successfully auto-recovers missing funds from a dropped webhook, it instantly broadcasts a WebSocket alert to the merchant dashboard ("We noticed an unprocessed money...").
 - **Dashboard Stats Refactoring:** Decoupled dashboard analytics from webhook logs, deriving total volume directly from `transactions` and `virtual_account_transactions` tables to ensure perfect accuracy.
 - **Swagger Documentation Sandbox:** Overhauled docs UI to include an interactive Swagger Sandbox playground.
 - **JS SDK & Inline Checkout:** Introduced dropping a `<script>` tag for instant checkouts with dynamic layout scaling.
