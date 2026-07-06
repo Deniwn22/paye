@@ -364,6 +364,7 @@ func main() {
 	transactions.RegisterRoutes(apiKeyProtected, transactionHandler)
 	virtual_accounts.RegisterRoutes(apiKeyProtected, vaHandler)
 	reporting.RegisterVARoutes(apiKeyProtected, reportingHandler)
+	providers.RegisterAPIRoutes(apiKeyProtected, providerHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {

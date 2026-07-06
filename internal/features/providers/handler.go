@@ -152,6 +152,25 @@ func (h *ProviderHandler) listProvidersWithEnv(c *gin.Context, env string) {
 	c.JSON(http.StatusOK, api.Success("Providers retrieved successfully", resp))
 }
 
+// ListAPIProvidersHandler godoc
+// @Summary List active providers for the API Key environment
+// @Description Retrieve a list of provider configurations matching the environment (live or test) of the provided API key.
+// @Tags Providers
+// @Security ApiKeyAuth
+// @Produce json
+// @Success 200 {object} api.SwaggerProviderConfigListResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /providers/active [get]
+func (h *ProviderHandler) ListAPIProvidersHandler(c *gin.Context) {
+	isLive, exists := c.Get(middleware.IsLiveContextKey)
+	env := "test"
+	if exists && isLive.(bool) {
+		env = "live"
+	}
+	h.listProvidersWithEnv(c, env)
+}
+
 // UpdateProviderHandler godoc
 // @Summary Update provider configuration
 // @Description Update fields of a specific provider config
@@ -310,6 +329,14 @@ func RegisterRoutes(rg *gin.RouterGroup, h *ProviderHandler) {
 
 	rg.POST("/transfers", h.CreateTransferHandler)
 	rg.GET("/transfers", h.ListTransfersHandler)
+}
+
+func RegisterAPIRoutes(rg *gin.RouterGroup, h *ProviderHandler) {
+	providers := rg.Group("/providers")
+	{
+		// /api/v1/providers/active using API Key
+		providers.GET("/active", h.ListAPIProvidersHandler)
+	}
 }
 
 func (h *ProviderHandler) RefundHandler(c *gin.Context) {

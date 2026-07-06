@@ -767,6 +767,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/providers/active": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of provider configurations matching the environment (live or test) of the provided API key.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "List active providers for the API Key environment",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerProviderConfigListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/providers/live": {
             "get": {
                 "security": [
