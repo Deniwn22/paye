@@ -11,5 +11,5 @@ type Project struct {
 	TestPublicID string    `gorm:"unique;index"`
 	UserID         uuid.UUID `gorm:"type:uuid;not null;index"`
 	User           *User     `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
-	AutoMigrateVAs bool      `gorm:"default:false"`
+	AutoMigrateVAs bool      `gorm:"column:auto_migrate_vas;default:false"`
 }
