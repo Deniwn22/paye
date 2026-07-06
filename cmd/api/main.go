@@ -252,7 +252,12 @@ func main() {
 
 	// Gin config
 	r := gin.Default()
-	r.Use(cors.Default())
+	// Enable CORS
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowAllOrigins = true
+	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization", "x-paye-api-key"}
+	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}
+	r.Use(cors.New(corsConfig))
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Hello, World!",
