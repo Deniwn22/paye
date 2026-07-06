@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file.
 - **Webhook Environments:** Webhook configurations are now environment-aware. You can specify a separate Target URL for test webhooks and live webhooks.
 - **Provider Parity:** Added support for Nomba and OPay alongside Paystack and Flutterwave.
 - **Virtual Accounts (VA):** Introduced API and webhook integrations for provisioning and processing Virtual Accounts.
+- **Flutterwave Virtual Accounts:** Added full support for provisioning Virtual Accounts and parsing `BANK_TRANSFER_TRANSACTION` webhooks natively using Flutterwave.
+- **Dynamic Virtual Accounts:** Native support across both Nomba and Flutterwave to seamlessly provision dynamic, expiring, and expected-amount virtual accounts from a unified payload.
+- **VA Pagination & Filtering:** `GET /virtual-accounts` now supports `page`, `limit`, and `provider` filtering, returning a standardized pagination `meta` object.
+- **Dashboard VA Analytics:** Dashboard statistics now automatically count and report active virtual accounts for a project.
 - **Misdirected Payments:** Safe handling and idempotent processing for webhooks regarding misdirected transfers.
 - **Structured Logging:** Switched logging engine to `slog` for structured JSON logs.
 - **Background Polling:** Added scheduled background jobs for polling transaction statuses on pending checkouts and serving as a fallback for missed Virtual Account webhooks.

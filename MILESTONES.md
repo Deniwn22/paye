@@ -12,9 +12,9 @@ This document tracks the high-level roadmap and major milestones for the Paye pl
 - [x] Virtual Accounts API & Webhooks.
 
 ## Milestone 2: Unified Virtual Accounts & Nomba Hackathon
-- [ ] Provider Parity for VA: Extend virtual account provisioning and webhook processing to support Paystack and Flutterwave (currently only Nomba and OPay are supported).
+- [x] Provider Parity for VA: Extend virtual account provisioning and webhook processing to support Paystack and Flutterwave (currently only Nomba and OPay are supported).
 - [ ] Automatic VA Migration: When a business switches their active provider on the dashboard, Paye should automatically start provisioning new Virtual Accounts for their existing customers under the new provider, deprecating the old ones gracefully.
-- [ ] Unified Account Lifecycle: Abstract the creation, updating, and expiring of virtual accounts so a single API call handles it across any provider.
+- [x] Unified Account Lifecycle: Abstract the creation, updating, and expiring of virtual accounts so a single API call handles it across any provider.
 
 ## Milestone 3: Reliability & Delivery 
 - [ ] Advanced Webhook Delivery Engine: Queue webhook proxy payloads with exponential backoff retries.
