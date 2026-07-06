@@ -66,31 +66,53 @@ func main() {
 		}
 	}()
 
+	providers.RegisterProviderFactory("nomba", nomba.NewNombaProvider)
+	providers.RegisterProviderFactory("flutterwave", flutterwave.NewFlutterwaveProvider)
+
 	ctx := context.Background()
 
-	// 1. Find all 'expired' VAs
+	// 1. Find all TEST MODE paye_va_ids that have at least one 'expired' VA
 	var expiredVAs []*models.VirtualAccount
-	if err := database.DB.Where("status = ?", "expired").Find(&expiredVAs).Error; err != nil {
+	if err := database.DB.Where("status = ? AND is_live = ?", "expired", false).Find(&expiredVAs).Error; err != nil {
 		log.Fatalf("Failed to query expired VAs: %v", err)
 	}
 
-	if len(expiredVAs) == 0 {
-		log.Println("No expired VAs found.")
+	expiredPayeIDs := make(map[string]bool)
+	for _, va := range expiredVAs {
+		if va.PayeVaID != "" {
+			expiredPayeIDs[va.PayeVaID] = true
+		}
+	}
+
+	var payeIDsList []string
+	for id := range expiredPayeIDs {
+		payeIDsList = append(payeIDsList, id)
+	}
+
+	if len(payeIDsList) == 0 {
+		log.Println("No expired VA chains found in test mode.")
 		return
 	}
 
-	log.Printf("Found %d expired Virtual Accounts. Attempting physical expiration...", len(expiredVAs))
+	// 2. Find all TEST MODE 'active' VAs that belong to those expired paye_va_ids (orphans)
+	var orphanedVAs []*models.VirtualAccount
+	if err := database.DB.Where("status = ? AND is_live = ? AND paye_va_id IN ?", "active", false, payeIDsList).Find(&orphanedVAs).Error; err != nil {
+		log.Fatalf("Failed to query orphaned VAs: %v", err)
+	}
+
+	if len(orphanedVAs) == 0 {
+		log.Println("No orphaned active VAs found in test mode.")
+		return
+	}
+
+	log.Printf("Found %d orphaned 'active' Virtual Accounts belonging to an expired chain in TEST MODE. Attempting expiration...", len(orphanedVAs))
 
 	successCount := 0
-	for _, va := range expiredVAs {
+	for _, va := range orphanedVAs {
 		env := "test"
-		if va.IsLive {
-			env = "live"
-		}
-
 		var providerCfg models.ProviderConfig
 		if err := database.DB.Where("project_id = ? AND provider_name = ? AND environment = ?", va.ProjectID, va.Provider, env).First(&providerCfg).Error; err != nil {
-			log.Printf("Skip VA %s (Provider %s): config not found", va.PvcID, va.Provider)
+			log.Printf("Skip VA %s (Provider %s): config not found: %v", va.PvcID, va.Provider, err)
 			continue
 		}
 
@@ -100,7 +122,7 @@ func main() {
 			continue
 		}
 
-		log.Printf("Expiring VA %s physically on %s...", va.AccountRef, va.Provider)
+		log.Printf("Expiring orphaned VA %s physically on %s...", va.AccountRef, va.Provider)
 		if err := provider.ExpireVirtualAccount(ctx, va.AccountRef); err != nil {
 			if !strings.Contains(err.Error(), "expire VA not supported") {
 				log.Printf("Failed to expire VA %s on %s: %v", va.AccountRef, va.Provider, err)
@@ -112,7 +134,11 @@ func main() {
 			log.Printf("Successfully expired VA %s on %s", va.AccountRef, va.Provider)
 			successCount++
 		}
+
+		// Mark it expired locally
+		va.Status = "expired"
+		database.DB.Save(va)
 	}
 
-	fmt.Printf("\nCleanup complete! Processed %d VAs. %d physical expiration successful.\n", len(expiredVAs), successCount)
+	fmt.Printf("\nCleanup complete! Processed %d orphaned VAs. %d physical expiration successful.\n", len(orphanedVAs), successCount)
 }
