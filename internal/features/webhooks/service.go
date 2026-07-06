@@ -397,6 +397,61 @@ func (s *WebhookService) ListAllLogs(ctx context.Context, projectID string, limi
 	return s.repo.ListAllLogs(ctx, projectID, limit, offset)
 }
 
+func (s *WebhookService) ReconcileMissedVAWebhooks(ctx context.Context, duration time.Duration) error {
+	logs, err := s.repo.ListRecentLogs(ctx, duration)
+	if err != nil {
+		return err
+	}
+
+	for _, wl := range logs {
+		isVA := false
+
+		var nombaPayload struct {
+			Data struct {
+				Transaction struct {
+					Type string `json:"type"`
+				} `json:"transaction"`
+			} `json:"data"`
+		}
+		if err := json.Unmarshal([]byte(wl.Payload), &nombaPayload); err == nil && nombaPayload.Data.Transaction.Type == "vact_transfer" {
+			isVA = true
+		}
+
+		var fwPayload struct {
+			EventTypeFW string `json:"event.type"`
+		}
+		if err := json.Unmarshal([]byte(wl.Payload), &fwPayload); err == nil && fwPayload.EventTypeFW == "BANK_TRANSFER_TRANSACTION" {
+			isVA = true
+		}
+
+		if isVA {
+			if wl.WebhookConfigID == nil {
+				continue
+			}
+
+			wc, err := s.repo.FindByID(ctx, wl.WebhookConfigID.String(), wl.ProjectID.String())
+			if err != nil {
+				continue
+			}
+
+			err = s.ProcessVAWebhook(ctx, wc, []byte(wl.Payload), wl.IsLive)
+			if err == nil {
+				if s.notifier != nil {
+					s.notifier.CreateAndNotify(
+						context.Background(),
+						wc.ProjectID.String(),
+						"System Reconciliation",
+						"We noticed an unprocessed money, we have successfully recovered and processed it now!",
+						"reconciliation",
+						nil,
+					)
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (s *WebhookService) ProcessVAWebhook(ctx context.Context, wc *models.WebhookConfig, payload []byte, isLive bool) error {
 	if wc.ProviderName == "flutterwave" {
 		var fwPayload struct {

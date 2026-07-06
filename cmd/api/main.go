@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"crypto/sha256"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/robfig/cron/v3"
@@ -165,50 +167,57 @@ func main() {
 	reportingRepo := reporting.NewReportingRepo(database.DB)
 	reportingService := reporting.NewReportingService(transactionRepo, vaRepo, reportingRepo)
 
-	// Background worker for processing due subscriptions
-	c := cron.New()
-	_, err = c.AddFunc("@hourly", func() {
-		slog.Info("Running cron job: ProcessDueSubscriptions")
-		err := subscriptionService.ProcessDueSubscriptions(context.Background())
+	// Background worker helper for configurable scheduled tasks
+	startCronJob := func(c *cron.Cron, name, envSchedule, defaultSchedule, envStatus string, job func()) {
+		status := os.Getenv(envStatus)
+		if strings.ToLower(status) == "stop" {
+			slog.Info(fmt.Sprintf("Cron job %s is stopped via environment variable", name))
+			return
+		}
+
+		schedule := os.Getenv(envSchedule)
+		if schedule == "" {
+			schedule = defaultSchedule
+		}
+
+		_, err := c.AddFunc(schedule, func() {
+			slog.Info(fmt.Sprintf("Running cron job: %s", name))
+			job()
+		})
 		if err != nil {
+			slog.Error(fmt.Sprintf("failed to add cron job %s", name), "error", err)
+			os.Exit(1)
+		}
+	}
+
+	c := cron.New()
+
+	startCronJob(c, "ProcessDueSubscriptions", "WORKER_SUBSCRIPTIONS_SCHEDULE", "@hourly", "WORKER_SUBSCRIPTIONS_STATUS", func() {
+		if err := subscriptionService.ProcessDueSubscriptions(context.Background()); err != nil {
 			slog.Error("Cron error (ProcessDueSubscriptions)", "error", err)
 		}
 	})
-	if err != nil {
-		slog.Error("failed to add cron job", "error", err)
-		os.Exit(1)
-	}
 
-	// Background job to verify older pending transactions that didn't get webhook updates
-	_, err = c.AddFunc("*/5 * * * *", func() {
-		slog.Info("Running cron job: PollPendingTransactions")
-		err := transactionService.PollPendingTransactions(context.Background())
-		if err != nil {
+	startCronJob(c, "PollPendingTransactions", "WORKER_PENDING_TX_SCHEDULE", "*/5 * * * *", "WORKER_PENDING_TX_STATUS", func() {
+		if err := transactionService.PollPendingTransactions(context.Background()); err != nil {
 			slog.Error("Cron error (PollPendingTransactions)", "error", err)
 		}
 	})
-	if err != nil {
-		slog.Error("failed to add transactions polling cron job", "error", err)
-		os.Exit(1)
-	}
 
-	// Background job to poll virtual account transactions (fallback for missing webhooks)
-	_, err = c.AddFunc("*/5 * * * *", func() {
-		slog.Info("Running cron job: PollVirtualAccounts")
-		err := vaService.PollVirtualAccounts(context.Background())
-		if err != nil {
+	startCronJob(c, "PollVirtualAccounts", "WORKER_POLL_VA_SCHEDULE", "*/5 * * * *", "WORKER_POLL_VA_STATUS", func() {
+		if err := vaService.PollVirtualAccounts(context.Background()); err != nil {
 			slog.Error("Cron error (PollVirtualAccounts)", "error", err)
 		}
 	})
-	if err != nil {
-		slog.Error("failed to add VA polling cron job", "error", err)
-		os.Exit(1)
-	}
 
-	// Background job to keep the Render service awake (only in release mode)
+	startCronJob(c, "ReconcileMissedVAWebhooks", "WORKER_RECONCILE_VA_SCHEDULE", "@hourly", "WORKER_RECONCILE_VA_STATUS", func() {
+		if err := webhookService.ReconcileMissedVAWebhooks(context.Background(), 24*time.Hour); err != nil {
+			slog.Error("Cron error (ReconcileMissedVAWebhooks)", "error", err)
+		}
+	})
+
 	if os.Getenv("GIN_MODE") == "release" {
-		_, err = c.AddFunc("*/10 * * * *", func() {
-			slog.Info("Running cron job: KeepAlive Ping")
+		startCronJob(c, "KeepAlive Ping", "WORKER_KEEPALIVE_SCHEDULE", "*/10 * * * *", "WORKER_KEEPALIVE_STATUS", func() {
 			keepAliveURL := os.Getenv("KEEPALIVE_URL")
 			if keepAliveURL == "" {
 				keepAliveURL = "https://api.paye.africa/api/v1/health"
@@ -221,10 +230,6 @@ func main() {
 			defer resp.Body.Close()
 			slog.Info("KeepAlive ping successful", "status", resp.StatusCode)
 		})
-		if err != nil {
-			slog.Error("failed to add keepalive cron job", "error", err)
-			os.Exit(1)
-		}
 	}
 
 	c.Start()

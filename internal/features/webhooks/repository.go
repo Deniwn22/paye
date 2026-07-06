@@ -3,6 +3,7 @@ package webhooks
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/ttomsin/paye/internal/models"
@@ -119,6 +120,15 @@ func (r *WebhookRepo) ListAllLogs(ctx context.Context, projectID string, limit i
 		Where("project_id = ?", projectID).
 		Order("created_at DESC").
 		Limit(limit).Offset(offset).
+		Find(&logs).Error
+	return logs, err
+}
+
+func (r *WebhookRepo) ListRecentLogs(ctx context.Context, duration time.Duration) ([]*models.WebhookLog, error) {
+	var logs []*models.WebhookLog
+	err := r.db.WithContext(ctx).
+		Where("created_at >= ?", time.Now().Add(-duration)).
+		Order("created_at DESC").
 		Find(&logs).Error
 	return logs, err
 }
