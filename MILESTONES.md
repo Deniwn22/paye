@@ -17,10 +17,12 @@ This document tracks the high-level roadmap and major milestones for the Paye pl
 - [x] Unified Account Lifecycle: Abstract the creation, updating, and expiring of virtual accounts so a single API call handles it across any provider.
 
 ## Milestone 3: Reliability & Delivery 
+- [x] Zero Data-Loss Reconciliation Bots: Automated background workers that continuously scan logs and recover dropped webhooks to keep the system 100% perfectly synced and stable.
 - [ ] Advanced Webhook Delivery Engine: Queue webhook proxy payloads with exponential backoff retries.
 - [ ] Dead Letter Queue (DLQ) & Manual Replay: Allow merchants to manually replay failed webhook deliveries from the dashboard.
 - [ ] Smart Routing & Failover: Dynamically switch gateway routes based on conversion rates or latency, and enable automated backup failovers during provider downtime.
 - [ ] Webhook Schema Drift Detection: Implement JSON Schema validation at the webhook ingress layer to automatically detect, alert on, and fallback from undocumented payload changes by upstream providers.
+- [ ] Future Reconciliation: Advanced anomaly detection algorithms to reconcile complex edge-cases and mismatched statement balances across providers.
 
 ## Milestone 4: Communication & Identity
 - [ ] Real Email Verification: Verify merchant email identities to prevent abuse and spam.

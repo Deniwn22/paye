@@ -110,6 +110,45 @@ flowchart LR
 
 ---
 
+### Zero Data-Loss Reconciliation Bots
+
+Because network issues, dropped packets, and API timeouts are inevitable when dealing with third-party payment gateways, Paye employs a suite of automated background "bots" (cron workers) that continuously monitor the system's health. 
+
+These bots act as a safety net, actively polling for stuck transactions and gracefully recovering missing webhooks to keep the system 100% perfectly synced and stable.
+
+```mermaid
+flowchart TD
+    subgraph DB ["Paye Database"]
+        WL[("Webhook Logs\n(Raw Ingress)")]
+        TX[("Transactions Ledger")]
+    end
+
+    subgraph BOTS ["Reconciliation Bots (Background Workers)"]
+        direction TB
+        VA_BOT["VA Reconciliation Bot\nRuns @hourly"]
+        POLL_BOT["Pending Tx Poller Bot\nRuns */5 mins"]
+    end
+    
+    subgraph ACTION ["Recovery Actions"]
+        PROCESS["Process Idempotently"]
+        NOTIFY["Real-time WebSocket\nMerchant Notification"]
+        UPDATE["Sync Gateway Status"]
+    end
+
+    WL -.->|"Detect missed transfers"| VA_BOT
+    VA_BOT -->|"Replays raw payload"| PROCESS
+    PROCESS -->|"Saves safely"| TX
+    PROCESS -->|"Broadcasts recovery"| NOTIFY
+    
+    TX -.->|"Detect stuck checkouts"| POLL_BOT
+    POLL_BOT -->|"Queries Gateway API"| UPDATE
+    UPDATE --> TX
+```
+
+Whenever a bot automatically recovers missing funds, it fires a real-time WebSocket notification directly to the Merchant Dashboard: **"System Reconciliation: We noticed an unprocessed money, we have successfully recovered and processed it now!"**
+
+---
+
 ### Verifiable Statement Engine
 
 Paye doesn't just process payments; it acts as a system of record. Merchants can generate PDF Statements of Account (for aggregated checkout volumes or specific Virtual Accounts). Each PDF contains a cryptographic `Verification Ref` that anyone can verify via a public endpoint.
