@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -77,6 +78,41 @@ func (s *VAService) getVAProvider(ctx context.Context, projectID string) (provid
 	return client, "nomba", subAccountID, nil
 }
 
+func (s *VAService) getProviderInstance(ctx context.Context, projectID string, providerName string, isLive bool) (providers.VirtualAccountProvider, error) {
+	env := "test"
+	if isLive {
+		env = "live"
+	}
+	pc, err := s.providerRepo.GetProviderByNameAndEnv(ctx, projectID, providerName, env)
+	if err != nil {
+		return nil, fmt.Errorf("provider config not found: %w", err)
+	}
+
+	encSecret := pc.SecretKey
+	clientSecret, err := crypto.Decrypt(encSecret, s.encryptionKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt client secret: %w", err)
+	}
+
+	if pc.ProviderName == "flutterwave" {
+		client := flutterwave.New(clientSecret)
+		return client, nil
+	}
+
+	encClientID := pc.PublicKey
+	clientID, err := crypto.Decrypt(encClientID, s.encryptionKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt client id: %w", err)
+	}
+
+	accountID := pc.Metadata.NombaAccountID
+	subAccountID := pc.Metadata.NombaSubAccountID
+
+	webhookSecret, _ := crypto.Decrypt(pc.WebhookSecret, s.encryptionKey)
+	client := nomba.New(clientID, clientSecret, webhookSecret, accountID, subAccountID, isLive)
+	return client, nil
+}
+
 func (s *VAService) CreateVirtualAccount(ctx context.Context, projectID string, dto dto.CreateVirtualAccountDTO) (*models.VirtualAccount, error) {
 	provider, providerName, subAccountID, err := s.getVAProvider(ctx, projectID)
 	if err != nil {
@@ -104,14 +140,11 @@ func (s *VAService) CreateVirtualAccount(ctx context.Context, projectID string, 
 
 		if project.AutoMigrateVAs {
 			// MIGRATION: Provider has switched and AutoMigrateVAs is ON!
-			oldProviderCfg, err := s.providerRepo.FindByCode(existing.Provider)
+			oldProvider, err := s.getProviderInstance(ctx, projectID, existing.Provider, existing.IsLive)
 			if err == nil {
-				oldProvider, err := providers.NewProvider(existing.Provider, oldProviderCfg, s.encryptionKey)
-				if err == nil {
-					if err := oldProvider.ExpireVirtualAccount(ctx, existing.AccountRef); err != nil {
-						if !strings.Contains(err.Error(), "expire VA not supported") {
-							slog.Error("failed to expire old VA on provider during auto-migration", "provider", existing.Provider, "error", err)
-						}
+				if err := oldProvider.ExpireVirtualAccount(ctx, existing.AccountRef); err != nil {
+					if !strings.Contains(err.Error(), "expire VA not supported") {
+						slog.Error("failed to expire old VA on provider during auto-migration", "provider", existing.Provider, "error", err)
 					}
 				}
 			}
@@ -255,14 +288,11 @@ func (s *VAService) MigrateVirtualAccount(ctx context.Context, projectID string,
 	}
 
 	// 3. Expire old VA on the previous provider's network
-	oldProviderCfg, err := s.providerRepo.FindByCode(existing.Provider)
+	oldProvider, err := s.getProviderInstance(ctx, projectID, existing.Provider, existing.IsLive)
 	if err == nil {
-		oldProvider, err := providers.NewProvider(existing.Provider, oldProviderCfg, s.encryptionKey)
-		if err == nil {
-			if err := oldProvider.ExpireVirtualAccount(ctx, existing.AccountRef); err != nil {
-				if !strings.Contains(err.Error(), "expire VA not supported") {
-					slog.Error("failed to expire old VA on provider during manual migration", "provider", existing.Provider, "error", err)
-				}
+		if err := oldProvider.ExpireVirtualAccount(ctx, existing.AccountRef); err != nil {
+			if !strings.Contains(err.Error(), "expire VA not supported") {
+				slog.Error("failed to expire old VA on provider during manual migration", "provider", existing.Provider, "error", err)
 			}
 		}
 	}
@@ -352,13 +382,7 @@ func (s *VAService) ExpireVirtualAccount(ctx context.Context, projectID string, 
 		}
 
 		// Initialize the appropriate provider for this specific VA
-		providerCfg, err := s.providerRepo.FindByCode(va.Provider)
-		if err != nil {
-			slog.Error("failed to find provider config for VA", "provider", va.Provider, "error", err)
-			continue
-		}
-
-		provider, err := providers.NewProvider(va.Provider, providerCfg, s.encryptionKey)
+		provider, err := s.getProviderInstance(ctx, projectID, va.Provider, va.IsLive)
 		if err != nil {
 			slog.Error("failed to initialize provider", "provider", va.Provider, "error", err)
 			continue
