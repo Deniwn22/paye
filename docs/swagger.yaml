@@ -699,7 +699,7 @@ definitions:
     - email
     - publicId
     type: object
-host: localhost:8080
+host: api.paye.africa
 info:
   contact: {}
   description: |-
@@ -707,7 +707,7 @@ info:
 
     ![Paye Logo](/favicon_io/android-chrome-192x192.png)
 
-    Production Server: https://paye.africa
+    Production Server: https://api.paye.africa
     Local Server: http://localhost:8080
 
     ---

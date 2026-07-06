@@ -41,7 +41,7 @@ import (
 // @description 
 // @description ![Paye Logo](/favicon_io/android-chrome-192x192.png)
 // @description
-// @description Production Server: https://paye.africa
+// @description Production Server: https://api.paye.africa
 // @description Local Server: http://localhost:8080
 // @description
 // @description ---
@@ -54,7 +54,7 @@ import (
 // @description Authentication Modes:
 // @description 1. Bearer JWT Token: Passed as "Authorization: Bearer <token>". Scoped to Dashboard CRUD resources (projects, provider credentials, webhook routes, logs).
 // @description 2. API Key Header: Passed as "X-Paye-API-Key: paye_live_..." or "paye_test_...". Scoped to server-to-server transaction initializations, refunds, and payouts.
-// @host localhost:8080
+// @host api.paye.africa
 // @BasePath /api/v1
 
 // @securityDefinitions.apikey BearerAuth
