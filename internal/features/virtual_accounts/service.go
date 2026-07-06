@@ -77,15 +77,24 @@ func (s *VAService) getVAProvider(ctx context.Context, projectID string) (provid
 }
 
 func (s *VAService) CreateVirtualAccount(ctx context.Context, projectID string, dto dto.CreateVirtualAccountDTO) (*models.VirtualAccount, error) {
-	// check if customer_reference already has a VA under this project
-	existing, err := s.repo.FindByCustomerRef(ctx, dto.CustomerReference, projectID)
-	if err == nil && existing != nil {
-		return nil, fmt.Errorf("virtual account already exists for customer reference: %s", dto.CustomerReference)
-	}
-
 	provider, providerName, subAccountID, err := s.getVAProvider(ctx, projectID)
 	if err != nil {
 		return nil, err
+	}
+
+	// check if customer_reference already has an active VA under this project
+	existing, err := s.repo.FindByCustomerRef(ctx, dto.CustomerReference, projectID)
+	if err == nil && existing != nil {
+		if existing.Provider == providerName {
+			// Idempotent: VA already exists on the active provider. Return it.
+			return existing, nil
+		}
+		
+		// MIGRATION: Provider has switched!
+		// Safely deprecate the old Virtual Account by marking it expired locally.
+		// Any late payments will now fall into the Misdirected Payments queue.
+		existing.Status = "expired"
+		s.repo.UpdateVirtualAccount(ctx, existing)
 	}
 
 	pvcID := "pvc_" + uuid.New().String()

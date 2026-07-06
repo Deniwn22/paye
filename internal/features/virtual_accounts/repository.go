@@ -44,7 +44,7 @@ func (r *VARepository) FindByPvcID(ctx context.Context, pvcID string, projectID 
 
 func (r *VARepository) FindByCustomerRef(ctx context.Context, customerRef string, projectID string) (*models.VirtualAccount, error) {
 	var va models.VirtualAccount
-	err := r.db.WithContext(ctx).Where("customer_reference = ? AND project_id = ?", customerRef, projectID).First(&va).Error
+	err := r.db.WithContext(ctx).Where("customer_reference = ? AND project_id = ? AND status = ?", customerRef, projectID, "active").Order("created_at DESC").First(&va).Error
 	return &va, err
 }
 
