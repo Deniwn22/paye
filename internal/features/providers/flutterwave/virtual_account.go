@@ -37,15 +37,18 @@ type flwVAResponse struct {
 	Data    flwVAData `json:"data"`
 }
 
-// CreateVirtualAccount creates a new Virtual Account using Flutterwave
 func (f *Flutterwave) CreateVirtualAccount(ctx context.Context, req providers.CreateVARequest) (*providers.VirtualAccount, error) {
-	// Parse expected amount (must be 0 for permanent VAs)
 	amount := int(req.ExpectedAmount)
+	// Check if this is meant to be a dynamic VA
+	isPermanent := true
+	if req.ExpectedAmount > 0 || req.ExpiryDate != "" {
+		isPermanent = false
+	}
 
 	flwReq := flwCreateVARequest{
 		Email:       "customer@paye.africa", // placeholder if customer email is not provided
 		TxRef:       req.AccountRef,         // Use AccountRef as tx_ref so webhooks map back easily
-		IsPermanent: true,                   // Assuming permanent VAs for static accounts
+		IsPermanent: isPermanent,
 		Narration:   req.AccountName,
 		Amount:      amount,
 		Currency:    req.Currency,
