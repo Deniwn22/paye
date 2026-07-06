@@ -70,6 +70,31 @@ func (s *ProviderService) ListProviders(ctx context.Context, projectID string) (
 	return res, nil
 }
 
+// ListProvidersByEnv retrieves all provider configurations for the given project and environment.
+func (s *ProviderService) ListProvidersByEnv(ctx context.Context, projectID string, env string) ([]*dto.ProviderConfigResponse, error) {
+	configs := s.repo.ListProvidersByEnv(ctx, projectID, env)
+	counts := s.repo.GetVACountsByProvider(ctx, projectID)
+
+	res := make([]*dto.ProviderConfigResponse, 0, len(configs))
+	for _, config := range configs {
+		var decrypted *models.ProviderConfig
+		var err error
+		decrypted, err = s.decryptConfigKeys(config)
+		if err != nil {
+			// fallback if decryption fails
+			cloned := *config
+			cloned.SecretKey = "********"
+			cloned.PublicKey = "********"
+			decrypted = &cloned
+		}
+		
+		resp := dto.ToProviderConfigResponse(decrypted)
+		resp.VACount = counts[config.ProviderName]
+		res = append(res, resp)
+	}
+	return res, nil
+}
+
 func validateProviderKeys(providerName string, env string, secretKey, publicKey string) error {
 	prefix := "test_"
 	if env == "live" {

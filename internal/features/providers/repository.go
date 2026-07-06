@@ -36,6 +36,13 @@ func (p *ProviderRepo) ListProviders(ctx context.Context, projectID string) []*m
 	return providers
 }
 
+// ListProvidersByEnv returns a list of providers for a given projectID and environment
+func (p *ProviderRepo) ListProvidersByEnv(ctx context.Context, projectID string, env string) []*models.ProviderConfig {
+	var providers []*models.ProviderConfig
+	p.db.WithContext(ctx).Where("project_id = ? AND environment = ?", projectID, env).Find(&providers)
+	return providers
+}
+
 // GetProviderByLabel returns a single provider by label and projectID
 func (p *ProviderRepo) GetProviderByLabel(ctx context.Context, projectID string, label string) *models.ProviderConfig {
 	var provider models.ProviderConfig

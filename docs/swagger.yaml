@@ -1312,6 +1312,28 @@ paths:
       tags:
       - Providers
   /providers/live:
+    get:
+      description: Retrieve list of all provider configs for the live environment
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerProviderConfigListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: List live provider configurations
+      tags:
+      - Providers
     post:
       consumes:
       - application/json
@@ -1348,6 +1370,28 @@ paths:
       tags:
       - Providers
   /providers/test:
+    get:
+      description: Retrieve list of all provider configs for the test environment
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerProviderConfigListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: List test provider configurations
+      tags:
+      - Providers
     post:
       consumes:
       - application/json

@@ -107,6 +107,51 @@ func (h *ProviderHandler) ListProvidersHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, api.Success("Providers retrieved successfully", resp))
 }
 
+// ListLiveProvidersHandler godoc
+// @Summary List live provider configurations
+// @Description Retrieve list of all provider configs for the live environment
+// @Tags Providers
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {object} api.SwaggerProviderConfigListResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /providers/live [get]
+func (h *ProviderHandler) ListLiveProvidersHandler(c *gin.Context) {
+	h.listProvidersWithEnv(c, "live")
+}
+
+// ListTestProvidersHandler godoc
+// @Summary List test provider configurations
+// @Description Retrieve list of all provider configs for the test environment
+// @Tags Providers
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {object} api.SwaggerProviderConfigListResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /providers/test [get]
+func (h *ProviderHandler) ListTestProvidersHandler(c *gin.Context) {
+	h.listProvidersWithEnv(c, "test")
+}
+
+func (h *ProviderHandler) listProvidersWithEnv(c *gin.Context, env string) {
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		return
+	}
+
+	resp, err := h.service.ListProvidersByEnv(c.Request.Context(), projectID.(string), env)
+	if err != nil {
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success("Providers retrieved successfully", resp))
+}
+
 // UpdateProviderHandler godoc
 // @Summary Update provider configuration
 // @Description Update fields of a specific provider config
@@ -240,6 +285,8 @@ func RegisterRoutes(rg *gin.RouterGroup, h *ProviderHandler) {
 	{
 		providers.POST("/test", h.AddTestProviderHandler)
 		providers.POST("/live", h.AddLiveProviderHandler)
+		providers.GET("/test", h.ListTestProvidersHandler)
+		providers.GET("/live", h.ListLiveProvidersHandler)
 		providers.GET("", h.ListProvidersHandler)
 		providers.PUT("/:id", h.UpdateProviderHandler)
 		providers.DELETE("/:id", h.DeleteProviderHandler)
