@@ -84,7 +84,7 @@ func main() {
 	}
 
 	if os.Getenv("GIN_MODE") == "release" {
-		docs.SwaggerInfo.Host = "paye.africa"
+		docs.SwaggerInfo.Host = "api.paye.africa"
 		docs.SwaggerInfo.Schemes = []string{"https"}
 	} else {
 		docs.SwaggerInfo.Host = "localhost:8080"
@@ -248,7 +248,7 @@ func main() {
 
 	// Dynamic Swagger Host Configuration
 	if os.Getenv("GIN_MODE") == "release" {
-		docs.SwaggerInfo.Host = "paye.africa"
+		docs.SwaggerInfo.Host = "api.paye.africa"
 		docs.SwaggerInfo.Schemes = []string{"https"}
 	} else {
 		docs.SwaggerInfo.Host = "localhost:8080"
