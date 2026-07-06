@@ -93,6 +93,8 @@ definitions:
         type: array
       message:
         type: string
+      meta:
+        $ref: '#/definitions/dto.PaginationMeta'
       status:
         type: boolean
     type: object
@@ -200,14 +202,20 @@ definitions:
   dto.DashboardStatsResponse:
     properties:
       active_providers_count:
+        example: 2
         type: integer
       failed_deliveries:
+        example: 5
         type: integer
       failed_transactions:
         type: integer
       successful_deliveries:
+        example: 1200
         type: integer
       total_transactions:
+        type: integer
+      total_virtual_accounts:
+        example: 15
         type: integer
       total_volume:
         type: number
@@ -269,6 +277,18 @@ definitions:
         - failed
         example: pending
         type: string
+    type: object
+  dto.PaginationMeta:
+    properties:
+      limit:
+        example: 20
+        type: integer
+      page:
+        example: 1
+        type: integer
+      total:
+        example: 50
+        type: integer
     type: object
   dto.PaymentProviderResponse:
     properties:
@@ -1628,6 +1648,21 @@ paths:
   /virtual-accounts:
     get:
       description: List all virtual accounts associated with the project
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by provider
+        in: query
+        name: provider
+        type: string
       produces:
       - application/json
       responses:

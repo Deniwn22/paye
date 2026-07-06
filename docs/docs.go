@@ -1483,6 +1483,28 @@ const docTemplate = `{
                     "Virtual Accounts"
                 ],
                 "summary": "List virtual accounts",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by provider",
+                        "name": "provider",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2471,6 +2493,9 @@ const docTemplate = `{
                 "message": {
                     "type": "string"
                 },
+                "meta": {
+                    "$ref": "#/definitions/dto.PaginationMeta"
+                },
                 "status": {
                     "type": "boolean"
                 }
@@ -2629,19 +2654,26 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "active_providers_count": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 2
                 },
                 "failed_deliveries": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 5
                 },
                 "failed_transactions": {
                     "type": "integer"
                 },
                 "successful_deliveries": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1200
                 },
                 "total_transactions": {
                     "type": "integer"
+                },
+                "total_virtual_accounts": {
+                    "type": "integer",
+                    "example": 15
                 },
                 "total_volume": {
                     "type": "number"
@@ -2723,6 +2755,23 @@ const docTemplate = `{
                         "failed"
                     ],
                     "example": "pending"
+                }
+            }
+        },
+        "dto.PaginationMeta": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 50
                 }
             }
         },

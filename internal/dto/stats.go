@@ -6,9 +6,10 @@ type DashboardStatsResponse struct {
 	TotalVolume          float64 `json:"total_volume"`
 	TotalTransactions    int64   `json:"total_transactions"`
 	FailedTransactions   int64   `json:"failed_transactions"`
-	SuccessfulDeliveries int64   `json:"successful_deliveries"`
-	FailedDeliveries     int64   `json:"failed_deliveries"`
-	ActiveProvidersCount int64   `json:"active_providers_count"`
+	SuccessfulDeliveries int64   `json:"successful_deliveries" example:"1200"`
+	FailedDeliveries     int64   `json:"failed_deliveries" example:"5"`
+	ActiveProvidersCount int64   `json:"active_providers_count" example:"2"`
+	TotalVirtualAccounts int64   `json:"total_virtual_accounts" example:"15"`
 }
 
 type WebhookLogResponse struct {

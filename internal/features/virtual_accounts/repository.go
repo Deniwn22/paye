@@ -48,10 +48,21 @@ func (r *VARepository) FindByCustomerRef(ctx context.Context, customerRef string
 	return &va, err
 }
 
-func (r *VARepository) ListVirtualAccounts(ctx context.Context, projectID string) ([]*models.VirtualAccount, error) {
+func (r *VARepository) ListVirtualAccounts(ctx context.Context, projectID string, provider string, limit, offset int) ([]*models.VirtualAccount, int64, error) {
 	var vas []*models.VirtualAccount
+	var total int64
 	isLive := middleware.GetIsLiveFromContext(ctx)
-	err := r.db.WithContext(ctx).Where("project_id = ? AND is_live = ?", projectID, isLive).Order("created_at DESC").Find(&vas).Error
+
+	query := r.db.WithContext(ctx).Model(&models.VirtualAccount{}).Where("project_id = ? AND is_live = ?", projectID, isLive)
+	if provider != "" {
+		query = query.Where("provider = ?", provider)
+	}
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	err := query.Order("created_at DESC").Limit(limit).Offset(offset).Find(&vas).Error
 	
 	if err == nil && len(vas) > 0 {
 		var totals []struct {
@@ -73,7 +84,7 @@ func (r *VARepository) ListVirtualAccounts(ctx context.Context, projectID string
 		}
 	}
 	
-	return vas, err
+	return vas, total, err
 }
 
 func (r *VARepository) UpdateVirtualAccount(ctx context.Context, va *models.VirtualAccount) error {

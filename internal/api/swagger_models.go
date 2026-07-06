@@ -92,6 +92,7 @@ type SwaggerVirtualAccountListResponse struct {
 	Status  bool                         `json:"status"`
 	Message string                       `json:"message"`
 	Data    []dto.VirtualAccountResponse `json:"data"`
+	Meta    dto.PaginationMeta           `json:"meta"`
 }
 
 // SwaggerVirtualAccountTransactionListResponse represents a list of virtual account transactions response

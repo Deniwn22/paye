@@ -145,8 +145,8 @@ func (s *VAService) GetVirtualAccount(ctx context.Context, projectID string, pvc
 	return s.repo.FindByPvcID(ctx, pvcID, projectID)
 }
 
-func (s *VAService) ListVirtualAccounts(ctx context.Context, projectID string) ([]*models.VirtualAccount, error) {
-	return s.repo.ListVirtualAccounts(ctx, projectID)
+func (s *VAService) ListVirtualAccounts(ctx context.Context, projectID string, provider string, limit, offset int) ([]*models.VirtualAccount, int64, error) {
+	return s.repo.ListVirtualAccounts(ctx, projectID, provider, limit, offset)
 }
 
 func (s *VAService) SuspendVirtualAccount(ctx context.Context, projectID string, pvcID string) error {

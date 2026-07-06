@@ -10,6 +10,12 @@ type CreateVirtualAccountDTO struct {
 	ExpiryDate        string  `json:"expiry_date,omitempty" example:"2026-12-31T23:59:59Z" description:"Optional (Required for Dynamic). ISO-8601 date string when the account expires"`
 }
 
+type PaginationMeta struct {
+	Total int64 `json:"total" example:"50"`
+	Page  int   `json:"page" example:"1"`
+	Limit int   `json:"limit" example:"20"`
+}
+
 type UpdateVADTO struct {
 	AccountName string `json:"account_name" example:"Thompson Oretan Updated" description:"The new name to display on the virtual account"`
 }

@@ -100,6 +100,14 @@ func (r *DashboardRepo) GetStats(ctx context.Context, projectID string) (*dto.Da
 		return nil, err
 	}
 
+	// Total Virtual Accounts Count
+	err = r.db.WithContext(ctx).Model(&models.VirtualAccount{}).
+		Where("project_id = ? AND is_live = ?", projectID, isLive).
+		Count(&stats.TotalVirtualAccounts).Error
+	if err != nil {
+		return nil, err
+	}
+
 	return &stats, nil
 }
 

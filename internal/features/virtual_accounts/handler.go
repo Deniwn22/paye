@@ -2,6 +2,7 @@ package virtual_accounts
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -97,6 +98,9 @@ func (h *VAHandler) GetVirtualAccountHandler(c *gin.Context) {
 // @Tags Virtual Accounts
 // @Produce json
 // @Security ApiKeyAuth
+// @Param page query int false "Page number" default(1)
+// @Param limit query int false "Number of items per page" default(20)
+// @Param provider query string false "Filter by provider"
 // @Success 200 {object} api.SwaggerVirtualAccountListResponse
 // @Failure 401 {object} api.SwaggerSimpleResponse
 // @Failure 500 {object} api.SwaggerSimpleResponse
@@ -108,14 +112,38 @@ func (h *VAHandler) ListVirtualAccountsHandler(c *gin.Context) {
 		return
 	}
 
-	vas, err := h.service.ListVirtualAccounts(c.Request.Context(), projectID.(string))
+	page := 1
+	limit := 20
+	provider := c.Query("provider")
+	if va := c.Query("va"); va != "" {
+		provider = va
+	}
+
+	if p, err := strconv.Atoi(c.Query("page")); err == nil && p > 0 {
+		page = p
+	}
+	if l, err := strconv.Atoi(c.Query("limit")); err == nil && l > 0 {
+		limit = l
+	}
+	offset := (page - 1) * limit
+
+	vas, total, err := h.service.ListVirtualAccounts(c.Request.Context(), projectID.(string), provider, limit, offset)
 	if err != nil {
 		slog.Error("internal server error", "error", err)
 		c.JSON(http.StatusInternalServerError, api.Error("An internal error occurred. Please try again later."))
 		return
 	}
 
-	c.JSON(http.StatusOK, api.Success("Virtual accounts retrieved successfully", vas))
+	c.JSON(http.StatusOK, gin.H{
+		"status":  true,
+		"message": "Virtual accounts retrieved successfully",
+		"data":    vas,
+		"meta": gin.H{
+			"total": total,
+			"page":  page,
+			"limit": limit,
+		},
+	})
 }
 
 // @Summary Suspend a virtual account
