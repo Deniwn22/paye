@@ -71,6 +71,10 @@ sequenceDiagram
 * **The Decision**: The JS SDK dynamically injects the appropriate gateway pop library (e.g. Paystack's `inline.js`) on the fly rather than bundling gateway libraries together.
 * **Why**: Performance and flexibility. Preloading multiple heavy payment scripts slows down merchant landing page load speeds (impacting Core Web Vitals). The Paye SDK only loads a gateway script if the merchant has activated that specific provider in their dashboard, resulting in lightweight, highly performant landing pages.
 
+### 5. Zero Data-Loss Reconciliation Bots
+* **The Decision**: Paye employs a fleet of automated background cron workers (e.g., `ReconcileMissedVAWebhooks`, `PollPendingTransactions`) that continuously monitor the database for stuck transactions and missed webhooks, automatically replaying them through an idempotent processor.
+* **Why**: Network connections drop, providers experience downtime, and webhooks fail. Rather than putting the burden on the merchant to notice missing funds, Paye's background bots proactively scan the system. If a webhook is logged but unprocessed, the bots safely replay the payload and instantly broadcast a real-time WebSocket recovery notification to the merchant. This guarantees system stability and 100% financial accuracy across all providers.
+
 ---
 
 ## Connecting to Providers & Encryption
