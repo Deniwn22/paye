@@ -236,15 +236,15 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 			return s.processVAWebhook(ctx, wc, payload, isLive)
 		case models.ALL:
 			var eventPayload struct {
-				EventType string `json:"event_type"`
-				Data      struct {
+				EventTypeFW string `json:"event.type"`
+				Data        struct {
 					Transaction struct {
 						Type string `json:"type"`
 					} `json:"transaction"`
 				} `json:"data"`
 			}
 			json.Unmarshal(payload, &eventPayload)
-			if eventPayload.Data.Transaction.Type == "vact_transfer" {
+			if eventPayload.Data.Transaction.Type == "vact_transfer" || eventPayload.EventTypeFW == "BANK_TRANSFER_TRANSACTION" {
 				return s.processVAWebhook(ctx, wc, payload, isLive)
 			}
 			// else fall through to payment flow
@@ -395,6 +395,124 @@ func (s *WebhookService) ListAllLogs(ctx context.Context, projectID string, limi
 }
 
 func (s *WebhookService) processVAWebhook(ctx context.Context, wc *models.WebhookConfig, payload []byte, isLive bool) error {
+	if wc.ProviderName == "flutterwave" {
+		var fwPayload struct {
+			Data struct {
+				TxRef    string  `json:"tx_ref"`
+				Amount   float64 `json:"amount"`
+				Status   string  `json:"status"`
+				Customer struct {
+					Name          string `json:"name"`
+					PhoneNumber   string `json:"phone_number"`
+					Email         string `json:"email"`
+				} `json:"customer"`
+			} `json:"data"`
+		}
+		if err := json.Unmarshal(payload, &fwPayload); err != nil {
+			return fmt.Errorf("flutterwave va webhook: failed to parse payload: %w", err)
+		}
+
+		accountRef := fwPayload.Data.TxRef
+		if accountRef == "" {
+			return fmt.Errorf("flutterwave va webhook: tx_ref missing from payload")
+		}
+
+		va, err := s.vaRepo.FindByAccountRef(ctx, accountRef, wc.ProjectID.String())
+		if err != nil {
+			mp := &models.MisdirectedPayment{
+				ProjectID:         &wc.ProjectID,
+				BankAccountNumber: accountRef, // fallback since FW doesn't give exact target bank account here
+				Amount:            fwPayload.Data.Amount,
+				Currency:          "NGN",
+				SenderName:        fwPayload.Data.Customer.Name,
+				Reference:         accountRef,
+				Reason:            "va_not_found",
+				Status:            "unresolved",
+				Provider:          "flutterwave",
+				IsLive:            isLive,
+			}
+			s.vaRepo.CreateMisdirectedPayment(ctx, mp)
+			s.notifyMisdirected(ctx, wc, mp, payload, isLive)
+			return nil
+		}
+
+		if va.Status != "active" {
+			mp := &models.MisdirectedPayment{
+				ProjectID:         &wc.ProjectID,
+				BankAccountNumber: va.BankAccountNumber,
+				Amount:            fwPayload.Data.Amount,
+				Currency:          "NGN",
+				SenderName:        fwPayload.Data.Customer.Name,
+				Reference:         accountRef,
+				Reason:            "va_" + va.Status,
+				Status:            "unresolved",
+				Provider:          "flutterwave",
+				IsLive:            isLive,
+			}
+			s.vaRepo.CreateMisdirectedPayment(ctx, mp)
+			s.notifyMisdirected(ctx, wc, mp, payload, isLive)
+			return nil
+		}
+
+		if _, err := s.vaRepo.FindTransactionByReference(ctx, accountRef); err == nil {
+			return nil // Idempotency check: already processed
+		}
+
+		vatx := &models.VirtualAccountTransaction{
+			VirtualAccountID: va.Base.ID,
+			ProjectID:        wc.ProjectID,
+			PvcID:            va.PvcID,
+			Amount:           fwPayload.Data.Amount,
+			Currency:         "NGN",
+			SenderName:       fwPayload.Data.Customer.Name,
+			Reference:        accountRef, // FLW doesn't provide a unique tx ID per transfer in webhook, so using tx_ref which maps to VA creation
+			Status:           "success",
+			Provider:         "flutterwave",
+			IsLive:           isLive,
+		}
+		
+		if _, err := s.vaRepo.CreateTransaction(ctx, vatx); err != nil {
+			return fmt.Errorf("flutterwave va webhook: failed to persist transaction: %w", err)
+		}
+
+		merchantPayload, _ := json.Marshal(map[string]any{
+			"event":              "virtual_account.credit",
+			"pvc_id":             va.PvcID,
+			"customer_reference": va.CustomerReference,
+			"amount":             fwPayload.Data.Amount,
+			"currency":           "NGN",
+			"sender_name":        fwPayload.Data.Customer.Name,
+			"reference":          accountRef,
+		})
+
+		wl := &models.WebhookLog{
+			ProjectID:       wc.ProjectID,
+			WebhookConfigID: &wc.Base.ID,
+			Event:           "virtual_account.credit",
+			Reference:       accountRef,
+			Amount:          fwPayload.Data.Amount,
+			Status:          "success",
+			ForwardedStatus: 0,
+			Payload:         string(payload),
+			IsLive:          isLive,
+		}
+
+		if wc.TargetURL == "" {
+			wl.ForwardedStatus = 200
+			wl.ErrorMessage = "Locally stored; no forwarding target URL configured"
+		}
+		_ = s.repo.CreateLog(ctx, wl)
+
+		if wc.TargetURL != "" {
+			apiKey := wc.Project.ApiKey
+			if !isLive && wc.Project.TestApiKey != "" {
+				apiKey = wc.Project.TestApiKey
+			}
+			go s.forwardWebhook(wl, wc.TargetURL, apiKey, merchantPayload)
+		}
+		return nil
+	}
+
 	var nombaPayload struct {
 		Data struct {
 			Transaction struct {

@@ -15,6 +15,7 @@ import (
 	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/dto"
 	"github.com/ttomsin/paye/internal/features/providers"
+	"github.com/ttomsin/paye/internal/features/providers/flutterwave"
 	"github.com/ttomsin/paye/internal/features/providers/nomba"
 	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
@@ -46,18 +47,22 @@ func (s *VAService) getVAProvider(ctx context.Context, projectID string) (provid
 		return nil, "", "", fmt.Errorf("no active provider found for project: %w", err)
 	}
 
-	if pc.ProviderName != "nomba" {
+	if pc.ProviderName != "nomba" && pc.ProviderName != "flutterwave" {
 		return nil, "", "", fmt.Errorf("The active provider does not support virtual accounts")
 	}
 
 	encSecret := pc.SecretKey
-	encClientID := pc.PublicKey
-
 	clientSecret, err := crypto.Decrypt(encSecret, s.encryptionKey)
 	if err != nil {
 		return nil, "", "", fmt.Errorf("failed to decrypt client secret: %w", err)
 	}
 
+	if pc.ProviderName == "flutterwave" {
+		client := flutterwave.New(clientSecret)
+		return client, "flutterwave", "", nil
+	}
+
+	encClientID := pc.PublicKey
 	clientID, err := crypto.Decrypt(encClientID, s.encryptionKey)
 	if err != nil {
 		return nil, "", "", fmt.Errorf("failed to decrypt client id: %w", err)
@@ -126,6 +131,7 @@ func (s *VAService) CreateVirtualAccount(ctx context.Context, projectID string, 
 		Status:            "active",
 		ExpectedAmount:    dto.ExpectedAmount,
 		IsLive:            middleware.GetIsLiveFromContext(ctx),
+		Metadata:          result.Metadata,
 	}
 
 	if dto.ExpiryDate != "" {

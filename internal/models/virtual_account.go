@@ -24,7 +24,8 @@ type VirtualAccount struct {
 	ExpectedAmount    float64    `json:"expected_amount"`
 	ExpiryDate        *time.Time `json:"expiry_date,omitempty"`
 	IsLive            bool       `gorm:"default:false;index" json:"is_live"`
-	TotalReceived     float64    `gorm:"-" json:"total_received"`
+	TotalReceived     float64        `gorm:"-" json:"total_received"`
+	Metadata          map[string]any `gorm:"serializer:json" json:"metadata,omitempty"`
 }
 
 type VirtualAccountTransaction struct {

@@ -190,6 +190,7 @@ type VirtualAccount struct {
 	Currency      string
 	Status        string
 	CreatedAt     time.Time
+	Metadata      map[string]any
 }
 
 type VATransactionResult struct {
