@@ -230,25 +230,7 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 			}
 		}
 
-		// Branch based on webhook type
-		switch wc.Type {
-		case models.VA:
-			return s.processVAWebhook(ctx, wc, payload, isLive)
-		case models.ALL:
-			var eventPayload struct {
-				EventTypeFW string `json:"event.type"`
-				Data        struct {
-					Transaction struct {
-						Type string `json:"type"`
-					} `json:"transaction"`
-				} `json:"data"`
-			}
-			json.Unmarshal(payload, &eventPayload)
-			if eventPayload.Data.Transaction.Type == "vact_transfer" || eventPayload.EventTypeFW == "BANK_TRANSFER_TRANSACTION" {
-				return s.processVAWebhook(ctx, wc, payload, isLive)
-			}
-			// else fall through to payment flow
-		}
+
 
 		// Create a failed WebhookLog record in the database for debugging
 		wl := &models.WebhookLog{
@@ -267,6 +249,27 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 		_ = s.repo.CreateLog(ctx, wl)
 
 		return fmt.Errorf("%s", errStr)
+	}
+
+	// At this point, the signature is successfully verified!
+	// Branch based on webhook type to handle Virtual Accounts
+	switch wc.Type {
+	case models.VA:
+		return s.ProcessVAWebhook(ctx, wc, payload, isLive)
+	case models.ALL:
+		var eventPayload struct {
+			EventTypeFW string `json:"event.type"`
+			Data        struct {
+				Transaction struct {
+					Type string `json:"type"`
+				} `json:"transaction"`
+			} `json:"data"`
+		}
+		json.Unmarshal(payload, &eventPayload)
+		if eventPayload.Data.Transaction.Type == "vact_transfer" || eventPayload.EventTypeFW == "BANK_TRANSFER_TRANSACTION" {
+			return s.ProcessVAWebhook(ctx, wc, payload, isLive)
+		}
+		// else fall through to standard checkout payment flow
 	}
 
 	// Create a WebhookLog record in the database
@@ -394,7 +397,7 @@ func (s *WebhookService) ListAllLogs(ctx context.Context, projectID string, limi
 	return s.repo.ListAllLogs(ctx, projectID, limit, offset)
 }
 
-func (s *WebhookService) processVAWebhook(ctx context.Context, wc *models.WebhookConfig, payload []byte, isLive bool) error {
+func (s *WebhookService) ProcessVAWebhook(ctx context.Context, wc *models.WebhookConfig, payload []byte, isLive bool) error {
 	if wc.ProviderName == "flutterwave" {
 		var fwPayload struct {
 			Data struct {
@@ -473,6 +476,19 @@ func (s *WebhookService) processVAWebhook(ctx context.Context, wc *models.Webhoo
 		
 		if _, err := s.vaRepo.CreateTransaction(ctx, vatx); err != nil {
 			return fmt.Errorf("flutterwave va webhook: failed to persist transaction: %w", err)
+		}
+
+		if s.notifier != nil {
+			title := "Virtual Account Credit"
+			message := fmt.Sprintf("Received %s %.2f from %s.", vatx.Currency, vatx.Amount, vatx.SenderName)
+			s.notifier.CreateAndNotify(
+				context.Background(),
+				wc.ProjectID.String(),
+				title,
+				message,
+				"virtual_account",
+				vatx,
+			)
 		}
 
 		merchantPayload, _ := json.Marshal(map[string]any{
@@ -619,6 +635,19 @@ func (s *WebhookService) processVAWebhook(ctx context.Context, wc *models.Webhoo
 	
 	if _, err := s.vaRepo.CreateTransaction(ctx, vatx); err != nil {
 		return fmt.Errorf("va webhook: failed to persist transaction: %w", err)
+	}
+
+	if s.notifier != nil {
+		title := "Virtual Account Credit"
+		message := fmt.Sprintf("Received %s %.2f from %s.", vatx.Currency, vatx.Amount, vatx.SenderName)
+		s.notifier.CreateAndNotify(
+			context.Background(),
+			wc.ProjectID.String(),
+			title,
+			message,
+			"virtual_account",
+			vatx,
+		)
 	}
 
 	merchantPayload, _ := json.Marshal(map[string]any{
