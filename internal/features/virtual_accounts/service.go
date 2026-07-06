@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -316,7 +317,9 @@ func (s *VAService) ExpireVirtualAccount(ctx context.Context, projectID string, 
 	}
 
 	if err := provider.ExpireVirtualAccount(ctx, va.AccountRef); err != nil {
-		return fmt.Errorf("failed to expire on provider: %w", err)
+		if !strings.Contains(err.Error(), "expire VA not supported") {
+			return fmt.Errorf("failed to expire on provider: %w", err)
+		}
 	}
 
 	va.Status = "expired"
