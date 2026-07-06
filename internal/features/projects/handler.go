@@ -52,15 +52,71 @@ func (h *ProjectHandler) CreateProjectHandler(c *gin.Context) {
 	}
 
 	resp := &ProjectResponse{
-		ID:           project.ID.String(),
-		Name:         project.Name,
-		ApiKey:       project.ApiKey,
-		PublicID:     project.PublicID,
-		TestApiKey:   project.TestApiKey,
-		TestPublicID: project.TestPublicID,
+		ID:             project.ID.String(),
+		Name:           project.Name,
+		ApiKey:         project.ApiKey,
+		PublicID:       project.PublicID,
+		TestApiKey:     project.TestApiKey,
+		TestPublicID:   project.TestPublicID,
+		AutoMigrateVAs: project.AutoMigrateVAs,
 	}
 
 	c.JSON(http.StatusOK, api.Success("Project created successfully", resp))
+}
+
+type UpdateProjectSettingsRequest struct {
+	AutoMigrateVAs *bool `json:"auto_migrate_vas" binding:"required"`
+}
+
+// @Summary Update project settings
+// @Description Update settings like auto-migrate VAs
+// @Tags Projects
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "Project ID"
+// @Param request body UpdateProjectSettingsRequest true "Project settings"
+// @Success 200 {object} api.SwaggerSimpleResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 404 {object} api.SwaggerSimpleResponse
+// @Router /projects/{id}/settings [patch]
+func (h *ProjectHandler) UpdateProjectSettingsHandler(c *gin.Context) {
+	userID, exists := c.Get(userIDContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		return
+	}
+
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, api.Error("Project ID is required"))
+		return
+	}
+
+	var req UpdateProjectSettingsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+		return
+	}
+
+	project, err := h.service.UpdateProjectSettings(c.Request.Context(), id, userID.(string), *req.AutoMigrateVAs)
+	if err != nil {
+		c.JSON(http.StatusNotFound, api.Error(err.Error()))
+		return
+	}
+
+	resp := &ProjectResponse{
+		ID:             project.ID.String(),
+		Name:           project.Name,
+		ApiKey:         project.ApiKey,
+		PublicID:       project.PublicID,
+		TestApiKey:     project.TestApiKey,
+		TestPublicID:   project.TestPublicID,
+		AutoMigrateVAs: project.AutoMigrateVAs,
+	}
+
+	c.JSON(http.StatusOK, api.Success("Project settings updated successfully", resp))
 }
 
 // @Summary List user projects
@@ -89,12 +145,13 @@ func (h *ProjectHandler) ListProjectsHandler(c *gin.Context) {
 	var resp []*ProjectResponse
 	for _, p := range projects {
 		resp = append(resp, &ProjectResponse{
-			ID:           p.ID.String(),
-			Name:         p.Name,
-			ApiKey:       p.ApiKey,
-			PublicID:     p.PublicID,
-			TestApiKey:   p.TestApiKey,
-			TestPublicID: p.TestPublicID,
+			ID:             p.ID.String(),
+			Name:           p.Name,
+			ApiKey:         p.ApiKey,
+			PublicID:       p.PublicID,
+			TestApiKey:     p.TestApiKey,
+			TestPublicID:   p.TestPublicID,
+			AutoMigrateVAs: p.AutoMigrateVAs,
 		})
 	}
 
@@ -138,10 +195,13 @@ func (h *ProjectHandler) GetProjectHandler(c *gin.Context) {
 	}
 
 	resp := &ProjectResponse{
-		ID:       project.ID.String(),
-		Name:     project.Name,
-		ApiKey:   project.ApiKey,
-		PublicID: project.PublicID,
+		ID:             project.ID.String(),
+		Name:           project.Name,
+		ApiKey:         project.ApiKey,
+		PublicID:       project.PublicID,
+		TestApiKey:     project.TestApiKey,
+		TestPublicID:   project.TestPublicID,
+		AutoMigrateVAs: project.AutoMigrateVAs,
 	}
 
 	c.JSON(http.StatusOK, api.Success("Project retrieved successfully", resp))
@@ -187,6 +247,7 @@ func RegisterRoutes(rg *gin.RouterGroup, h *ProjectHandler) {
 		projects.POST("", h.CreateProjectHandler)
 		projects.GET("", h.ListProjectsHandler)
 		projects.GET("/:id", h.GetProjectHandler)
+		projects.PATCH("/:id/settings", h.UpdateProjectSettingsHandler)
 		projects.DELETE("/:id", h.DeleteProjectHandler)
 	}
 }

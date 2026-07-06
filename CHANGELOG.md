@@ -2,9 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.2.0] - 2026-07-06
 
 ### Added
+- **Auto VA Migration:** Seamlessly transition Virtual Accounts between providers when switching the active gateway. Existing customers keep paying, but Paye quietly provisions them new accounts on the new provider.
+- **Unified Paye VA Balances:** Introduces `paye_va_id` tracking, allowing businesses to view a combined `paye_total_received` balance across all migrated VAs for a single customer.
 - **Dual Environments:** Full support for `test` and `live` environments separated by API keys (`paye_test_...` vs `paye_live_...`).
 - **Webhook Environments:** Webhook configurations are now environment-aware. You can specify a separate Target URL for test webhooks and live webhooks.
 - **Provider Parity:** Added support for Nomba and OPay alongside Paystack and Flutterwave.

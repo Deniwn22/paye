@@ -370,6 +370,9 @@ definitions:
         type: string
       secret_key:
         type: string
+      va_count:
+        example: 100
+        type: integer
       webhook_secret:
         type: string
     type: object
@@ -487,6 +490,15 @@ definitions:
       is_live:
         example: true
         type: boolean
+      paye_total_received:
+        example: 25000
+        type: number
+      paye_va_count:
+        example: 3
+        type: integer
+      paye_va_id:
+        example: pva_12345
+        type: string
       project_id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
@@ -644,6 +656,13 @@ definitions:
         type: string
     required:
     - name
+    type: object
+  projects.UpdateProjectSettingsRequest:
+    properties:
+      auto_migrate_vas:
+        type: boolean
+    required:
+    - auto_migrate_vas
     type: object
   sdk.CreateSDKSubscriptionRequest:
     properties:
@@ -1116,6 +1135,47 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get project details
+      tags:
+      - Projects
+  /projects/{id}/settings:
+    patch:
+      consumes:
+      - application/json
+      description: Update settings like auto-migrate VAs
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Project settings
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/projects.UpdateProjectSettingsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update project settings
       tags:
       - Projects
   /providers:
@@ -1823,6 +1883,39 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update a virtual account
+      tags:
+      - Virtual Accounts
+  /virtual-accounts/{pvc_id}/migrate:
+    post:
+      description: Migrates an active virtual account to the current active provider
+      parameters:
+      - description: Virtual Account ID (PVC ID)
+        in: path
+        name: pvc_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerVirtualAccountResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Manually migrate a virtual account
       tags:
       - Virtual Accounts
   /virtual-accounts/{pvc_id}/statement:

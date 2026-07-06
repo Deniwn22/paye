@@ -255,6 +255,41 @@ func (h *VAHandler) UpdateVirtualAccountHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, api.Success[any]("Virtual account updated successfully", nil))
 }
 
+// MigrateVirtualAccountHandler godoc
+// @Summary Manually migrate a virtual account
+// @Description Migrates an active virtual account to the current active provider
+// @Tags Virtual Accounts
+// @Produce json
+// @Security ApiKeyAuth
+// @Param pvc_id path string true "Virtual Account ID (PVC ID)"
+// @Success 200 {object} api.SwaggerVirtualAccountResponse
+// @Failure 400 {object} api.SwaggerSimpleResponse
+// @Failure 401 {object} api.SwaggerSimpleResponse
+// @Failure 500 {object} api.SwaggerSimpleResponse
+// @Router /virtual-accounts/{pvc_id}/migrate [post]
+func (h *VAHandler) MigrateVirtualAccountHandler(c *gin.Context) {
+	projectID, exists := c.Get(middleware.ProjectIDContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, api.Error("Unauthorized"))
+		return
+	}
+
+	pvcID := c.Param("pvc_id")
+	if pvcID == "" {
+		c.JSON(http.StatusBadRequest, api.Error("pvc_id is required"))
+		return
+	}
+
+	va, err := h.service.MigrateVirtualAccount(c.Request.Context(), projectID.(string), pvcID)
+	if err != nil {
+		slog.Error("internal server error", "error", err)
+		c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, api.Success("Virtual account migrated successfully", va))
+}
+
 // ExpireVirtualAccountHandler godoc
 // @Summary Expire a virtual account
 // @Description Expire (delete/deactivate) a virtual account on the provider
@@ -358,6 +393,7 @@ func RegisterRoutes(rg *gin.RouterGroup, h *VAHandler) {
 		va.PUT("/:pvc_id", h.UpdateVirtualAccountHandler)
 		va.PATCH("/:pvc_id/suspend", h.SuspendVirtualAccountHandler)
 		va.DELETE("/:pvc_id", h.ExpireVirtualAccountHandler)
+		va.POST("/:pvc_id/migrate", h.MigrateVirtualAccountHandler)
 		va.GET("/:pvc_id/transactions", h.ListTransactionsHandler)
 		va.GET("/misdirected", h.ListMisdirectedPaymentsHandler)
 		va.PATCH("/misdirected/:id/resolve", h.ResolveMisdirectedPaymentHandler)

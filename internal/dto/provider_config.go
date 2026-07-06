@@ -28,6 +28,7 @@ type ProviderConfigResponse struct {
 	WebhookSecret string                  `json:"webhook_secret"`
 	IsActive      bool                    `json:"is_active" example:"true"`
 	Metadata      models.ProviderMetadata `json:"metadata"`
+	VACount       int64                   `json:"va_count" example:"100"`
 }
 
 func ToProviderConfigResponse(config *models.ProviderConfig) *ProviderConfigResponse {

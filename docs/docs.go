@@ -666,6 +666,70 @@ const docTemplate = `{
                 }
             }
         },
+        "/projects/{id}/settings": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update settings like auto-migrate VAs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Update project settings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Project settings",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/projects.UpdateProjectSettingsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/providers": {
             "get": {
                 "security": [
@@ -1838,6 +1902,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/virtual-accounts/{pvc_id}/migrate": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Migrates an active virtual account to the current active provider",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Virtual Accounts"
+                ],
+                "summary": "Manually migrate a virtual account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Virtual Account ID (PVC ID)",
+                        "name": "pvc_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerVirtualAccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/virtual-accounts/{pvc_id}/statement": {
             "get": {
                 "security": [
@@ -2889,6 +3005,10 @@ const docTemplate = `{
                 "secret_key": {
                     "type": "string"
                 },
+                "va_count": {
+                    "type": "integer",
+                    "example": 100
+                },
                 "webhook_secret": {
                     "type": "string"
                 }
@@ -3056,6 +3176,18 @@ const docTemplate = `{
                 "is_live": {
                     "type": "boolean",
                     "example": true
+                },
+                "paye_total_received": {
+                    "type": "number",
+                    "example": 25000
+                },
+                "paye_va_count": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "paye_va_id": {
+                    "type": "string",
+                    "example": "pva_12345"
                 },
                 "project_id": {
                     "type": "string",
@@ -3282,6 +3414,17 @@ const docTemplate = `{
             "properties": {
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "projects.UpdateProjectSettingsRequest": {
+            "type": "object",
+            "required": [
+                "auto_migrate_vas"
+            ],
+            "properties": {
+                "auto_migrate_vas": {
+                    "type": "boolean"
                 }
             }
         },

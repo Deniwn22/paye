@@ -9,6 +9,7 @@ import (
 type VirtualAccount struct {
 	Base
 	PvcID             string     `gorm:"unique;not null;index" json:"pvc_id"`
+	PayeVaID          string     `gorm:"index" json:"paye_va_id"`
 	ProjectID         uuid.UUID  `gorm:"type:uuid;not null;index" json:"project_id"`
 	Project           *Project   `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE" json:"-"`
 	CustomerReference string     `gorm:"not null;index" json:"customer_reference"`
@@ -25,6 +26,8 @@ type VirtualAccount struct {
 	ExpiryDate        *time.Time `json:"expiry_date,omitempty"`
 	IsLive            bool       `gorm:"default:false;index" json:"is_live"`
 	TotalReceived     float64        `gorm:"-" json:"total_received"`
+	PayeTotalReceived float64        `gorm:"-" json:"paye_total_received"`
+	PayeVACount       int64          `gorm:"-" json:"paye_va_count"`
 	Metadata          map[string]any `gorm:"serializer:json" json:"metadata,omitempty"`
 }
 

@@ -13,6 +13,7 @@ type IProjectRepo interface {
 	FindByPublicID(ctx context.Context, publicID string) (*models.Project, error)
 	ListProjects(ctx context.Context, userID string) ([]*models.Project, error)
 	DeleteProject(ctx context.Context, id string, userID string) error
+	UpdateProject(ctx context.Context, project *models.Project) error
 }
 
 type ProjectRepo struct {
@@ -65,4 +66,8 @@ func (r *ProjectRepo) ListProjects(ctx context.Context, userID string) ([]*model
 
 func (r *ProjectRepo) DeleteProject(ctx context.Context, id string, userID string) error {
 	return r.db.WithContext(ctx).Where("id = ? AND user_id = ?", id, userID).Delete(&models.Project{}).Error
+}
+
+func (r *ProjectRepo) UpdateProject(ctx context.Context, project *models.Project) error {
+	return r.db.WithContext(ctx).Save(project).Error
 }

@@ -40,6 +40,9 @@ type VirtualAccountResponse struct {
 	ExpiryDate        string  `json:"expiry_date,omitempty" example:"2026-12-31T23:59:59Z"`
 	IsLive            bool    `json:"is_live" example:"true"`
 	TotalReceived     float64 `json:"total_received" example:"15000.00"`
+	PayeVaID          string  `json:"paye_va_id" example:"pva_12345"`
+	PayeTotalReceived float64 `json:"paye_total_received" example:"25000.00"`
+	PayeVACount       int64   `json:"paye_va_count" example:"3"`
 }
 
 type VirtualAccountTransactionResponse struct {

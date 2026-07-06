@@ -23,8 +23,9 @@ type ProjectResponse struct {
 	Name         string `json:"name"`
 	ApiKey       string `json:"api_key"`
 	PublicID     string `json:"public_id"`
-	TestApiKey   string `json:"test_api_key"`
-	TestPublicID string `json:"test_public_id"`
+	TestApiKey     string `json:"test_api_key"`
+	TestPublicID   string `json:"test_public_id"`
+	AutoMigrateVAs bool   `json:"auto_migrate_vas"`
 }
 
 func NewProjectService(repo IProjectRepo) *ProjectService {
@@ -85,4 +86,20 @@ func (s *ProjectService) GetProjectByID(ctx context.Context, id string) (*models
 
 func (s *ProjectService) DeleteProject(ctx context.Context, id string, userID string) error {
 	return s.repo.DeleteProject(ctx, id, userID)
+}
+
+func (s *ProjectService) UpdateProjectSettings(ctx context.Context, id string, userID string, autoMigrateVAs bool) (*models.Project, error) {
+	project, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if project.UserID.String() != userID {
+		return nil, errors.New("forbidden")
+	}
+
+	project.AutoMigrateVAs = autoMigrateVAs
+	if err := s.repo.UpdateProject(ctx, project); err != nil {
+		return nil, err
+	}
+	return project, nil
 }

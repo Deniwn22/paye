@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
 	"gorm.io/gorm"
@@ -33,11 +34,31 @@ func (r *VARepository) FindByPvcID(ctx context.Context, pvcID string, projectID 
 	var va models.VirtualAccount
 	err := r.db.WithContext(ctx).Where("pvc_id = ? AND project_id = ?", pvcID, projectID).First(&va).Error
 	if err == nil {
+		if va.PayeVaID == "" {
+			va.PayeVaID = "pva_" + uuid.New().String()
+			r.db.WithContext(ctx).Save(&va)
+		}
+
 		var total float64
 		r.db.WithContext(ctx).Model(&models.VirtualAccountTransaction{}).
 			Where("pvc_id = ? AND status = ?", pvcID, "success").
 			Select("COALESCE(SUM(amount), 0)").Scan(&total)
 		va.TotalReceived = total
+
+		if va.PayeVaID != "" {
+			var payeTotal float64
+			r.db.WithContext(ctx).Model(&models.VirtualAccountTransaction{}).
+				Joins("JOIN virtual_accounts ON virtual_accounts.id = virtual_account_transactions.virtual_account_id").
+				Where("virtual_accounts.paye_va_id = ? AND virtual_account_transactions.status = ?", va.PayeVaID, "success").
+				Select("COALESCE(SUM(virtual_account_transactions.amount), 0)").Scan(&payeTotal)
+			va.PayeTotalReceived = payeTotal
+
+			var vaCount int64
+			r.db.WithContext(ctx).Model(&models.VirtualAccount{}).
+				Where("paye_va_id = ?", va.PayeVaID).
+				Count(&vaCount)
+			va.PayeVACount = vaCount
+		}
 	}
 	return &va, err
 }
@@ -65,6 +86,13 @@ func (r *VARepository) ListVirtualAccounts(ctx context.Context, projectID string
 	err := query.Order("created_at DESC").Limit(limit).Offset(offset).Find(&vas).Error
 	
 	if err == nil && len(vas) > 0 {
+		for _, va := range vas {
+			if va.PayeVaID == "" {
+				va.PayeVaID = "pva_" + uuid.New().String()
+				r.db.WithContext(ctx).Save(va)
+			}
+		}
+
 		var totals []struct {
 			PvcID string
 			Total float64
@@ -78,9 +106,42 @@ func (r *VARepository) ListVirtualAccounts(ctx context.Context, projectID string
 		for _, t := range totals {
 			totalsMap[t.PvcID] = t.Total
 		}
+
+		var payeTotals []struct {
+			PayeVaID string
+			Total    float64
+		}
+		r.db.WithContext(ctx).Model(&models.VirtualAccountTransaction{}).
+			Joins("JOIN virtual_accounts ON virtual_accounts.id = virtual_account_transactions.virtual_account_id").
+			Select("virtual_accounts.paye_va_id, COALESCE(SUM(virtual_account_transactions.amount), 0) as total").
+			Where("virtual_account_transactions.project_id = ? AND virtual_account_transactions.status = ? AND virtual_accounts.paye_va_id != ''", projectID, "success").
+			Group("virtual_accounts.paye_va_id").Scan(&payeTotals)
+
+		payeTotalsMap := make(map[string]float64)
+		for _, t := range payeTotals {
+			payeTotalsMap[t.PayeVaID] = t.Total
+		}
+
+		var payeCounts []struct {
+			PayeVaID string
+			Count    int64
+		}
+		r.db.WithContext(ctx).Model(&models.VirtualAccount{}).
+			Select("paye_va_id, count(*) as count").
+			Where("project_id = ? AND paye_va_id != ''", projectID).
+			Group("paye_va_id").Scan(&payeCounts)
+
+		payeCountsMap := make(map[string]int64)
+		for _, c := range payeCounts {
+			payeCountsMap[c.PayeVaID] = c.Count
+		}
 		
 		for _, va := range vas {
 			va.TotalReceived = totalsMap[va.PvcID]
+			if va.PayeVaID != "" {
+				va.PayeTotalReceived = payeTotalsMap[va.PayeVaID]
+				va.PayeVACount = payeCountsMap[va.PayeVaID]
+			}
 		}
 	}
 	

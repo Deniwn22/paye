@@ -48,18 +48,24 @@ func (s *ProviderService) GetProviderByLabel(ctx context.Context, projectID stri
 // ListProviders retrieves all provider configurations for the given project.
 func (s *ProviderService) ListProviders(ctx context.Context, projectID string) ([]*dto.ProviderConfigResponse, error) {
 	configs := s.repo.ListProviders(ctx, projectID)
+	counts := s.repo.GetVACountsByProvider(ctx, projectID)
+
 	res := make([]*dto.ProviderConfigResponse, 0, len(configs))
 	for _, config := range configs {
-		decrypted, err := s.decryptConfigKeys(config)
+		var decrypted *models.ProviderConfig
+		var err error
+		decrypted, err = s.decryptConfigKeys(config)
 		if err != nil {
 			// fallback if decryption fails
 			cloned := *config
 			cloned.SecretKey = "********"
 			cloned.PublicKey = "********"
-			res = append(res, dto.ToProviderConfigResponse(&cloned))
-			continue
+			decrypted = &cloned
 		}
-		res = append(res, dto.ToProviderConfigResponse(decrypted))
+		
+		resp := dto.ToProviderConfigResponse(decrypted)
+		resp.VACount = counts[config.ProviderName]
+		res = append(res, resp)
 	}
 	return res, nil
 }

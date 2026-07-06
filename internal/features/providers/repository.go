@@ -126,3 +126,22 @@ func (p *ProviderRepo) FindPaymentProviderByName(ctx context.Context, name strin
 	}
 	return &provider, nil
 }
+
+// GetVACountsByProvider returns a map of provider names to their active virtual account counts
+func (p *ProviderRepo) GetVACountsByProvider(ctx context.Context, projectID string) map[string]int64 {
+	var counts []struct {
+		Provider string
+		Count    int64
+	}
+	p.db.WithContext(ctx).Model(&models.VirtualAccount{}).
+		Select("provider, count(*) as count").
+		Where("project_id = ? AND status = 'active'", projectID).
+		Group("provider").
+		Scan(&counts)
+
+	res := make(map[string]int64)
+	for _, c := range counts {
+		res[c.Provider] = c.Count
+	}
+	return res
+}

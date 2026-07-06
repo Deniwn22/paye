@@ -82,6 +82,13 @@ func (s *VAService) CreateVirtualAccount(ctx context.Context, projectID string, 
 		return nil, err
 	}
 
+	var project models.Project
+	if err := s.repo.GetDB().WithContext(ctx).First(&project, "id = ?", projectID).Error; err != nil {
+		return nil, fmt.Errorf("project not found: %w", err)
+	}
+
+	payeVaID := "pva_" + uuid.New().String()
+
 	// check if customer_reference already has an active VA under this project
 	existing, err := s.repo.FindByCustomerRef(ctx, dto.CustomerReference, projectID)
 	if err == nil && existing != nil {
@@ -90,11 +97,19 @@ func (s *VAService) CreateVirtualAccount(ctx context.Context, projectID string, 
 			return existing, nil
 		}
 		
-		// MIGRATION: Provider has switched!
-		// Safely deprecate the old Virtual Account by marking it expired locally.
-		// Any late payments will now fall into the Misdirected Payments queue.
-		existing.Status = "expired"
-		s.repo.UpdateVirtualAccount(ctx, existing)
+		if existing.PayeVaID != "" {
+			payeVaID = existing.PayeVaID
+		}
+
+		if project.AutoMigrateVAs {
+			// MIGRATION: Provider has switched and AutoMigrateVAs is ON!
+			// Safely deprecate the old Virtual Account by marking it expired locally.
+			existing.Status = "expired"
+			s.repo.UpdateVirtualAccount(ctx, existing)
+		} else {
+			// AutoMigrateVAs is OFF! Let them keep using their old VA.
+			return existing, nil
+		}
 	}
 
 	pvcID := "pvc_" + uuid.New().String()
@@ -140,6 +155,7 @@ func (s *VAService) CreateVirtualAccount(ctx context.Context, projectID string, 
 		Status:            "active",
 		ExpectedAmount:    dto.ExpectedAmount,
 		IsLive:            middleware.GetIsLiveFromContext(ctx),
+		PayeVaID:          payeVaID,
 		Metadata:          result.Metadata,
 	}
 
@@ -203,6 +219,89 @@ func (s *VAService) UpdateVirtualAccount(ctx context.Context, projectID string, 
 	}
 
 	return s.repo.UpdateVirtualAccount(ctx, va)
+}
+
+func (s *VAService) MigrateVirtualAccount(ctx context.Context, projectID string, pvcID string) (*models.VirtualAccount, error) {
+	// 1. Get the existing virtual account
+	existing, err := s.repo.FindByPvcID(ctx, pvcID, projectID)
+	if err != nil {
+		return nil, fmt.Errorf("virtual account not found: %w", err)
+	}
+	if existing.Status != "active" {
+		return nil, fmt.Errorf("cannot migrate a %s virtual account", existing.Status)
+	}
+
+	// 2. Get current active provider
+	provider, providerName, subAccountID, err := s.getVAProvider(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
+
+	if existing.Provider == providerName {
+		return nil, fmt.Errorf("virtual account is already on the active provider (%s)", providerName)
+	}
+
+	// 3. Mark old VA as expired
+	existing.Status = "expired"
+	if err := s.repo.UpdateVirtualAccount(ctx, existing); err != nil {
+		return nil, err
+	}
+
+	// 4. Create new VA
+	newPvcID := "pvc_" + uuid.New().String()
+	accountRef := "paye_" + uuid.New().String()
+
+	req := providers.CreateVARequest{
+		AccountRef:     accountRef,
+		AccountName:    existing.AccountName,
+		Currency:       existing.Currency,
+		SubAccountID:   subAccountID,
+		ExpectedAmount: existing.ExpectedAmount,
+	}
+
+	if existing.ExpiryDate != nil {
+		req.ExpiryDate = existing.ExpiryDate.Format(time.RFC3339)
+	}
+
+	result, err := provider.CreateVirtualAccount(ctx, req)
+	if err != nil {
+		// Rollback if creation fails
+		existing.Status = "active"
+		s.repo.UpdateVirtualAccount(ctx, existing)
+		return nil, fmt.Errorf("failed to create virtual account on provider: %w", err)
+	}
+
+	pID, _ := uuid.Parse(projectID)
+
+	payeVaID := existing.PayeVaID
+	if payeVaID == "" {
+		payeVaID = "pva_" + uuid.New().String()
+		// update old one to share the ID retroactively
+		existing.PayeVaID = payeVaID
+		s.repo.UpdateVirtualAccount(ctx, existing)
+	}
+
+	newVa := &models.VirtualAccount{
+		PvcID:             newPvcID,
+		ProjectID:         pID,
+		CustomerReference: existing.CustomerReference,
+		AccountRef:        accountRef,
+		AccountName:       existing.AccountName,
+		BankName:          result.BankName,
+		BankAccountNumber: result.AccountNumber,
+		BankAccountName:   result.AccountName,
+		Currency:          existing.Currency,
+		Provider:          providerName,
+		Type:              existing.Type,
+		Status:            "active",
+		ExpectedAmount:    existing.ExpectedAmount,
+		ExpiryDate:        existing.ExpiryDate,
+		IsLive:            middleware.GetIsLiveFromContext(ctx),
+		PayeVaID:          payeVaID,
+		Metadata:          result.Metadata,
+	}
+
+	return s.repo.CreateVirtualAccount(ctx, newVa)
 }
 
 func (s *VAService) ExpireVirtualAccount(ctx context.Context, projectID string, pvcID string) error {
