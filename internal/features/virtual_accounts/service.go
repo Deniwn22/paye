@@ -104,6 +104,18 @@ func (s *VAService) CreateVirtualAccount(ctx context.Context, projectID string, 
 
 		if project.AutoMigrateVAs {
 			// MIGRATION: Provider has switched and AutoMigrateVAs is ON!
+			oldProviderCfg, err := s.providerRepo.FindByCode(existing.Provider)
+			if err == nil {
+				oldProvider, err := providers.NewProvider(existing.Provider, oldProviderCfg, s.encryptionKey)
+				if err == nil {
+					if err := oldProvider.ExpireVirtualAccount(ctx, existing.AccountRef); err != nil {
+						if !strings.Contains(err.Error(), "expire VA not supported") {
+							slog.Error("failed to expire old VA on provider during auto-migration", "provider", existing.Provider, "error", err)
+						}
+					}
+				}
+			}
+
 			// Safely deprecate the old Virtual Account by marking it expired locally.
 			existing.Status = "expired"
 			s.repo.UpdateVirtualAccount(ctx, existing)
@@ -242,7 +254,20 @@ func (s *VAService) MigrateVirtualAccount(ctx context.Context, projectID string,
 		return nil, fmt.Errorf("virtual account is already on the active provider (%s)", providerName)
 	}
 
-	// 3. Mark old VA as expired
+	// 3. Expire old VA on the previous provider's network
+	oldProviderCfg, err := s.providerRepo.FindByCode(existing.Provider)
+	if err == nil {
+		oldProvider, err := providers.NewProvider(existing.Provider, oldProviderCfg, s.encryptionKey)
+		if err == nil {
+			if err := oldProvider.ExpireVirtualAccount(ctx, existing.AccountRef); err != nil {
+				if !strings.Contains(err.Error(), "expire VA not supported") {
+					slog.Error("failed to expire old VA on provider during manual migration", "provider", existing.Provider, "error", err)
+				}
+			}
+		}
+	}
+
+	// Mark old VA as expired locally
 	existing.Status = "expired"
 	if err := s.repo.UpdateVirtualAccount(ctx, existing); err != nil {
 		return nil, err
@@ -306,24 +331,53 @@ func (s *VAService) MigrateVirtualAccount(ctx context.Context, projectID string,
 }
 
 func (s *VAService) ExpireVirtualAccount(ctx context.Context, projectID string, pvcID string) error {
-	va, err := s.repo.FindByPvcID(ctx, pvcID, projectID)
+	targetVa, err := s.repo.FindByPvcID(ctx, pvcID, projectID)
 	if err != nil {
 		return fmt.Errorf("virtual account not found: %w", err)
 	}
 
-	provider, _, _, err := s.getVAProvider(ctx, projectID)
-	if err != nil {
-		return err
+	var vasToExpire []*models.VirtualAccount
+	if targetVa.PayeVaID != "" {
+		vasToExpire, err = s.repo.FindVAsByPayeID(ctx, targetVa.PayeVaID, projectID)
+		if err != nil {
+			return fmt.Errorf("failed to fetch related virtual accounts: %w", err)
+		}
+	} else {
+		vasToExpire = append(vasToExpire, targetVa)
 	}
 
-	if err := provider.ExpireVirtualAccount(ctx, va.AccountRef); err != nil {
-		if !strings.Contains(err.Error(), "expire VA not supported") {
-			return fmt.Errorf("failed to expire on provider: %w", err)
+	for _, va := range vasToExpire {
+		if va.Status == "expired" {
+			continue // Already expired locally
+		}
+
+		// Initialize the appropriate provider for this specific VA
+		providerCfg, err := s.providerRepo.FindByCode(va.Provider)
+		if err != nil {
+			slog.Error("failed to find provider config for VA", "provider", va.Provider, "error", err)
+			continue
+		}
+
+		provider, err := providers.NewProvider(va.Provider, providerCfg, s.encryptionKey)
+		if err != nil {
+			slog.Error("failed to initialize provider", "provider", va.Provider, "error", err)
+			continue
+		}
+
+		if err := provider.ExpireVirtualAccount(ctx, va.AccountRef); err != nil {
+			if !strings.Contains(err.Error(), "expire VA not supported") {
+				slog.Error("failed to expire on provider", "provider", va.Provider, "error", err)
+				// we won't strictly fail the whole request, but we will log it.
+			}
+		}
+
+		va.Status = "expired"
+		if err := s.repo.UpdateVirtualAccount(ctx, va); err != nil {
+			slog.Error("failed to update VA status in DB", "pvc_id", va.PvcID, "error", err)
 		}
 	}
 
-	va.Status = "expired"
-	return s.repo.UpdateVirtualAccount(ctx, va)
+	return nil
 }
 
 func (s *VAService) ListMisdirectedPayments(ctx context.Context, projectID string) ([]*models.MisdirectedPayment, error) {

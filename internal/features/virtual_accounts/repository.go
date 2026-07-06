@@ -63,6 +63,12 @@ func (r *VARepository) FindByPvcID(ctx context.Context, pvcID string, projectID 
 	return &va, err
 }
 
+func (r *VARepository) FindVAsByPayeID(ctx context.Context, payeID string, projectID string) ([]*models.VirtualAccount, error) {
+	var vas []*models.VirtualAccount
+	err := r.db.WithContext(ctx).Where("paye_va_id = ? AND project_id = ?", payeID, projectID).Find(&vas).Error
+	return vas, err
+}
+
 func (r *VARepository) FindByCustomerRef(ctx context.Context, customerRef string, projectID string) (*models.VirtualAccount, error) {
 	var va models.VirtualAccount
 	err := r.db.WithContext(ctx).Where("customer_reference = ? AND project_id = ? AND status = ?", customerRef, projectID, "active").Order("created_at DESC").First(&va).Error
