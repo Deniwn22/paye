@@ -199,17 +199,31 @@ func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.Provide
 
 	// Encrypt keys
 	if pcreq.SecretKey != "" {
-		pcreq.SecretKey, err = crypto.Encrypt(pcreq.SecretKey, s.encryptionKey)
-		if err != nil {
-			return nil, err
+		if !strings.Contains(pcreq.SecretKey, "*") {
+			pcreq.SecretKey, err = crypto.Encrypt(pcreq.SecretKey, s.encryptionKey)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			pcreq.SecretKey = provider.SecretKey
 		}
+	} else {
+		pcreq.SecretKey = provider.SecretKey
 	}
+
 	if pcreq.PublicKey != "" {
-		pcreq.PublicKey, err = crypto.Encrypt(pcreq.PublicKey, s.encryptionKey)
-		if err != nil {
-			return nil, err
+		if !strings.Contains(pcreq.PublicKey, "*") {
+			pcreq.PublicKey, err = crypto.Encrypt(pcreq.PublicKey, s.encryptionKey)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			pcreq.PublicKey = provider.PublicKey
 		}
+	} else {
+		pcreq.PublicKey = provider.PublicKey
 	}
+
 	if pcreq.WebhookSecret != "" {
 		if !strings.Contains(pcreq.WebhookSecret, "*") {
 			pcreq.WebhookSecret, err = crypto.Encrypt(pcreq.WebhookSecret, s.encryptionKey)
@@ -219,6 +233,8 @@ func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.Provide
 		} else {
 			pcreq.WebhookSecret = provider.WebhookSecret
 		}
+	} else {
+		pcreq.WebhookSecret = provider.WebhookSecret
 	}
 
 	// update provider fields
