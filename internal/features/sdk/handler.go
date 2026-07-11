@@ -185,6 +185,7 @@ func (h *SDKHandler) InitializeSDKTransaction(c *gin.Context) {
 		Currency:    req.Currency,
 		Reference:   req.Reference,
 		CallbackURL: req.CallbackURL,
+		IsInline:    true,
 	}
 	if initReq.Currency == "" {
 		initReq.Currency = "NGN"

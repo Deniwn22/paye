@@ -126,6 +126,7 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 		Currency:    req.Currency,
 		Reference:   reference,
 		CallbackURL: req.CallbackURL,
+		IsInline:    req.IsInline,
 	}
 
 	if pc.ProviderName == "opay" {
