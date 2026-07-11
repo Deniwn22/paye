@@ -134,6 +134,10 @@ func (s *ProviderService) AddProvider(ctx context.Context, pcreq *dto.ProviderCo
 		return nil, fmt.Errorf("nomba requires metadata.nomba_account_id")
 	}
 
+	pcreq.SecretKey = strings.TrimSpace(pcreq.SecretKey)
+	pcreq.PublicKey = strings.TrimSpace(pcreq.PublicKey)
+	pcreq.WebhookSecret = strings.TrimSpace(pcreq.WebhookSecret)
+
 	// Validate keys first
 	if err := validateProviderKeys(string(pcreq.ProviderName), env, pcreq.SecretKey, pcreq.PublicKey); err != nil {
 		return nil, err
@@ -191,6 +195,10 @@ func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.Provide
 	if string(pcreq.ProviderName) == "nomba" && pcreq.Metadata.NombaAccountID == "" {
 		return nil, fmt.Errorf("nomba requires metadata.nomba_account_id")
 	}
+
+	pcreq.SecretKey = strings.TrimSpace(pcreq.SecretKey)
+	pcreq.PublicKey = strings.TrimSpace(pcreq.PublicKey)
+	pcreq.WebhookSecret = strings.TrimSpace(pcreq.WebhookSecret)
 
 	// Validate keys first
 	if err := validateProviderKeys(string(pcreq.ProviderName), provider.Environment, pcreq.SecretKey, pcreq.PublicKey); err != nil {
