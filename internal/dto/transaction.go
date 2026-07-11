@@ -10,7 +10,6 @@ type InitializeTransactionRequest struct {
 	Currency    string  `json:"currency" binding:"required" example:"NGN" enums:"NGN,USD,GHS,KES" description:"Currency to charge in"`
 	Reference   string  `json:"reference" example:"tx_ref_123456" description:"Your internal unique transaction reference"`
 	CallbackURL string  `json:"callbackUrl" example:"https://your-app.com/webhook" description:"Optional callback URL for webhook notification"`
-	IsInline    bool    `json:"isInline,omitempty" description:"Set to true if using an inline checkout widget"`
 }
 
 type InitializeTransactionResponse struct {

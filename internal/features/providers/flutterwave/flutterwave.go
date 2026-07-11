@@ -76,20 +76,6 @@ func (f *Flutterwave) InitializeTransaction(req providers.TransactionRequest) (*
 			Email: req.Email,
 		},
 	}
-	if req.IsInline {
-		// For Flutterwave V3 Inline, we skip server-side initialization to avoid duplicate tx_ref errors in sandbox.
-		return &providers.TransactionResponse{
-			Status:    true,
-			Message:   "Transaction initialized locally for inline checkout",
-			Reference: req.Reference,
-			AuthURL:   "https://paye.africa/inline-checkout", // Dummy URL
-			Provider:  f.Name(),
-			Metadata: map[string]any{
-				"tx_ref": req.Reference,
-			},
-		}, nil
-	}
-
 	body, err := json.Marshal(fReq)
 	if err != nil {
 		return nil, err

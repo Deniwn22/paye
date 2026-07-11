@@ -22,7 +22,6 @@ type TransactionRequest struct {
 	Currency    string
 	Reference   string
 	CallbackURL string
-	IsInline    bool
 	Metadata    map[string]any
 }
 

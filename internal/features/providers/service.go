@@ -134,10 +134,6 @@ func (s *ProviderService) AddProvider(ctx context.Context, pcreq *dto.ProviderCo
 		return nil, fmt.Errorf("nomba requires metadata.nomba_account_id")
 	}
 
-	pcreq.SecretKey = strings.TrimSpace(pcreq.SecretKey)
-	pcreq.PublicKey = strings.TrimSpace(pcreq.PublicKey)
-	pcreq.WebhookSecret = strings.TrimSpace(pcreq.WebhookSecret)
-
 	// Validate keys first
 	if err := validateProviderKeys(string(pcreq.ProviderName), env, pcreq.SecretKey, pcreq.PublicKey); err != nil {
 		return nil, err
@@ -196,10 +192,6 @@ func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.Provide
 		return nil, fmt.Errorf("nomba requires metadata.nomba_account_id")
 	}
 
-	pcreq.SecretKey = strings.TrimSpace(pcreq.SecretKey)
-	pcreq.PublicKey = strings.TrimSpace(pcreq.PublicKey)
-	pcreq.WebhookSecret = strings.TrimSpace(pcreq.WebhookSecret)
-
 	// Validate keys first
 	if err := validateProviderKeys(string(pcreq.ProviderName), provider.Environment, pcreq.SecretKey, pcreq.PublicKey); err != nil {
 		return nil, err
@@ -207,31 +199,17 @@ func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.Provide
 
 	// Encrypt keys
 	if pcreq.SecretKey != "" {
-		if !strings.Contains(pcreq.SecretKey, "*") {
-			pcreq.SecretKey, err = crypto.Encrypt(pcreq.SecretKey, s.encryptionKey)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			pcreq.SecretKey = provider.SecretKey
+		pcreq.SecretKey, err = crypto.Encrypt(pcreq.SecretKey, s.encryptionKey)
+		if err != nil {
+			return nil, err
 		}
-	} else {
-		pcreq.SecretKey = provider.SecretKey
 	}
-
 	if pcreq.PublicKey != "" {
-		if !strings.Contains(pcreq.PublicKey, "*") {
-			pcreq.PublicKey, err = crypto.Encrypt(pcreq.PublicKey, s.encryptionKey)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			pcreq.PublicKey = provider.PublicKey
+		pcreq.PublicKey, err = crypto.Encrypt(pcreq.PublicKey, s.encryptionKey)
+		if err != nil {
+			return nil, err
 		}
-	} else {
-		pcreq.PublicKey = provider.PublicKey
 	}
-
 	if pcreq.WebhookSecret != "" {
 		if !strings.Contains(pcreq.WebhookSecret, "*") {
 			pcreq.WebhookSecret, err = crypto.Encrypt(pcreq.WebhookSecret, s.encryptionKey)
@@ -241,8 +219,6 @@ func (s *ProviderService) UpdateProvider(ctx context.Context, pcreq *dto.Provide
 		} else {
 			pcreq.WebhookSecret = provider.WebhookSecret
 		}
-	} else {
-		pcreq.WebhookSecret = provider.WebhookSecret
 	}
 
 	// update provider fields
