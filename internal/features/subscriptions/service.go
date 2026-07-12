@@ -20,6 +20,7 @@ import (
 type SubscriptionService struct {
 	db            *gorm.DB
 	providerRepo  *providers.ProviderRepo
+	repo          *SubscriptionRepo
 	encryptionKey string
 }
 
@@ -27,6 +28,7 @@ func NewSubscriptionService(db *gorm.DB, providerRepo *providers.ProviderRepo, e
 	return &SubscriptionService{
 		db:            db,
 		providerRepo:  providerRepo,
+		repo:          NewSubscriptionRepo(db),
 		encryptionKey: encryptionKey,
 	}
 }
@@ -189,5 +191,76 @@ func (s *SubscriptionService) chargeSubscription(ctx context.Context, sub *model
 	}
 	s.db.WithContext(ctx).Create(tx)
 
+	return nil
+}
+
+// --- Dashboard API Methods ---
+
+func (s *SubscriptionService) CreatePlan(ctx context.Context, projectID string, req *CreatePlanRequest, isLive bool) (*PlanResponse, error) {
+	projUUID, err := uuid.Parse(projectID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid project ID")
+	}
+
+	planCode := "PLN_" + uuid.New().String()[:12]
+
+	plan := &models.Plan{
+		ProjectID:   projUUID,
+		PlanCode:    planCode,
+		Name:        req.Name,
+		Amount:      req.Amount,
+		Interval:    req.Interval,
+		Currency:    req.Currency,
+		Description: req.Description,
+		IsLive:      isLive,
+	}
+
+	if err := s.repo.CreatePlan(ctx, plan); err != nil {
+		return nil, fmt.Errorf("failed to create plan: %w", err)
+	}
+
+	return ToPlanResponse(plan), nil
+}
+
+func (s *SubscriptionService) ListPlans(ctx context.Context, projectID string, isLive bool, page, limit int) (*PlanListResponse, error) {
+	plans, meta, err := s.repo.ListPlans(ctx, projectID, isLive, page, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list plans: %w", err)
+	}
+
+	res := make([]PlanResponse, len(plans))
+	for i, p := range plans {
+		res[i] = *ToPlanResponse(&p)
+	}
+
+	return &PlanListResponse{Data: res, Meta: meta}, nil
+}
+
+func (s *SubscriptionService) GetPlan(ctx context.Context, projectID string, planCode string) (*PlanResponse, error) {
+	plan, err := s.repo.GetPlanByCode(ctx, projectID, planCode)
+	if err != nil {
+		return nil, fmt.Errorf("plan not found")
+	}
+	return ToPlanResponse(plan), nil
+}
+
+func (s *SubscriptionService) ListSubscriptions(ctx context.Context, projectID string, isLive bool, page, limit int) (*SubscriptionListResponse, error) {
+	subs, meta, err := s.repo.ListSubscriptions(ctx, projectID, isLive, page, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list subscriptions: %w", err)
+	}
+
+	res := make([]SubscriptionResponse, len(subs))
+	for i, sub := range subs {
+		res[i] = *ToSubscriptionResponse(&sub)
+	}
+
+	return &SubscriptionListResponse{Data: res, Meta: meta}, nil
+}
+
+func (s *SubscriptionService) CancelSubscription(ctx context.Context, projectID string, subCode string) error {
+	if err := s.repo.CancelSubscription(ctx, projectID, subCode); err != nil {
+		return fmt.Errorf("failed to cancel subscription: %w", err)
+	}
 	return nil
 }

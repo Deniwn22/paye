@@ -66,8 +66,6 @@ func main() {
 		}
 	}()
 
-
-
 	ctx := context.Background()
 
 	// 1. Find all TEST MODE paye_va_ids that have at least one 'expired' VA

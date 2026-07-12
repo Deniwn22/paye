@@ -14,6 +14,5 @@ type Plan struct {
 	Interval    string    `gorm:"not null" json:"interval"`
 	Currency    string    `gorm:"not null" json:"currency"`
 	Description string    `json:"description"`
-	Provider    string    `gorm:"not null" json:"provider"`
 	IsLive      bool      `gorm:"default:false;index" json:"is_live"`
 }

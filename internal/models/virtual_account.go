@@ -8,23 +8,23 @@ import (
 
 type VirtualAccount struct {
 	Base
-	PvcID             string     `gorm:"unique;not null;index" json:"pvc_id"`
-	PayeVaID          string     `gorm:"index" json:"paye_va_id"`
-	ProjectID         uuid.UUID  `gorm:"type:uuid;not null;index" json:"project_id"`
-	Project           *Project   `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE" json:"-"`
-	CustomerReference string     `gorm:"not null;index" json:"customer_reference"`
-	AccountRef        string     `gorm:"unique;not null" json:"account_ref"`
-	AccountName       string     `gorm:"not null" json:"account_name"`
-	BankName          string     `json:"bank_name"`
-	BankAccountNumber string     `gorm:"not null" json:"bank_account_number"`
-	BankAccountName   string     `json:"bank_account_name"`
-	Currency          string     `gorm:"not null;default:NGN" json:"currency"`
-	Provider          string     `gorm:"not null" json:"provider"`
-	Type              string     `gorm:"not null;default:static" json:"type"`
-	Status            string     `gorm:"not null;default:active" json:"status"`
-	ExpectedAmount    float64    `json:"expected_amount"`
-	ExpiryDate        *time.Time `json:"expiry_date,omitempty"`
-	IsLive            bool       `gorm:"default:false;index" json:"is_live"`
+	PvcID             string         `gorm:"unique;not null;index" json:"pvc_id"`
+	PayeVaID          string         `gorm:"index" json:"paye_va_id"`
+	ProjectID         uuid.UUID      `gorm:"type:uuid;not null;index" json:"project_id"`
+	Project           *Project       `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE" json:"-"`
+	CustomerReference string         `gorm:"not null;index" json:"customer_reference"`
+	AccountRef        string         `gorm:"unique;not null" json:"account_ref"`
+	AccountName       string         `gorm:"not null" json:"account_name"`
+	BankName          string         `json:"bank_name"`
+	BankAccountNumber string         `gorm:"not null" json:"bank_account_number"`
+	BankAccountName   string         `json:"bank_account_name"`
+	Currency          string         `gorm:"not null;default:NGN" json:"currency"`
+	Provider          string         `gorm:"not null" json:"provider"`
+	Type              string         `gorm:"not null;default:static" json:"type"`
+	Status            string         `gorm:"not null;default:active" json:"status"`
+	ExpectedAmount    float64        `json:"expected_amount"`
+	ExpiryDate        *time.Time     `json:"expiry_date,omitempty"`
+	IsLive            bool           `gorm:"default:false;index" json:"is_live"`
 	TotalReceived     float64        `gorm:"-" json:"total_received"`
 	PayeTotalReceived float64        `gorm:"-" json:"paye_total_received"`
 	PayeVACount       int64          `gorm:"-" json:"paye_va_count"`

@@ -98,7 +98,7 @@ func main() {
 
 	respBodyBytes, _ := io.ReadAll(resp.Body)
 	log.Printf("Token response: %s", string(respBodyBytes))
-	
+
 	var tokenRes struct {
 		Data struct {
 			AccessToken string `json:"access_token"`

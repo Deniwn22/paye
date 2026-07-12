@@ -230,8 +230,6 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 			}
 		}
 
-
-
 		// Create a failed WebhookLog record in the database for debugging
 		wl := &models.WebhookLog{
 			ProjectID:       wc.ProjectID,
@@ -460,9 +458,9 @@ func (s *WebhookService) ProcessVAWebhook(ctx context.Context, wc *models.Webhoo
 				Amount   float64 `json:"amount"`
 				Status   string  `json:"status"`
 				Customer struct {
-					Name          string `json:"name"`
-					PhoneNumber   string `json:"phone_number"`
-					Email         string `json:"email"`
+					Name        string `json:"name"`
+					PhoneNumber string `json:"phone_number"`
+					Email       string `json:"email"`
 				} `json:"customer"`
 			} `json:"data"`
 		}
@@ -528,7 +526,7 @@ func (s *WebhookService) ProcessVAWebhook(ctx context.Context, wc *models.Webhoo
 			Provider:         "flutterwave",
 			IsLive:           isLive,
 		}
-		
+
 		if _, err := s.vaRepo.CreateTransaction(ctx, vatx); err != nil {
 			return fmt.Errorf("flutterwave va webhook: failed to persist transaction: %w", err)
 		}
@@ -687,7 +685,7 @@ func (s *WebhookService) ProcessVAWebhook(ctx context.Context, wc *models.Webhoo
 		Provider:         "nomba",
 		IsLive:           isLive,
 	}
-	
+
 	if _, err := s.vaRepo.CreateTransaction(ctx, vatx); err != nil {
 		return fmt.Errorf("va webhook: failed to persist transaction: %w", err)
 	}

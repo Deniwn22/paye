@@ -218,7 +218,7 @@ func (n *Nomba) PollVirtualAccountTransactions(ctx context.Context, startDate, e
 	if accID != n.tokenManager.accountID {
 		url += fmt.Sprintf("&accountId=%s", accID)
 	}
-	
+
 	resp, err := n.makeRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -245,12 +245,12 @@ func (n *Nomba) PollVirtualAccountTransactions(ctx context.Context, startDate, e
 		if tx.Type != "vact_transfer" {
 			continue
 		}
-		
+
 		status := "failed"
 		if tx.Status == "SUCCESS" {
 			status = "success"
 		}
-		
+
 		txs = append(txs, providers.VATransactionResult{
 			Reference:     tx.ID,
 			Amount:        tx.TransactionAmount,

@@ -20,10 +20,10 @@ import (
 	"github.com/johnfercher/maroto/v2/pkg/props"
 
 	"github.com/ttomsin/paye/internal/dto"
-	"github.com/ttomsin/paye/internal/models"
 	"github.com/ttomsin/paye/internal/features/transactions"
 	"github.com/ttomsin/paye/internal/features/virtual_accounts"
 	"github.com/ttomsin/paye/internal/middleware"
+	"github.com/ttomsin/paye/internal/models"
 )
 
 type ReportingService struct {
@@ -113,7 +113,7 @@ func (s *ReportingService) GeneratePDFStatement(ctx context.Context, projectID s
 		IsLive:           isLive,
 	}
 	record.ID = uuid.New()
-	
+
 	if err := s.repRepo.CreateStatementRecord(ctx, record); err != nil {
 		return nil, fmt.Errorf("failed to save statement record: %w", err)
 	}
@@ -150,7 +150,7 @@ func (s *ReportingService) GeneratePDFStatement(ctx context.Context, projectID s
 
 	m.AddRow(10, text.NewCol(12, fmt.Sprintf("Project: %s", projectName), props.Text{Style: fontstyle.Bold, Size: 12}))
 	m.AddRow(10, text.NewCol(12, fmt.Sprintf("Period: %s to %s", data.StartDate.Format("Jan 02, 2006"), data.EndDate.Format("Jan 02, 2006")), props.Text{Size: 10}))
-	
+
 	m.AddRow(10) // Spacer
 
 	if len(data.CheckoutStats) > 0 {
@@ -261,7 +261,7 @@ func (s *ReportingService) GenerateVAPDFStatement(ctx context.Context, projectID
 		IsLive:           isLive,
 	}
 	record.ID = uuid.New()
-	
+
 	if err := s.repRepo.CreateStatementRecord(ctx, record); err != nil {
 		return nil, fmt.Errorf("failed to save statement record: %w", err)
 	}

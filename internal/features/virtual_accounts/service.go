@@ -133,7 +133,7 @@ func (s *VAService) CreateVirtualAccount(ctx context.Context, projectID string, 
 			// Idempotent: VA already exists on the active provider. Return it.
 			return existing, nil
 		}
-		
+
 		if existing.PayeVaID != "" {
 			payeVaID = existing.PayeVaID
 		}

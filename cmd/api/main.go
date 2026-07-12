@@ -38,7 +38,7 @@ import (
 // @title Paye API
 // @version 1.0
 // @description Unified payment routing engine and secure webhook proxies for African developers.
-// @description 
+// @description
 // @description ![Paye Logo](/favicon_io/android-chrome-192x192.png)
 // @description
 // @description Production Server: https://api.paye.africa
@@ -242,6 +242,7 @@ func main() {
 	webhookHandler := webhooks.NewWebhookHandler(webhookService)
 	dashboardHandler := dashboard.NewDashboardHandler(dashboardService)
 	transactionHandler := transactions.NewTransactionHandler(transactionService)
+	subscriptionHandler := subscriptions.NewSubscriptionHandler(subscriptionService)
 	sdkHandler := sdk.NewSDKHandler(userRepo, projectRepo, providerRepo, transactionService, derivedEncryptionKey, database.DB, subscriptionService)
 	vaHandler := virtual_accounts.NewVAHandler(vaService)
 	reportingHandler := reporting.NewReportingHandler(reportingService, projectRepo, vaRepo, reportingRepo)
@@ -307,7 +308,7 @@ func main() {
 
 	// Auth Routes (Public)
 	auth.RegisterRoutes(v1, authHandler)
-	
+
 	// Reporting Routes (Public)
 	reporting.RegisterPublicRoutes(v1, reportingHandler)
 
@@ -333,6 +334,9 @@ func main() {
 
 	// Register Notifications routes (Protected)
 	notifications.RegisterRoutes(protected, notificationHandler)
+
+	// Register Subscriptions & Plans routes (Protected)
+	subscriptions.RegisterRoutes(protected, subscriptionHandler)
 
 	// Admin Protected Group (Requires JWT token and Admin role)
 	adminProtected := v1.Group("")

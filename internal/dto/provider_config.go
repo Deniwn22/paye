@@ -57,4 +57,3 @@ func ToProviderConfig(config *ProviderConfigRequest, env string) *models.Provide
 		Metadata:      config.Metadata,
 	}
 }
-

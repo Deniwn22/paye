@@ -206,7 +206,6 @@ func (s *PaystackService) CreatePlan(ctx context.Context, projectID string, req 
 		Interval:    resp.Interval,
 		Currency:    req.Currency,
 		Description: req.Description,
-		Provider:    "paystack",
 		IsLive:      middleware.GetIsLiveFromContext(ctx),
 	}
 

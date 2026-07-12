@@ -90,7 +90,7 @@ func (r *VARepository) ListVirtualAccounts(ctx context.Context, projectID string
 	}
 
 	err := query.Order("created_at DESC").Limit(limit).Offset(offset).Find(&vas).Error
-	
+
 	if err == nil && len(vas) > 0 {
 		for _, va := range vas {
 			if va.PayeVaID == "" {
@@ -107,7 +107,7 @@ func (r *VARepository) ListVirtualAccounts(ctx context.Context, projectID string
 			Select("pvc_id, COALESCE(SUM(amount), 0) as total").
 			Where("project_id = ? AND status = ?", projectID, "success").
 			Group("pvc_id").Scan(&totals)
-			
+
 		totalsMap := make(map[string]float64)
 		for _, t := range totals {
 			totalsMap[t.PvcID] = t.Total
@@ -141,7 +141,7 @@ func (r *VARepository) ListVirtualAccounts(ctx context.Context, projectID string
 		for _, c := range payeCounts {
 			payeCountsMap[c.PayeVaID] = c.Count
 		}
-		
+
 		for _, va := range vas {
 			va.TotalReceived = totalsMap[va.PvcID]
 			if va.PayeVaID != "" {
@@ -150,7 +150,7 @@ func (r *VARepository) ListVirtualAccounts(ctx context.Context, projectID string
 			}
 		}
 	}
-	
+
 	return vas, total, err
 }
 

@@ -26,7 +26,7 @@ func main() {
 
 	var txs []Transaction
 	db.Raw("SELECT id, amount, provider, status, is_live, created_at FROM transactions").Scan(&txs)
-	
+
 	fmt.Printf("Total Checkout Transactions: %d\n", len(txs))
 	for _, t := range txs {
 		fmt.Printf("Tx: amount=%.2f provider=%s status=%s live=%v\n", t.Amount, t.Provider, t.Status, t.IsLive)
@@ -34,7 +34,7 @@ func main() {
 
 	var vaTxs []Transaction
 	db.Raw("SELECT id, amount, provider, status, is_live, created_at FROM virtual_account_transactions").Scan(&vaTxs)
-	
+
 	fmt.Printf("\nTotal VA Transactions: %d\n", len(vaTxs))
 	for _, t := range vaTxs {
 		fmt.Printf("VA Tx: amount=%.2f provider=%s status=%s live=%v\n", t.Amount, t.Provider, t.Status, t.IsLive)

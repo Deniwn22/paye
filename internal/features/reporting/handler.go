@@ -73,7 +73,7 @@ func (h *ReportingHandler) GenerateAggregatorStatementHandler(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": false, "message": "failed to generate pdf: " + err.Error()})
 			return
 		}
-		
+
 		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=statement_%s.pdf", req.StartDate.Format("20060102")))
 		c.Data(http.StatusOK, "application/pdf", pdfBytes)
 		return
@@ -139,7 +139,7 @@ func (h *ReportingHandler) GenerateVAStatementHandler(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": false, "message": "failed to generate pdf: " + err.Error()})
 			return
 		}
-		
+
 		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=va_statement_%s.pdf", pvcID))
 		c.Data(http.StatusOK, "application/pdf", pdfBytes)
 		return
@@ -149,7 +149,7 @@ func (h *ReportingHandler) GenerateVAStatementHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status": true,
 		"data": gin.H{
-			"transactions": txs,
+			"transactions":   txs,
 			"total_received": total,
 		},
 	})
@@ -184,7 +184,7 @@ func (h *ReportingHandler) VerifyStatementHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status": true,
+		"status":  true,
 		"message": "statement verified successfully",
 		"data": gin.H{
 			"id":                record.ID,

@@ -62,7 +62,7 @@ func (s *ProviderService) ListProviders(ctx context.Context, projectID string) (
 			cloned.PublicKey = "********"
 			decrypted = &cloned
 		}
-		
+
 		resp := dto.ToProviderConfigResponse(decrypted)
 		resp.VACount = counts[config.ProviderName]
 		res = append(res, resp)
@@ -87,7 +87,7 @@ func (s *ProviderService) ListProvidersByEnv(ctx context.Context, projectID stri
 			cloned.PublicKey = "********"
 			decrypted = &cloned
 		}
-		
+
 		resp := dto.ToProviderConfigResponse(decrypted)
 		resp.VACount = counts[config.ProviderName]
 		res = append(res, resp)

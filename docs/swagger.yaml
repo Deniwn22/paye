@@ -699,6 +699,29 @@ definitions:
     - email
     - publicId
     type: object
+  subscriptions.CreatePlanRequest:
+    properties:
+      amount:
+        type: number
+      currency:
+        type: string
+      description:
+        type: string
+      interval:
+        enum:
+        - daily
+        - weekly
+        - monthly
+        - annually
+        type: string
+      name:
+        type: string
+    required:
+    - amount
+    - currency
+    - interval
+    - name
+    type: object
 host: api.paye.africa
 info:
   contact: {}
@@ -1010,6 +1033,108 @@ paths:
       summary: Toggle payment provider support status
       tags:
       - Providers
+  /plans:
+    get:
+      description: Retrieve a paginated list of billing plans
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: List billing plans
+      tags:
+      - Subscriptions
+    post:
+      consumes:
+      - application/json
+      description: Create a new provider-agnostic billing plan
+      parameters:
+      - description: Plan details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/subscriptions.CreatePlanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a billing plan
+      tags:
+      - Subscriptions
+  /plans/{planCode}:
+    get:
+      description: Retrieve details of a specific billing plan
+      parameters:
+      - description: Plan Code
+        in: path
+        name: planCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a billing plan
+      tags:
+      - Subscriptions
   /projects:
     get:
       description: List all projects belonging to the authenticated user
@@ -1670,6 +1795,69 @@ paths:
       summary: Initialize public transaction
       tags:
       - SDK
+  /subscriptions:
+    get:
+      description: Retrieve a paginated list of active subscriptions for the project
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: List active subscriptions
+      tags:
+      - Subscriptions
+  /subscriptions/{subCode}/cancel:
+    post:
+      description: Immediately cancels an active subscription
+      parameters:
+      - description: Subscription Code
+        in: path
+        name: subCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Cancel a subscription
+      tags:
+      - Subscriptions
   /transactions:
     get:
       description: Retrieve a list of payment transactions for the authenticated merchant.

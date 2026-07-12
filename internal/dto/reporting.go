@@ -19,8 +19,8 @@ type AggregatorStatementResponse struct {
 }
 
 type ProviderSummary struct {
-	TotalVolume     float64 `json:"total_volume"`
-	TransactionCount int64  `json:"transaction_count"`
+	TotalVolume      float64 `json:"total_volume"`
+	TransactionCount int64   `json:"transaction_count"`
 }
 
 // StatementRecordDTO represents the verified statement payload
