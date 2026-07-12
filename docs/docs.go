@@ -1898,6 +1898,63 @@ const docTemplate = `{
                 }
             }
         },
+        "/transfers": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Initiate a transfer to a bank account. If Smart Payouts is enabled, Paye will automatically route this through the active provider with the highest balance.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transfers"
+                ],
+                "summary": "Initiate a transfer",
+                "parameters": [
+                    {
+                        "description": "Transfer details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/transfers.TransferRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.SwaggerSimpleResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/virtual-accounts": {
             "get": {
                 "security": [
@@ -3786,10 +3843,14 @@ const docTemplate = `{
         "projects.UpdateProjectSettingsRequest": {
             "type": "object",
             "required": [
-                "auto_migrate_vas"
+                "auto_migrate_vas",
+                "smart_payouts_enabled"
             ],
             "properties": {
                 "auto_migrate_vas": {
+                    "type": "boolean"
+                },
+                "smart_payouts_enabled": {
                     "type": "boolean"
                 }
             }
@@ -3873,6 +3934,36 @@ const docTemplate = `{
                     ]
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "transfers.TransferRequest": {
+            "type": "object",
+            "required": [
+                "account_name",
+                "account_number",
+                "amount",
+                "bank_code"
+            ],
+            "properties": {
+                "account_name": {
+                    "type": "string"
+                },
+                "account_number": {
+                    "type": "string"
+                },
+                "amount": {
+                    "type": "number"
+                },
+                "bank_code": {
+                    "type": "string"
+                },
+                "provider": {
+                    "description": "Optional: If empty, Smart Payouts will route it automatically",
+                    "type": "string"
+                },
+                "reason": {
                     "type": "string"
                 }
             }

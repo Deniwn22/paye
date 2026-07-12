@@ -19,13 +19,14 @@ type CreateProjectRequest struct {
 }
 
 type ProjectResponse struct {
-	ID             string `json:"id"`
-	Name           string `json:"name"`
-	ApiKey         string `json:"api_key"`
-	PublicID       string `json:"public_id"`
-	TestApiKey     string `json:"test_api_key"`
-	TestPublicID   string `json:"test_public_id"`
-	AutoMigrateVAs bool   `json:"auto_migrate_vas"`
+	ID                  string `json:"id"`
+	Name                string `json:"name"`
+	ApiKey              string `json:"api_key"`
+	PublicID            string `json:"public_id"`
+	TestApiKey          string `json:"test_api_key"`
+	TestPublicID        string `json:"test_public_id"`
+	AutoMigrateVAs      bool   `json:"auto_migrate_vas"`
+	SmartPayoutsEnabled bool   `json:"smart_payouts_enabled"`
 }
 
 func NewProjectService(repo IProjectRepo) *ProjectService {
@@ -88,7 +89,7 @@ func (s *ProjectService) DeleteProject(ctx context.Context, id string, userID st
 	return s.repo.DeleteProject(ctx, id, userID)
 }
 
-func (s *ProjectService) UpdateProjectSettings(ctx context.Context, id string, userID string, autoMigrateVAs bool) (*models.Project, error) {
+func (s *ProjectService) UpdateProjectSettings(ctx context.Context, id string, userID string, autoMigrateVAs bool, smartPayoutsEnabled bool) (*models.Project, error) {
 	project, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -98,6 +99,7 @@ func (s *ProjectService) UpdateProjectSettings(ctx context.Context, id string, u
 	}
 
 	project.AutoMigrateVAs = autoMigrateVAs
+	project.SmartPayoutsEnabled = smartPayoutsEnabled
 	if err := s.repo.UpdateProject(ctx, project); err != nil {
 		return nil, err
 	}

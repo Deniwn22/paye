@@ -29,6 +29,7 @@ import (
 	"github.com/ttomsin/paye/internal/features/sdk"
 	"github.com/ttomsin/paye/internal/features/subscriptions"
 	"github.com/ttomsin/paye/internal/features/transactions"
+	"github.com/ttomsin/paye/internal/features/transfers"
 	"github.com/ttomsin/paye/internal/features/user"
 	"github.com/ttomsin/paye/internal/features/virtual_accounts"
 	"github.com/ttomsin/paye/internal/features/webhooks"
@@ -243,6 +244,10 @@ func main() {
 	dashboardHandler := dashboard.NewDashboardHandler(dashboardService)
 	transactionHandler := transactions.NewTransactionHandler(transactionService)
 	subscriptionHandler := subscriptions.NewSubscriptionHandler(subscriptionService)
+
+	transferService := transfers.NewTransferService(database.DB, providerRepo, projectRepo, jwtSecret)
+	transferHandler := transfers.NewTransferHandler(transferService)
+
 	sdkHandler := sdk.NewSDKHandler(userRepo, projectRepo, providerRepo, transactionService, derivedEncryptionKey, database.DB, subscriptionService)
 	vaHandler := virtual_accounts.NewVAHandler(vaService)
 	reportingHandler := reporting.NewReportingHandler(reportingService, projectRepo, vaRepo, reportingRepo)
@@ -337,6 +342,9 @@ func main() {
 
 	// Register Subscriptions & Plans routes (Protected)
 	subscriptions.RegisterRoutes(protected, subscriptionHandler)
+
+	// Register Transfers routes (Protected)
+	transfers.RegisterRoutes(protected, transferHandler)
 
 	// Admin Protected Group (Requires JWT token and Admin role)
 	adminProtected := v1.Group("")

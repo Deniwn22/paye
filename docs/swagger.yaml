@@ -661,8 +661,11 @@ definitions:
     properties:
       auto_migrate_vas:
         type: boolean
+      smart_payouts_enabled:
+        type: boolean
     required:
     - auto_migrate_vas
+    - smart_payouts_enabled
     type: object
   sdk.CreateSDKSubscriptionRequest:
     properties:
@@ -721,6 +724,27 @@ definitions:
     - currency
     - interval
     - name
+    type: object
+  transfers.TransferRequest:
+    properties:
+      account_name:
+        type: string
+      account_number:
+        type: string
+      amount:
+        type: number
+      bank_code:
+        type: string
+      provider:
+        description: 'Optional: If empty, Smart Payouts will route it automatically'
+        type: string
+      reason:
+        type: string
+    required:
+    - account_name
+    - account_number
+    - amount
+    - bank_code
     type: object
 host: api.paye.africa
 info:
@@ -1961,6 +1985,44 @@ paths:
       summary: Verify transaction status
       tags:
       - transactions
+  /transfers:
+    post:
+      consumes:
+      - application/json
+      description: Initiate a transfer to a bank account. If Smart Payouts is enabled,
+        Paye will automatically route this through the active provider with the highest
+        balance.
+      parameters:
+      - description: Transfer details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/transfers.TransferRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Initiate a transfer
+      tags:
+      - Transfers
   /virtual-accounts:
     get:
       description: List all virtual accounts associated with the project

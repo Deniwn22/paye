@@ -158,6 +158,15 @@ type Provider interface {
 
 	// Custom Paye-Managed Subscription charging
 	ChargeToken(req ChargeTokenRequest) (*TransactionResponse, error)
+
+	// Smart Routing & Balances
+	GetBalance() (*BalanceResponse, error)
+}
+
+type BalanceResponse struct {
+	AvailableBalance float64
+	Currency         string
+	Provider         string
 }
 
 type ChargeTokenRequest struct {

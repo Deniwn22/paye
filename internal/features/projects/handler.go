@@ -52,20 +52,22 @@ func (h *ProjectHandler) CreateProjectHandler(c *gin.Context) {
 	}
 
 	resp := &ProjectResponse{
-		ID:             project.ID.String(),
-		Name:           project.Name,
-		ApiKey:         project.ApiKey,
-		PublicID:       project.PublicID,
-		TestApiKey:     project.TestApiKey,
-		TestPublicID:   project.TestPublicID,
-		AutoMigrateVAs: project.AutoMigrateVAs,
+		ID:                  project.ID.String(),
+		Name:                project.Name,
+		ApiKey:              project.ApiKey,
+		PublicID:            project.PublicID,
+		TestApiKey:          project.TestApiKey,
+		TestPublicID:        project.TestPublicID,
+		AutoMigrateVAs:      project.AutoMigrateVAs,
+		SmartPayoutsEnabled: project.SmartPayoutsEnabled,
 	}
 
 	c.JSON(http.StatusOK, api.Success("Project created successfully", resp))
 }
 
 type UpdateProjectSettingsRequest struct {
-	AutoMigrateVAs *bool `json:"auto_migrate_vas" binding:"required"`
+	AutoMigrateVAs      *bool `json:"auto_migrate_vas" binding:"required"`
+	SmartPayoutsEnabled *bool `json:"smart_payouts_enabled" binding:"required"`
 }
 
 // @Summary Update project settings
@@ -100,20 +102,21 @@ func (h *ProjectHandler) UpdateProjectSettingsHandler(c *gin.Context) {
 		return
 	}
 
-	project, err := h.service.UpdateProjectSettings(c.Request.Context(), id, userID.(string), *req.AutoMigrateVAs)
+	project, err := h.service.UpdateProjectSettings(c.Request.Context(), id, userID.(string), *req.AutoMigrateVAs, *req.SmartPayoutsEnabled)
 	if err != nil {
 		c.JSON(http.StatusNotFound, api.Error(err.Error()))
 		return
 	}
 
 	resp := &ProjectResponse{
-		ID:             project.ID.String(),
-		Name:           project.Name,
-		ApiKey:         project.ApiKey,
-		PublicID:       project.PublicID,
-		TestApiKey:     project.TestApiKey,
-		TestPublicID:   project.TestPublicID,
-		AutoMigrateVAs: project.AutoMigrateVAs,
+		ID:                  project.ID.String(),
+		Name:                project.Name,
+		ApiKey:              project.ApiKey,
+		PublicID:            project.PublicID,
+		TestApiKey:          project.TestApiKey,
+		TestPublicID:        project.TestPublicID,
+		AutoMigrateVAs:      project.AutoMigrateVAs,
+		SmartPayoutsEnabled: project.SmartPayoutsEnabled,
 	}
 
 	c.JSON(http.StatusOK, api.Success("Project settings updated successfully", resp))
@@ -145,13 +148,14 @@ func (h *ProjectHandler) ListProjectsHandler(c *gin.Context) {
 	var resp []*ProjectResponse
 	for _, p := range projects {
 		resp = append(resp, &ProjectResponse{
-			ID:             p.ID.String(),
-			Name:           p.Name,
-			ApiKey:         p.ApiKey,
-			PublicID:       p.PublicID,
-			TestApiKey:     p.TestApiKey,
-			TestPublicID:   p.TestPublicID,
-			AutoMigrateVAs: p.AutoMigrateVAs,
+			ID:                  p.ID.String(),
+			Name:                p.Name,
+			ApiKey:              p.ApiKey,
+			PublicID:            p.PublicID,
+			TestApiKey:          p.TestApiKey,
+			TestPublicID:        p.TestPublicID,
+			AutoMigrateVAs:      p.AutoMigrateVAs,
+			SmartPayoutsEnabled: p.SmartPayoutsEnabled,
 		})
 	}
 
@@ -195,13 +199,14 @@ func (h *ProjectHandler) GetProjectHandler(c *gin.Context) {
 	}
 
 	resp := &ProjectResponse{
-		ID:             project.ID.String(),
-		Name:           project.Name,
-		ApiKey:         project.ApiKey,
-		PublicID:       project.PublicID,
-		TestApiKey:     project.TestApiKey,
-		TestPublicID:   project.TestPublicID,
-		AutoMigrateVAs: project.AutoMigrateVAs,
+		ID:                  project.ID.String(),
+		Name:                project.Name,
+		ApiKey:              project.ApiKey,
+		PublicID:            project.PublicID,
+		TestApiKey:          project.TestApiKey,
+		TestPublicID:        project.TestPublicID,
+		AutoMigrateVAs:      project.AutoMigrateVAs,
+		SmartPayoutsEnabled: project.SmartPayoutsEnabled,
 	}
 
 	c.JSON(http.StatusOK, api.Success("Project retrieved successfully", resp))
