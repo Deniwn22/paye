@@ -108,3 +108,17 @@ type SwaggerStatementVerifyResponse struct {
 	Message string                 `json:"message"`
 	Data    dto.StatementRecordDTO `json:"data"`
 }
+
+// SwaggerCustomerResponse represents a single customer response
+type SwaggerCustomerResponse struct {
+	Status  bool                 `json:"status"`
+	Message string               `json:"message"`
+	Data    dto.CustomerResponse `json:"data"`
+}
+
+// SwaggerCustomerListResponse represents a list of customers response
+type SwaggerCustomerListResponse struct {
+	Status  bool                     `json:"status"`
+	Message string                   `json:"message"`
+	Data    dto.CustomerListResponse `json:"data"`
+}

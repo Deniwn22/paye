@@ -12,12 +12,14 @@ import (
 	"github.com/google/uuid"
 	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/dto"
+	"github.com/ttomsin/paye/internal/features/customers"
 	"github.com/ttomsin/paye/internal/features/notifications"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/providers/flutterwave"
 	"github.com/ttomsin/paye/internal/features/providers/nomba"
 	"github.com/ttomsin/paye/internal/features/providers/opay"
 	"github.com/ttomsin/paye/internal/features/providers/paystack"
+	"github.com/ttomsin/paye/internal/features/subscriptions"
 	"github.com/ttomsin/paye/internal/features/webhooks"
 	"github.com/ttomsin/paye/internal/middleware"
 	"github.com/ttomsin/paye/internal/models"
@@ -25,21 +27,25 @@ import (
 )
 
 type TransactionService struct {
-	repo            *TransactionRepo
-	providerRepo    *providers.ProviderRepo
-	webhookRepo     *webhooks.WebhookRepo
-	encryptionKey   string
-	paystackBaseURL string
-	notifier        *notifications.NotificationService
+	repo                *TransactionRepo
+	providerRepo        *providers.ProviderRepo
+	webhookRepo         *webhooks.WebhookRepo
+	customerService     *customers.CustomerService
+	subscriptionService *subscriptions.SubscriptionService
+	encryptionKey       string
+	paystackBaseURL     string
+	notifier            *notifications.NotificationService
 }
 
-func NewTransactionService(repo *TransactionRepo, providerRepo *providers.ProviderRepo, webhookRepo *webhooks.WebhookRepo, encryptionKey string, notifier *notifications.NotificationService) *TransactionService {
+func NewTransactionService(repo *TransactionRepo, providerRepo *providers.ProviderRepo, webhookRepo *webhooks.WebhookRepo, customerService *customers.CustomerService, subscriptionService *subscriptions.SubscriptionService, encryptionKey string, notifier *notifications.NotificationService) *TransactionService {
 	return &TransactionService{
-		repo:          repo,
-		providerRepo:  providerRepo,
-		webhookRepo:   webhookRepo,
-		encryptionKey: encryptionKey,
-		notifier:      notifier,
+		repo:                repo,
+		providerRepo:        providerRepo,
+		webhookRepo:         webhookRepo,
+		customerService:     customerService,
+		subscriptionService: subscriptionService,
+		encryptionKey:       encryptionKey,
+		notifier:            notifier,
 	}
 }
 
@@ -154,8 +160,40 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 
 	rawRespBytes, _ := json.Marshal(resp)
 
+	var customerID *uuid.UUID
+	var customer *models.Customer
+
+	if req.PlanCode != "" && s.subscriptionService != nil {
+		_, err := s.subscriptionService.GetPlan(ctx, projectID, req.PlanCode)
+		if err != nil {
+			return nil, fmt.Errorf("invalid plan_code provided: %w", err)
+		}
+	}
+
+	if req.Email != "" && s.customerService != nil {
+		firstName := ""
+		lastName := ""
+		phone := ""
+		if req.Metadata != nil {
+			if fn, ok := req.Metadata["first_name"].(string); ok {
+				firstName = fn
+			}
+			if ln, ok := req.Metadata["last_name"].(string); ok {
+				lastName = ln
+			}
+			if p, ok := req.Metadata["phone"].(string); ok {
+				phone = p
+			}
+		}
+		customer, _ = s.customerService.FindOrCreateCustomer(ctx, projectID, req.Email, firstName, lastName, phone, isLive)
+		if customer != nil {
+			customerID = &customer.ID
+		}
+	}
+
 	tx := &models.Transaction{
 		ProjectID:   pID,
+		CustomerID:  customerID,
 		Provider:    pc.ProviderName,
 		Reference:   reference,
 		Amount:      req.Amount,
@@ -165,6 +203,7 @@ func (s *TransactionService) InitializeTransaction(ctx context.Context, projectI
 		AuthURL:     resp.AuthURL,
 		Metadata:    resp.Metadata,
 		RawResponse: string(rawRespBytes),
+		PlanCode:    req.PlanCode,
 		IsLive:      isLive,
 	}
 
@@ -250,6 +289,8 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 	rawRespBytes, _ := json.Marshal(resp)
 	tx.RawResponse = string(rawRespBytes)
 
+	wasSuccess := tx.Status == "success"
+
 	if resp.Status {
 		tx.Status = "success"
 	} else if resp.StatusText == string(providers.StatusPending) || resp.StatusText == string(providers.StatusInitial) {
@@ -262,6 +303,21 @@ func (s *TransactionService) VerifyTransaction(ctx context.Context, projectID st
 
 	if resp.AuthorizationCode != "" {
 		tx.AuthorizationCode = resp.AuthorizationCode
+	}
+
+	// Increment LTV if status transitions to success for the first time
+	if !wasSuccess && tx.Status == "success" {
+		if tx.CustomerID != nil && s.customerService != nil {
+			_ = s.customerService.IncrementLTV(ctx, tx.CustomerID.String(), tx.Amount)
+		}
+
+		// Create Subscription if PlanCode is present and we got an authorization code
+		if tx.PlanCode != "" && tx.AuthorizationCode != "" && s.subscriptionService != nil {
+			_, errSub := s.subscriptionService.CreateSubscription(ctx, tx.ProjectID, tx.Email, tx.PlanCode, tx.AuthorizationCode, tx.Provider)
+			if errSub != nil {
+				slog.Error("failed to create subscription automatically from transaction", "reference", tx.Reference, "plan_code", tx.PlanCode, "error", errSub)
+			}
+		}
 	}
 
 	err = s.repo.UpdateTransaction(ctx, tx)

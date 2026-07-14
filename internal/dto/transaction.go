@@ -5,11 +5,13 @@ import (
 )
 
 type InitializeTransactionRequest struct {
-	Amount      float64 `json:"amount" binding:"required" example:"5000.00" description:"Amount to charge the user"`
-	Email       string  `json:"email" binding:"required,email" example:"customer@example.com" description:"Email address of the customer"`
-	Currency    string  `json:"currency" binding:"required" example:"NGN" enums:"NGN,USD,GHS,KES" description:"Currency to charge in"`
-	Reference   string  `json:"reference" example:"tx_ref_123456" description:"Your internal unique transaction reference"`
-	CallbackURL string  `json:"callbackUrl" example:"https://your-app.com/webhook" description:"Optional callback URL for webhook notification"`
+	Amount      float64                `json:"amount" binding:"required" example:"5000.00" description:"Amount to charge the user"`
+	Email       string                 `json:"email" binding:"required,email" example:"customer@example.com" description:"Email address of the customer"`
+	Currency    string                 `json:"currency" binding:"required" example:"NGN" enums:"NGN,USD,GHS,KES" description:"Currency to charge in"`
+	Reference   string                 `json:"reference" example:"tx_ref_123456" description:"Your internal unique transaction reference"`
+	CallbackURL string                 `json:"callbackUrl" example:"https://your-app.com/webhook" description:"Optional callback URL for webhook notification"`
+	Metadata    map[string]interface{} `json:"metadata,omitempty" description:"Optional metadata for the transaction"`
+	PlanCode    string                 `json:"plan_code,omitempty" example:"PLN_123456789" description:"Optional plan code to subscribe the customer to upon successful payment"`
 }
 
 type InitializeTransactionResponse struct {
@@ -30,6 +32,7 @@ type VerifyTransactionResponse struct {
 	Currency  string  `json:"currency" example:"NGN"`
 	Provider  string  `json:"provider" example:"paystack"`
 	Message   string  `json:"message,omitempty" example:"Transaction verified successfully"`
+	PlanCode  string  `json:"plan_code,omitempty" example:"PLN_123456789"`
 }
 
 func ToInitializeTransactionResponse(tx *models.Transaction, message string) *InitializeTransactionResponse {
@@ -53,5 +56,6 @@ func ToVerifyTransactionResponse(tx *models.Transaction, message string) *Verify
 		Currency:  tx.Currency,
 		Provider:  tx.Provider,
 		Message:   message,
+		PlanCode:  tx.PlanCode,
 	}
 }

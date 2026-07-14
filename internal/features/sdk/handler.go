@@ -64,6 +64,7 @@ type InitializeSDKTransactionRequest struct {
 	Currency    string  `json:"currency"`
 	Reference   string  `json:"reference"`
 	CallbackURL string  `json:"callbackUrl"`
+	PlanCode    string  `json:"planCode"`
 }
 
 // ServeSDK serves the dynamic Javascript SDK script file for the merchant
@@ -185,6 +186,7 @@ func (h *SDKHandler) InitializeSDKTransaction(c *gin.Context) {
 		Currency:    req.Currency,
 		Reference:   req.Reference,
 		CallbackURL: req.CallbackURL,
+		PlanCode:    req.PlanCode,
 	}
 	if initReq.Currency == "" {
 		initReq.Currency = "NGN"

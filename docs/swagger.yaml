@@ -1,5 +1,23 @@
 basePath: /api/v1
 definitions:
+  api.SwaggerCustomerListResponse:
+    properties:
+      data:
+        $ref: '#/definitions/dto.CustomerListResponse'
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  api.SwaggerCustomerResponse:
+    properties:
+      data:
+        $ref: '#/definitions/dto.CustomerResponse'
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
   api.SwaggerDashboardStatsResponse:
     properties:
       data:
@@ -199,6 +217,34 @@ definitions:
     - currency
     - customer_reference
     type: object
+  dto.CustomerListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.CustomerResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/dto.PaginationMeta'
+    type: object
+  dto.CustomerResponse:
+    properties:
+      created_at:
+        type: string
+      customer_code:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      phone:
+        type: string
+      total_spent:
+        type: number
+      transactions_count:
+        type: integer
+    type: object
   dto.DashboardStatsResponse:
     properties:
       active_providers_count:
@@ -238,6 +284,12 @@ definitions:
         type: string
       email:
         example: customer@example.com
+        type: string
+      metadata:
+        additionalProperties: true
+        type: object
+      plan_code:
+        example: PLN_123456789
         type: string
       reference:
         example: tx_ref_123456
@@ -437,6 +489,9 @@ definitions:
         type: string
       message:
         example: Transaction verified successfully
+        type: string
+      plan_code:
+        example: PLN_123456789
         type: string
       provider:
         example: paystack
@@ -693,6 +748,8 @@ definitions:
         type: string
       email:
         type: string
+      planCode:
+        type: string
       publicId:
         type: string
       reference:
@@ -770,6 +827,71 @@ info:
   title: Paye API
   version: "1.0"
 paths:
+  /customers:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of unified customers for the current project.
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerCustomerListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: List customers
+      tags:
+      - Customers
+  /customers/{code}:
+    get:
+      consumes:
+      - application/json
+      description: Get details of a specific unified customer by their code.
+      parameters:
+      - description: Customer Code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SwaggerCustomerResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.SwaggerSimpleResponse'
+      security:
+      - BearerAuth: []
+      summary: Get customer details
+      tags:
+      - Customers
   /dashboard/logs:
     get:
       description: Retrieve recent webhook proxy delivery log history (paginated)

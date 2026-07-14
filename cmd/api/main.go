@@ -20,6 +20,7 @@ import (
 	"github.com/ttomsin/paye/docs" // generated docs
 	"github.com/ttomsin/paye/internal/db"
 	"github.com/ttomsin/paye/internal/features/auth"
+	"github.com/ttomsin/paye/internal/features/customers"
 	"github.com/ttomsin/paye/internal/features/dashboard"
 	"github.com/ttomsin/paye/internal/features/notifications"
 	"github.com/ttomsin/paye/internal/features/paystack"
@@ -145,6 +146,7 @@ func main() {
 	dashboardRepo := dashboard.NewDashboardRepo(database.DB)
 	transactionRepo := transactions.NewTransactionRepo(database.DB)
 	paystackRepo := paystack.NewPaystackRepository(database.DB)
+	customerRepo := customers.NewCustomerRepo(database.DB)
 
 	// init notifications
 	notificationRepo := notifications.NewNotificationRepo(database.DB)
@@ -160,11 +162,12 @@ func main() {
 	paystackService := paystack.NewPaystackService(paystackRepo, providerRepo, derivedEncryptionKey)
 	providerService := providers.NewProviderService(providerRepo, derivedEncryptionKey, database.DB)
 	providerService.SetPaystackService(paystackService)
-	webhookService := webhooks.NewWebhookService(webhookRepo, vaRepo, providerRepo, userRepo, derivedEncryptionKey, notificationService)
+	customerService := customers.NewCustomerService(customerRepo)
 	dashboardService := dashboard.NewDashboardService(dashboardRepo)
-	transactionService := transactions.NewTransactionService(transactionRepo, providerRepo, webhookRepo, derivedEncryptionKey, notificationService)
 	subscriptionService := subscriptions.NewSubscriptionService(database.DB, providerRepo, derivedEncryptionKey)
+	transactionService := transactions.NewTransactionService(transactionRepo, providerRepo, webhookRepo, customerService, subscriptionService, derivedEncryptionKey, notificationService)
 	vaService := virtual_accounts.NewVAService(vaRepo, providerRepo, derivedEncryptionKey)
+	webhookService := webhooks.NewWebhookService(webhookRepo, vaRepo, providerRepo, userRepo, customerService, subscriptionService, derivedEncryptionKey, notificationService)
 	reportingRepo := reporting.NewReportingRepo(database.DB)
 	reportingService := reporting.NewReportingService(transactionRepo, vaRepo, reportingRepo)
 
@@ -244,6 +247,7 @@ func main() {
 	dashboardHandler := dashboard.NewDashboardHandler(dashboardService)
 	transactionHandler := transactions.NewTransactionHandler(transactionService)
 	subscriptionHandler := subscriptions.NewSubscriptionHandler(subscriptionService)
+	customerHandler := customers.NewCustomerHandler(customerService)
 
 	transferService := transfers.NewTransferService(database.DB, providerRepo, projectRepo, jwtSecret)
 	transferHandler := transfers.NewTransferHandler(transferService)
@@ -345,6 +349,9 @@ func main() {
 
 	// Register Transfers routes (Protected)
 	transfers.RegisterRoutes(protected, transferHandler)
+
+	// Register Customers routes (Protected)
+	customers.RegisterRoutes(protected, customerHandler)
 
 	// Admin Protected Group (Requires JWT token and Admin role)
 	adminProtected := v1.Group("")

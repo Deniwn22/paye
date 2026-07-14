@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-07-12
+
+### Added
+- **Smart Payouts:** A unified `/transfers` endpoint that abstracts liquidity routing. Merchants request a payout, and Paye automatically queries virtual account balances across configured gateways to determine where the funds reside before routing the transfer to the correct provider.
+- **Unified Customer Identity:** The `Customer` model now persists across all payment gateways. If a customer pays via Paystack today and Nomba tomorrow, Paye reconciles them into a single identity based on their email.
+- **Customer Lifetime Value (LTV):** Automatically tracks and increments `TotalSpent` and `TransactionsCount` for a unified customer every time a transaction settles across any gateway.
+- **Unified Subscriptions:** Paye now officially owns the Plan and Subscription resources natively.
+- **Automatic Subscription Enrollment:** When initializing a checkout transaction, merchants can now pass a `PlanCode`. Upon successful payment and receipt of a tokenized card (`AuthorizationCode`), the backend automatically creates an active subscription.
+- **JS SDK Optimization:** Completely eliminated the need for the frontend to manually call the `/sdk/subscriptions/create` endpoint. The SDK simply passes the `planId` during initialization, and the Paye backend handles the rest.
+
+
+
 ## [0.2.0] - 2026-07-06
 
 ### Added

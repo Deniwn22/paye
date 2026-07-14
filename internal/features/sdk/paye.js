@@ -202,6 +202,7 @@
         provider: provider,
         reference: options.reference,
         callbackUrl: window.location.href,
+        planCode: options.planId,
       };
 
       // Call Paye public transactions initialize endpoint
@@ -247,49 +248,9 @@
                   paymentCompleted = true;
 
                   if (type === "subscription") {
-                    // Subscription Flow: call POST /sdk/subscriptions/create
-                    var subPayload = {
-                      publicId: config.merchantId,
-                      customerEmail: options.email,
-                      planId: options.planId,
-                      reference: txData.reference,
-                    };
-
-                    fetch(config.papiEndpoint + "/sdk/subscriptions/create", {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify(subPayload),
-                    })
-                      .then(function (subRes) {
-                        if (!subRes.ok) {
-                          return subRes.json().then(function (errJson) {
-                            throw new Error(
-                              errJson.message ||
-                                "Failed to create subscription",
-                            );
-                          });
-                        }
-                        return subRes.json();
-                      })
-                      .then(function (subData) {
-                        verifyTransaction(txData.reference, options);
-                      })
-                      .catch(function (subErr) {
-                        console.error("Paye SDK Subscription Error:", subErr);
-                        var subErrMsg =
-                          subErr.message ||
-                          subErr ||
-                          "Failed to create subscription";
-                        if (options.onFailure) {
-                          options.onFailure(subErrMsg, {
-                            status: "failed",
-                            reference: txData.reference,
-                            message: subErrMsg,
-                          });
-                        }
-                      });
+                    // Subscription is now automatically handled by the backend
+                    // We just need to verify the transaction
+                    verifyTransaction(txData.reference, options);
                   } else {
                     verifyTransaction(txData.reference, options);
                   }
@@ -326,49 +287,9 @@
                   paymentCompleted = true;
 
                   if (type === "subscription") {
-                    // Subscription Flow: call POST /sdk/subscriptions/create
-                    var subPayload = {
-                      publicId: config.merchantId,
-                      customerEmail: options.email,
-                      planId: options.planId,
-                      reference: txData.reference,
-                    };
-
-                    fetch(config.papiEndpoint + "/sdk/subscriptions/create", {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify(subPayload),
-                    })
-                      .then(function (subRes) {
-                        if (!subRes.ok) {
-                          return subRes.json().then(function (errJson) {
-                            throw new Error(
-                              errJson.message ||
-                                "Failed to create subscription",
-                            );
-                          });
-                        }
-                        return subRes.json();
-                      })
-                      .then(function (subData) {
-                        verifyTransaction(txData.reference, options);
-                      })
-                      .catch(function (subErr) {
-                        console.error("Paye SDK Subscription Error:", subErr);
-                        var subErrMsg =
-                          subErr.message ||
-                          subErr ||
-                          "Failed to create subscription";
-                        if (options.onFailure) {
-                          options.onFailure(subErrMsg, {
-                            status: "failed",
-                            reference: txData.reference,
-                            message: subErrMsg,
-                          });
-                        }
-                      });
+                    // Subscription is now automatically handled by the backend
+                    // We just need to verify the transaction
+                    verifyTransaction(txData.reference, options);
                   } else {
                     verifyTransaction(txData.reference, options);
                   }

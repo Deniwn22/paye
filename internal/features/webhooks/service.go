@@ -17,34 +17,40 @@ import (
 	"github.com/google/uuid"
 	"github.com/ttomsin/paye/internal/crypto"
 	"github.com/ttomsin/paye/internal/dto"
+	"github.com/ttomsin/paye/internal/features/customers"
 	"github.com/ttomsin/paye/internal/features/notifications"
 	"github.com/ttomsin/paye/internal/features/providers"
 	"github.com/ttomsin/paye/internal/features/providers/flutterwave"
 	"github.com/ttomsin/paye/internal/features/providers/nomba"
 	"github.com/ttomsin/paye/internal/features/providers/opay"
 	"github.com/ttomsin/paye/internal/features/providers/paystack"
+	"github.com/ttomsin/paye/internal/features/subscriptions"
 	"github.com/ttomsin/paye/internal/features/user"
 	"github.com/ttomsin/paye/internal/features/virtual_accounts"
 	"github.com/ttomsin/paye/internal/models"
 )
 
 type WebhookService struct {
-	repo          *WebhookRepo
-	vaRepo        *virtual_accounts.VARepository
-	providerRepo  *providers.ProviderRepo
-	userRepo      user.IUserRepo
-	encryptionKey string
-	httpClient    *http.Client
-	notifier      *notifications.NotificationService
+	repo                *WebhookRepo
+	vaRepo              *virtual_accounts.VARepository
+	providerRepo        *providers.ProviderRepo
+	userRepo            user.IUserRepo
+	customerService     *customers.CustomerService
+	subscriptionService *subscriptions.SubscriptionService
+	encryptionKey       string
+	httpClient          *http.Client
+	notifier            *notifications.NotificationService
 }
 
-func NewWebhookService(repo *WebhookRepo, vaRepo *virtual_accounts.VARepository, providerRepo *providers.ProviderRepo, userRepo user.IUserRepo, encryptionKey string, notifier *notifications.NotificationService) *WebhookService {
+func NewWebhookService(repo *WebhookRepo, vaRepo *virtual_accounts.VARepository, providerRepo *providers.ProviderRepo, userRepo user.IUserRepo, customerService *customers.CustomerService, subscriptionService *subscriptions.SubscriptionService, encryptionKey string, notifier *notifications.NotificationService) *WebhookService {
 	return &WebhookService{
-		repo:          repo,
-		vaRepo:        vaRepo,
-		providerRepo:  providerRepo,
-		userRepo:      userRepo,
-		encryptionKey: encryptionKey,
+		repo:                repo,
+		vaRepo:              vaRepo,
+		providerRepo:        providerRepo,
+		userRepo:            userRepo,
+		customerService:     customerService,
+		subscriptionService: subscriptionService,
+		encryptionKey:       encryptionKey,
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
 		},
@@ -312,6 +318,22 @@ func (s *WebhookService) ProcessWebhook(ctx context.Context, slug string, signat
 	// Fetch transaction and broadcast real-time notification
 	var tx models.Transaction
 	if s.repo.db.WithContext(ctx).Where("reference = ?", webhookEvent.Reference).First(&tx).Error == nil {
+
+		// Increment LTV if transitioning to success
+		if tx.Status != "success" && dbStatus == "success" {
+			if tx.CustomerID != nil && s.customerService != nil {
+				_ = s.customerService.IncrementLTV(ctx, tx.CustomerID.String(), tx.Amount)
+			}
+
+			// Auto enroll in subscription
+			if tx.PlanCode != "" && webhookEvent.AuthorizationCode != "" && s.subscriptionService != nil {
+				_, errSub := s.subscriptionService.CreateSubscription(ctx, tx.ProjectID, tx.Email, tx.PlanCode, webhookEvent.AuthorizationCode, tx.Provider)
+				if errSub != nil {
+					slog.Error("failed to create subscription automatically from webhook", "reference", tx.Reference, "plan_code", tx.PlanCode, "error", errSub)
+				}
+			}
+		}
+
 		if s.notifier != nil {
 			title := "Transaction Pending"
 			message := fmt.Sprintf("Transaction reference %s of %s %.2f is pending via %s.", tx.Reference, tx.Currency, tx.Amount, tx.Provider)

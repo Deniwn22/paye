@@ -29,8 +29,12 @@ This document tracks the high-level roadmap and major milestones for the Paye pl
 - [ ] Automated Customer VA Emails: Provide the ability for businesses to automatically email their customers when their Virtual Account number changes due to a provider migration.
 
 ## Milestone 4: Subscriptions & Recurring Billing
-- [ ] Unified Subscription Engine: Abstract recurring billing contracts across underlying gateways.
-- [ ] Tokenized Card Storage: Provide a unified interface to charge saved cards regardless of the provider used to save them.
+- [x] Unified Subscription Engine: Abstract recurring billing contracts across underlying gateways.
+- [x] Tokenized Card Storage: Provide a unified interface to charge saved cards regardless of the provider used to save them.
+
+## Milestone 5: Liquidity & Smart Payouts
+- [x] Unified Transfers: Abstract payout requests so merchants don't need to specify which gateway holds their funds.
+- [x] Automated Load Balancing: Check underlying virtual account balances to route payouts dynamically.
 
 ## Milestone 5: Platform & Collaboration
 - [ ] Team Workspaces: Support developer invitations and role-based permissions (Owner, Admin, Viewer).
