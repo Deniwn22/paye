@@ -315,20 +315,6 @@ func RegisterRoutes(rg *gin.RouterGroup, h *ProviderHandler) {
 	// Root-level Paystack feature routes
 	rg.POST("/refund", h.RefundHandler)
 	rg.GET("/refunds", h.ListRefundsHandler)
-
-	rg.POST("/plans", h.CreatePlanHandler)
-	rg.GET("/plans", h.ListPlansHandler)
-
-	rg.POST("/subscriptions", h.CreateSubscriptionHandler)
-	rg.GET("/subscriptions", h.ListSubscriptionsHandler)
-	rg.POST("/subscriptions/:code/cancel", h.CancelSubscriptionHandler)
-	rg.DELETE("/subscriptions/:code", h.CancelSubscriptionHandler)
-
-	rg.POST("/recipients", h.CreateRecipientHandler)
-	rg.GET("/recipients", h.ListRecipientsHandler)
-
-	rg.POST("/transfers", h.CreateTransferHandler)
-	rg.GET("/transfers", h.ListTransfersHandler)
 }
 
 func RegisterAPIRoutes(rg *gin.RouterGroup, h *ProviderHandler) {
